@@ -14,6 +14,6 @@ Customers and Melba receive transactional emails. A failed email does not cancel
 
 ## Operations
 
-Nuxt + Workers, D1, Stripe Checkout and a separate Queue/email Worker. Melba signs in through a single-use email link and configures prices, hours, blocks, WhatsApp bookings, cancellations, completed sessions and cash collections. Booking is initially closed, with prices undefined. Melba configured initial hours Monday through Sunday, 09:00–21:00, and the authorized email masajesaurora@gmail.com.
+Nuxt + Workers, D1, Stripe Checkout and a separate Queue/email Worker using Resend. Melba signs in through a single-use email link and configures prices, hours, blocks, WhatsApp bookings, cancellations, completed sessions and cash collections. Staging accepts cash bookings only, with prices of €40 for 40 minutes and €50 for 60 minutes; Stripe remains disabled. Melba configured initial hours Monday through Sunday, 09:00–21:00, and the authorized email masajesaurora@gmail.com.
 
 Existing .env.local is preserved. Production needs a real origin, authorized admin email, verified sender domain, separate DB/queue and payment credentials if online payment is enabled. Local emails are written to ignored .data/mail.jsonl, never sent to customers.

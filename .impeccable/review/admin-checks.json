@@ -1,0 +1,17 @@
+{
+  "fixtureData": "Synthetic bookings intercepted in the browser only; no booking or payment DB writes",
+  "checks": [
+    "real private login",
+    "week default",
+    "no Today control",
+    "capacity by massage",
+    "reservation selection and email",
+    "cash payment action",
+    "completion action",
+    "week navigation and clearing selection",
+    "mobile dialog and no page overflow",
+    "week/day switch",
+    "existing management sections"
+  ],
+  "passed": true
+}

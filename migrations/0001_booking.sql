@@ -25,17 +25,17 @@ CREATE TABLE admin_links(token_hash TEXT PRIMARY KEY, expires_at INTEGER NOT NUL
 CREATE TABLE admin_sessions(token_hash TEXT PRIMARY KEY, expires_at INTEGER NOT NULL);
 CREATE TABLE rate_limits(key TEXT PRIMARY KEY, bucket INTEGER NOT NULL, count INTEGER NOT NULL);
 CREATE TRIGGER booking_guard_insert BEFORE INSERT ON bookings WHEN NEW.status IN('held','confirmed','completed') BEGIN
- SELECT CASE WHEN NEW.start_at<unixepoch()+10800 THEN RAISE(ABORT,'LEAD_TIME') END;
- SELECT CASE WHEN (SELECT COALESCE(SUM(quantity),0) FROM bookings WHERE service_date=NEW.service_date AND status IN('held','confirmed','completed'))+NEW.quantity>3 THEN RAISE(ABORT,'CAPACITY') END;
- SELECT CASE WHEN EXISTS(SELECT 1 FROM bookings WHERE status IN('held','confirmed','completed') AND NEW.start_at<end_at+1800 AND NEW.end_at+1800>start_at) THEN RAISE(ABORT,'OVERLAP') END;
- SELECT CASE WHEN EXISTS(SELECT 1 FROM blocks WHERE NEW.start_at<end_at AND NEW.end_at>start_at) THEN RAISE(ABORT,'BLOCKED') END;
+ SELECT RAISE(ABORT,'LEAD_TIME') WHERE NEW.start_at<unixepoch()+10800;
+ SELECT RAISE(ABORT,'CAPACITY') WHERE (SELECT COALESCE(SUM(quantity),0) FROM bookings WHERE service_date=NEW.service_date AND status IN('held','confirmed','completed'))+NEW.quantity>3;
+ SELECT RAISE(ABORT,'OVERLAP') WHERE EXISTS(SELECT 1 FROM bookings WHERE status IN('held','confirmed','completed') AND NEW.start_at<end_at+1800 AND NEW.end_at+1800>start_at);
+ SELECT RAISE(ABORT,'BLOCKED') WHERE EXISTS(SELECT 1 FROM blocks WHERE NEW.start_at<end_at AND NEW.end_at>start_at);
 END;
 CREATE TRIGGER booking_guard_update BEFORE UPDATE OF status,start_at,end_at,quantity ON bookings WHEN NEW.status IN('held','confirmed','completed') BEGIN
- SELECT CASE WHEN (SELECT COALESCE(SUM(quantity),0) FROM bookings WHERE id<>NEW.id AND service_date=NEW.service_date AND status IN('held','confirmed','completed'))+NEW.quantity>3 THEN RAISE(ABORT,'CAPACITY') END;
- SELECT CASE WHEN EXISTS(SELECT 1 FROM bookings WHERE id<>NEW.id AND status IN('held','confirmed','completed') AND NEW.start_at<end_at+1800 AND NEW.end_at+1800>start_at) THEN RAISE(ABORT,'OVERLAP') END;
- SELECT CASE WHEN EXISTS(SELECT 1 FROM blocks WHERE NEW.start_at<end_at AND NEW.end_at>start_at) THEN RAISE(ABORT,'BLOCKED') END;
+ SELECT RAISE(ABORT,'CAPACITY') WHERE (SELECT COALESCE(SUM(quantity),0) FROM bookings WHERE id<>NEW.id AND service_date=NEW.service_date AND status IN('held','confirmed','completed'))+NEW.quantity>3;
+ SELECT RAISE(ABORT,'OVERLAP') WHERE EXISTS(SELECT 1 FROM bookings WHERE id<>NEW.id AND status IN('held','confirmed','completed') AND NEW.start_at<end_at+1800 AND NEW.end_at+1800>start_at);
+ SELECT RAISE(ABORT,'BLOCKED') WHERE EXISTS(SELECT 1 FROM blocks WHERE NEW.start_at<end_at AND NEW.end_at>start_at);
 END;
 CREATE TRIGGER block_guard BEFORE INSERT ON blocks BEGIN
- SELECT CASE WHEN EXISTS(SELECT 1 FROM bookings WHERE status IN('held','confirmed') AND NEW.start_at<end_at AND NEW.end_at>start_at) THEN RAISE(ABORT,'BOOKING_IN_BLOCK') END;
+ SELECT RAISE(ABORT,'BOOKING_IN_BLOCK') WHERE EXISTS(SELECT 1 FROM bookings WHERE status IN('held','confirmed') AND NEW.start_at<end_at AND NEW.end_at>start_at);
 END;
 

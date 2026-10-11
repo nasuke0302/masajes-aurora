@@ -71,8 +71,9 @@ export default defineEventHandler(async event=>{
    if(path==='admin/settings'&&method==='PUT')return saveSettings(env,await readBody(event))
    if(path==='admin/bookings'&&method==='GET'){
     await reconcile(env)
-    const q=getQuery(event);const from=String(q.from||'2000-01-01'),to=String(q.to||'2100-01-01')
-    return (await env.DB.prepare('SELECT id,reference,service_date,start_at,end_at,quantity,amount_cents,lines_json,name,email,phone,address,notes,method,status,payment_status FROM bookings WHERE service_date BETWEEN ? AND ? ORDER BY start_at LIMIT 300').bind(from,to).all()).results
+    const q=getQuery(event);const from=String(q.from||'2000-01-01'),to=String(q.to||'2100-01-01'),state=String(q.status||'')
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)||from>to||(state&&!['held','confirmed','completed','cancelled','expired'].includes(state)))throw createError({statusCode:400,statusMessage:'Revisa las fechas y el estado del historial'})
+    return (await env.DB.prepare('SELECT id,reference,service_date,start_at,end_at,quantity,amount_cents,lines_json,name,email,phone,address,notes,method,status,payment_status FROM bookings WHERE service_date BETWEEN ? AND ? AND (? = \'\' OR status = ?) ORDER BY start_at LIMIT 300').bind(from,to,state,state).all()).results
    }
    if(path==='admin/bookings'&&method==='POST'){
     const body=await readBody(event);const b=await createBooking(env,{...body,method:'cash'});event.waitUntil(dispatch(env));return {reference:b.reference}

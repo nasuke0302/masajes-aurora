@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises'
 import StripeClient from 'stripe'
 import {createBooking,available} from '../server/core/bookings'
 import {checkout,reconcileBooking,handleStripeEvent,verifyImmediatePayments} from '../server/core/payments'
-import {deliver} from '../workers/notifications'
+import {deliver,sendResend} from '../workers/notifications'
 import {consumeLink,requireAdmin,saveSettings} from '../server/core/admin'
 import {hash} from '../server/core/security'
 import {localDate,datePlus,dayInstants,localLabel} from '../shared/booking'
@@ -34,6 +34,21 @@ beforeEach(async()=>{
 })
 afterAll(async()=>{await mf.dispose()})
 describe('D1 bookings and notifications',()=>{
+ it('sends through Resend with stable idempotency and persists the provider ID',async()=>{
+  await createBooking(env,input());const notice=(await env.DB.prepare('SELECT id FROM outbox LIMIT 1').first<{id:string}>())!
+  const mail={DB:env.DB,EMAIL_FROM:env.EMAIL_FROM,ADMIN_EMAIL:env.ADMIN_EMAIL,RESEND_API_KEY:'re_test'} as Parameters<typeof deliver>[0]
+  const request=vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response(JSON.stringify({id:'resend_test'}),{status:200}))
+  try{await deliver(mail,notice.id);await deliver(mail,notice.id);expect(request).toHaveBeenCalledTimes(1)
+   const [url,init]=request.mock.calls[0]!;expect(url).toBe('https://api.resend.com/emails');expect((init!.headers as Record<string,string>)['Idempotency-Key']).toBe('aurora/'+notice.id)
+   expect(JSON.parse(init!.body as string).reply_to).toBe(env.ADMIN_EMAIL)
+   expect(await env.DB.prepare('SELECT provider_id FROM outbox WHERE id=?').bind(notice.id).first()).toEqual({provider_id:'resend_test'})
+  }finally{request.mockRestore()}
+ })
+ it('keeps Resend failures pending without exposing provider responses',async()=>{
+  const mail={EMAIL_FROM:env.EMAIL_FROM,ADMIN_EMAIL:env.ADMIN_EMAIL,RESEND_API_KEY:'re_test'} as Parameters<typeof deliver>[0]
+  const request=vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response('private provider details',{status:429}))
+  try{await expect(sendResend(mail,{from:env.EMAIL_FROM,to:'client@example.com',subject:'Test',text:'Test',html:'Test'},'notice')).rejects.toThrow('EMAIL_SEND_FAILED')}finally{request.mockRestore()}
+ })
  it('makes one group reservation with snapshots and two persisted notices',async()=>{
   const b=await createBooking(env,input({massage40:1,massage60:1}))
   expect(b.quantity).toBe(2);expect(b.end_at-b.start_at).toBe(100*60);expect(b.amount_cents).toBe(10000)
@@ -52,9 +67,9 @@ describe('D1 bookings and notifications',()=>{
  it('counts completed sessions and releases cancelled ones',async()=>{const b=await createBooking(env,input({massage40:0,massage60:3}));await env.DB.prepare("UPDATE bookings SET status='completed' WHERE id=?").bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).remaining).toBe(0);await env.DB.prepare("UPDATE bookings SET status='cancelled' WHERE id=?").bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).remaining).toBe(3)})
  it('retries email failures without cancelling bookings and acknowledges duplicates',async()=>{
   const b=await createBooking(env,input()),notice=(await env.DB.prepare('SELECT id FROM outbox LIMIT 1').first<{id:string}>())!
-  const mail={DB:env.DB,EMAIL_FROM:env.EMAIL_FROM,EMAIL:{send:emailSend}} as unknown as Parameters<typeof deliver>[0]
-  emailSend.mockRejectedValueOnce(new Error('temporary'));await expect(deliver(mail,notice.id)).rejects.toThrow();expect((await row(b.id)).status).toBe('confirmed')
-  await env.DB.prepare('UPDATE outbox SET lease_until=0').run();emailSend.mockResolvedValueOnce({messageId:'sent'});await deliver(mail,notice.id);await deliver(mail,notice.id);expect(emailSend).toHaveBeenCalledTimes(2)
+  const mail={DB:env.DB,EMAIL_FROM:env.EMAIL_FROM,RESEND_API_KEY:'re_test'} as unknown as Parameters<typeof deliver>[0]
+  emailSend.mockRejectedValueOnce(new Error('temporary'));await expect(deliver(mail,notice.id,emailSend)).rejects.toThrow();expect((await row(b.id)).status).toBe('confirmed')
+  await env.DB.prepare('UPDATE outbox SET lease_until=0').run();emailSend.mockResolvedValueOnce({messageId:'sent'});await deliver(mail,notice.id,emailSend);await deliver(mail,notice.id,emailSend);expect(emailSend).toHaveBeenCalledTimes(2)
  })
 })
 describe('payment lifecycle',()=>{
