@@ -1,5 +1,5 @@
 export const TIME_ZONE = 'Europe/Madrid'
-export const DAILY_CAPACITY = 3
+export const MAX_SESSION_MASSAGES = 36 // At most one full day of 40-minute massages.
 export const BUFFER_MINUTES = 30
 export const LEAD_SECONDS = 3 * 3600
 export const HORIZON_DAYS = 30
@@ -30,7 +30,7 @@ export function dayInstants(date: string) {
   return result
 }
 export function totals(q: Quantities, products: Product[]) {
-  if (![q.massage40, q.massage60].every(n => Number.isInteger(n) && n >= 0) || q.massage40 + q.massage60 < 1 || q.massage40 + q.massage60 > DAILY_CAPACITY) throw new Error('Elige entre uno y tres masajes')
+  if (![q.massage40, q.massage60].every(n => Number.isSafeInteger(n) && n >= 0) || q.massage40 + q.massage60 < 1 || q.massage40 + q.massage60 > MAX_SESSION_MASSAGES) throw new Error('Elige al menos un masaje dentro de una jornada')
   let duration = 0, amount = 0
   for (const product of products) {
     const count = q[product.id]
@@ -43,7 +43,6 @@ export function totals(q: Quantities, products: Product[]) {
 }
 export function availability(date: string, q: Quantities, products: Product[], hours: Hours[], bookings: Occupancy[], blocks: { start_at: number; end_at: number }[], now: number) {
   const total = totals(q, products)
-  const remaining = Math.max(0, DAILY_CAPACITY - bookings.reduce((sum, b) => sum + b.quantity, 0))
   const weekday = new Date(date + 'T12:00:00Z').getUTCDay()
   const windows = hours.filter(h => h.weekday === weekday)
   const inHorizon = date >= localDate(now) && date <= datePlus(localDate(now), HORIZON_DAYS)
@@ -55,8 +54,8 @@ export function availability(date: string, q: Quantities, products: Product[], h
     const fits = localDate(end - 1) === date && windows.some(h => minute >= h.open_minute && !instants.some(p => p.epoch >= epoch && p.epoch < end && (p.minute < h.open_minute || p.minute >= h.close_minute)))
     const overlap = bookings.some(b => epoch < b.end_at + BUFFER_MINUTES * 60 && end + BUFFER_MINUTES * 60 > b.start_at)
     const blocked = blocks.some(b => epoch < b.end_at && end > b.start_at)
-    slots.push({ startAt: epoch, endAt: end, label: localLabel(epoch), available: inHorizon && epoch >= now + LEAD_SECONDS && total.quantity <= remaining && fits && !overlap && !blocked })
+    slots.push({ startAt: epoch, endAt: end, label: localLabel(epoch), available: inHorizon && epoch >= now + LEAD_SECONDS && fits && !overlap && !blocked })
   }
-  return { slots, remaining, ...total }
+  return { slots, ...total }
 }
 

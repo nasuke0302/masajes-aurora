@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {localDate,localLabel,dayInstants,type Hours} from '#shared/booking'
-import {agendaRange,clockMinute,dayCapacity,occupiesAgenda,type AgendaReservation,type AgendaBlock} from '#shared/admin-calendar'
+import {agendaRange,clockMinute,dayMassageCount,occupiesAgenda,type AgendaReservation,type AgendaBlock} from '#shared/admin-calendar'
 const props=defineProps<{dates:string[];rows:AgendaReservation[];blocks:AgendaBlock[];hours:Hours[];selectedId:string|null;loading:boolean}>()
 defineEmits<{select:[reservation:AgendaReservation]}>()
 const range=computed(()=>agendaRange(props.hours,props.rows))
@@ -17,7 +17,7 @@ function lineLabel(r:AgendaReservation){return (JSON.parse(r.lines_json) as {qua
 <template><div class="calendar-scroll" :aria-busy="loading" tabindex="0" aria-label="Agenda. Desplázate para ver todas las horas y días.">
  <div class="calendar-grid" :class="{'calendar-day':dates.length===1}" :style="{'--calendar-days':dates.length}">
   <div class="calendar-corner" aria-hidden="true"></div>
-  <div v-for="date in dates" :key="date" class="calendar-day-heading" :class="{'is-current-day':date===localDate(Date.now()/1000)}"><h3>{{ dayLabel(date) }}</h3><span :aria-label="dayCapacity(rows,date)+' de 3 masajes ocupados'"><span class="capacity-dots" aria-hidden="true"><i v-for="n in 3" :key="n" :class="{filled:n<=dayCapacity(rows,date)}"></i></span>{{ dayCapacity(rows,date) }}/3</span></div>
+  <div v-for="date in dates" :key="date" class="calendar-day-heading" :class="{'is-current-day':date===localDate(Date.now()/1000)}"><h3>{{ dayLabel(date) }}</h3><span>{{ dayMassageCount(rows,date) }} {{ dayMassageCount(rows,date)===1?'masaje':'masajes' }}</span></div>
   <div class="calendar-times" :style="{height:height+'px'}" aria-hidden="true"><span v-for="tick in ticks" :key="tick" :style="{top:(tick-range.start)*1.35+'px'}">{{ String(Math.floor(tick/60)).padStart(2,'0') }}:00</span></div>
   <div v-for="date in dates" :key="date+'-column'" class="calendar-column" :style="{height:height+'px'}">
    <div v-for="gap in closed(date)" :key="'closed'+gap.start" class="calendar-closed" :style="position(gap.start,gap.end)" title="Fuera de jornada"></div>

@@ -30,6 +30,11 @@
 
 @layer components {
  .action { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-7 py-3 font-semibold text-cream transition-colors hover:bg-sage disabled:cursor-not-allowed disabled:opacity-50; }
+ .landing-button { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-transparent bg-ink px-5 py-2.5 text-center text-sm font-semibold leading-5 text-cream transition-colors hover:bg-sage; }
+ .landing-button.secondary { @apply border-ink/30 bg-cream text-ink hover:bg-sage-light; }
+ .landing-actions { @apply mt-6 flex flex-wrap items-center gap-3; }
+ .landing-actions.contact-actions { @apply mt-0; }
+ @media (max-width: 575px) { .landing-actions { @apply w-full max-w-80 flex-col items-stretch; } }
  .text-link { @apply underline underline-offset-4 hover:text-coral; }
  .page-shell { @apply mx-auto max-w-7xl px-5 pb-12 sm:px-8; }
  .page-shell.narrow { @apply max-w-3xl; }
@@ -106,9 +111,6 @@
 .calendar-day-heading.is-current-day { background:#edf8f5; }
 .calendar-day-heading h3 { font-size:16px; font-weight:700; text-transform:capitalize; margin-bottom:6px; }
 .calendar-day-heading>span { display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-variant-numeric:tabular-nums; }
-.capacity-dots { display:flex; gap:3px; }
-.capacity-dots i { width:5px; height:5px; border-radius:50%; background:#064f5820; }
-.capacity-dots i.filled { background:#08767b; }
 .calendar-times { position:sticky; left:0; background:#fafdfc; z-index:4; font-variant-numeric:tabular-nums; }
 .calendar-times>span { position:absolute; right:8px; transform:translateY(-50%); font-size:11px; color:#386369; }
 .calendar-times>span:first-child { transform:none; }

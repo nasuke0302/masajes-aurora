@@ -1,10 +1,12 @@
-import { createError,getCookie,setCookie,type H3Event } from 'h3'
+import { createError,getCookie,setCookie,getHeader,type H3Event } from 'h3'
+import {verifyAccessToken} from '../../workers/access'
 import {z} from 'zod'
 import type {AppEnv,Booking} from './types'
 import {hash,token,nowSeconds,safeError} from './security'
 import {configuration} from './bookings'
 import {noticeStatements} from './notifications'
 export async function requireAdmin(event:H3Event,env:AppEnv){
+ if(env.ACCESS_AUD){try{await verifyAccessToken(getHeader(event,'cf-access-jwt-assertion')||'',env);return}catch{throw createError({statusCode:401,statusMessage:'Accede mediante Cloudflare Access'})}}
  const value=getCookie(event,'aurora_admin')||''
  if(!/^[a-f0-9]{64}$/.test(value)||!await env.DB.prepare('SELECT 1 FROM admin_sessions WHERE token_hash=? AND expires_at>?').bind(await hash(value),nowSeconds()).first())throw createError({statusCode:401,statusMessage:'Accede con el enlace enviado a tu email'})
 }

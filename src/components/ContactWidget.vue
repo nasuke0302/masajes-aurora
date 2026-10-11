@@ -17,14 +17,16 @@ import Phone from '@primeicons/vue/phone'
           exclusivamente en Ávila capital.
         </p>
       </div>
-      <div class="flex flex-col items-center gap-4 md:items-start">
-        <a class="flex gap-3 min-h-11 justify-center items-center text-xl font-semibold underline-offset-4 hover:underline"
+      <div class="flex flex-col items-start gap-3">
+        <a class="flex gap-2 min-h-11 items-center text-base font-semibold underline-offset-4 hover:underline"
           href="tel:+34644798063">
-          <Phone /> +34 644 798 063
+          <Phone :size="18" /> +34 644 798 063
         </a>
-        <NuxtLink to="/reservar" class="action">Reservar una sesión</NuxtLink>
-        <ContactButton />
-        <p class="text-sm text-muted">Recibir?s la confirmación de tu reserva por email.</p>
+        <div class="landing-actions contact-actions">
+          <NuxtLink to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>
+          <ContactButton />
+        </div>
+        <p class="max-w-[38ch] text-xs leading-relaxed text-muted">Recibirás la confirmación de tu reserva por email.</p>
       </div>
     </div>
   </section>

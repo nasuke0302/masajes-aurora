@@ -21,7 +21,7 @@ Abre http://localhost:3000. El adaptador de desarrollo usa D1 local persistente 
 
 Para pruebas locales, SITE_URL debe ser http://localhost:3000. Puedes configurar EMAIL_FROM=reservas@localhost exclusivamente en el entorno local; para Workers necesitas un remitente verificado. La variable anterior VITE_ANIMATED_MARBLE sigue funcionando; ANIMATED_MARBLE tiene prioridad.
 
-El panel permite definir precios y jornadas, abrir/cerrar reservas, bloquear periodos, añadir citas de WhatsApp, cancelar citas confirmadas, marcar sesiones realizadas y registrar cobros en efectivo. La agenda abre en una semana de lunes a domingo, con flechas para cambiar de periodo, selector Semana/Día y cupos diarios de masajes. Al seleccionar una reserva, el detalle aparece a la derecha en escritorio o en un diálogo en móvil e incluye el email del cliente con enlace mailto. Una cita pagada cancelada conserva el estado del pago hasta tramitar su devolución en Stripe. No hay reprogramación automática.
+El panel permite definir precios y jornadas, abrir/cerrar reservas, bloquear periodos, añadir citas de WhatsApp, cancelar citas confirmadas, marcar sesiones realizadas y registrar cobros en efectivo. La agenda abre en una semana de lunes a domingo, con flechas para cambiar de periodo, selector Semana/Día y recuento diario de masajes. Al seleccionar una reserva, el detalle aparece a la derecha en escritorio o en un diálogo en móvil e incluye el email del cliente con enlace mailto. Una cita pagada cancelada conserva el estado del pago hasta tramitar su devolución en Stripe. No hay reprogramación automática.
 
 El enlace discreto Historial de reservas, al pie de la agenda, sustituye la pestaña Reservas. Permite filtrar por fechas y estado, incluidas canceladas y caducadas, sin ocupar espacio en el calendario. Volver a la agenda recupera el periodo semanal o diario seleccionado.
 
@@ -38,13 +38,15 @@ build:cloudflare crea y valida dos Workers bajo .cloudflare/output/v0. preview e
 
 ## Reglas de reserva
 
-Una reserva agrupa de uno a tres masajes de 40/60 minutos, realizados consecutivamente en una sola dirección y con un único pago. **El máximo diario es tres masajes, no tres reservas**. Se suman cantidades, precios y duraciones sin descuentos; se conservan instantáneas de lo contratado.
+Una reserva agrupa masajes de 40/60 minutos, realizados consecutivamente en una sola dirección y con un único pago. **No hay cupo diario**: se pueden reservar las sesiones que quepan en las jornadas, respetando la separación entre visitas. Se suman cantidades, precios y duraciones sin descuentos; se conservan instantáneas de lo contratado.
 
-La jornada ofrece inicios cada diez minutos. Toda la visita debe caber y dejar 30 minutos entre reservas. No se añade pausa dentro del grupo. El servidor exige tres horas de antelación y permite reservar hasta 30 días vista; usa Europe/Madrid y distingue los instantes de los cambios de hora. Las horas no disponibles se muestran sin datos personales.
+La jornada ofrece inicios cada diez minutos. Toda la visita debe caber y dejar 30 minutos entre reservas. No se añade pausa dentro del grupo. El servidor exige tres horas de antelación y permite reservar hasta 30 días vista; usa Europe/Madrid y distingue los instantes de los cambios de hora. El desplegable muestra únicamente las horas disponibles y la hora de fin de la sesión, sin datos personales.
 
-Los triggers de D1 adjudican cupos y evitan solapamientos de forma atómica, incluyendo bloqueos temporales de pago y sesiones realizadas. Las cantidades e importes se validan y calculan en el servidor; el cliente no puede enviar un precio.
+Se comprobaron capturas locales del desplegable a 1440px y 390px con cuatro masajes de 60 minutos, catálogo real de staging y disponibilidad calculada con la lógica compartida sobre una agenda vacía de prueba; no se enviaron reservas. Pasan 42 tests y type-check, incluidas conservación de una reserva al migrar, cuatro masajes en una sesión y cuatro masajes entre reservas sin solapamiento, manteniendo separación y antelación. Tras desplegar, test:worker pasó SSR, API, assets, autenticación privada y límite de cuerpo. Chrome sobre staging real, sin fixtures, a 1440px y 390px confirmó cuatro masajes de 60 minutos, API 200 con 240 minutos y 49 horas disponibles (primera 09:00–13:00), sin indicador de cupo restante, desbordamiento horizontal ni errores de página. No se enviaron reservas ni emails.
 
-El efectivo confirma inmediatamente, con cobro pendiente y sin verificar email. El pago online crea un Checkout para toda la visita y bloquea cupos hasta 30 minutos, limitado por el corte de antelación. Un cron cada minuto reconcilia abandonos y despacha notificaciones. Antes de liberar se recupera/cierra Checkout y se verifica su estado. Si Stripe está inaccesible, se conserva el bloqueo para evitar sobreventa hasta poder cerrar el pago; este fallo debe generar una alerta operativa.
+Los triggers de D1 reservan franjas y evitan solapamientos de forma atómica, incluyendo bloqueos temporales de pago y sesiones realizadas. Las cantidades e importes se validan y calculan en el servidor; el cliente no puede enviar un precio.
+
+El efectivo confirma inmediatamente, con cobro pendiente y sin verificar email. El pago online crea un Checkout para toda la visita y bloquea el horario hasta 30 minutos, limitado por el corte de antelación. Un cron cada minuto reconcilia abandonos y despacha notificaciones. Antes de liberar se recupera/cierra Checkout y se verifica su estado. Si Stripe está inaccesible, se conserva el bloqueo para evitar sobreventa hasta poder cerrar el pago; este fallo debe generar una alerta operativa.
 
 Se usa el instante del evento de Stripe, no la hora de recepción del webhook, para respetar pagos a tiempo recibidos con retraso. Los cobros fuera de plazo se reembolsan con idempotencia. Solo se admiten tarjetas y sus monederos Apple Pay/Google Pay en una configuración de métodos dedicada. El servidor comprueba la configuración; desactiva Link, adeudos, transferencias y cualquier otro método en esta versión.
 
@@ -89,13 +91,13 @@ npm exec -- cf deploy --prebuilt --dry-run --mode staging --worker masajes-auror
 
 ### Configuración actual de staging
 
-- Desplegado y reservas abiertas el 11/10/2026. URL: https://masajes-aurora-staging.albertoesquivelanias.workers.dev
+- Desplegado y reservas abiertas el 11/10/2026. URL: https://aurora-staging.geonuvia.com
 - D1: masajes-aurora-staging; cola: masajes-aurora-notifications-staging.
 - Tarifas: 40 minutos, 40 €; 60 minutos, 50 €. Lunes a domingo, 09:00–21:00.
 - Pago en efectivo; las tres variables Stripe permanecen vacías.
 - Emails mediante Resend con el remitente de staging de Geonuvia y nombre Masajes Aurora. Acceso privado para masajesaurora@gmail.com.
 
-Se verificaron HTTP 200 en web, reserva, acceso e imágenes, catálogo con tarifas y efectivo, disponibilidad de grupos mixtos y HTTP 401 en la API privada. La conexión DNS local a workers.dev agotó el tiempo de espera; las comprobaciones se completaron con curl --resolve usando otra dirección de Cloudflare y TLS validado. Pasan 40 tests, type-check y test:worker.
+Se verificaron HTTP 200 en web, reserva, acceso e imágenes, catálogo con tarifas y efectivo, disponibilidad de grupos mixtos y HTTP 401 en la API privada. La URL inicial workers.dev agotaba el tiempo de conexión con la resolución DNS local. Staging se publica temporalmente en aurora-staging.geonuvia.com, actualizando SITE_URL y WORKER_DOMAIN. Se verificó en Chrome con conexión normal: página renderizada, imágenes y JavaScript sin errores, navegación a reservas y canonical con el nuevo origen. Pasan 42 tests, type-check y test:worker.
 
 Las pruebas manuales de reserva, recepción real de emails y panel quedan a cargo del propietario. Stripe y dominio definitivo se configuran posteriormente. No se ha enviado un email real como parte del despliegue.
 
@@ -105,9 +107,9 @@ La migración usa SELECT RAISE(...) WHERE dentro de los triggers y finales LF pa
 
 Crea una configuración de métodos **de pruebas** exclusiva para tarjetas y monederos; copia su ID pmc_ en STRIPE_PAYMENT_CONFIGURATION. Una clave restringida necesita lectura/escritura de Checkout, lectura de Events y Payment Method Configurations, y permiso para crear Refunds. Configura un webhook HTTPS en SITE_URL/api/stripe/webhook con eventos checkout.session.completed, checkout.session.expired, checkout.session.async_payment_succeeded y charge.refunded. Conserva su secreto whsec_ en el servidor; no se confirma una cita desde la página de retorno.
 
-Primero prueba una reserva en efectivo y otra con una tarjeta de pruebas de Stripe. Comprueba el grupo mixto, el límite diario, el resumen, ambos emails reales, el enlace privado y el panel. Abandona un Checkout y verifica cierre/liberación; reenvía un webhook y comprueba que no duplica avisos. Verifica también una devolución desde el Dashboard y un fallo recuperable de email. No uses tarjetas reales en staging.
+Primero prueba una reserva en efectivo y otra con una tarjeta de pruebas de Stripe. Comprueba el grupo mixto, jornadas y separación entre visitas, el resumen, ambos emails reales, el enlace privado y el panel. Abandona un Checkout y verifica cierre/liberación; reenvía un webhook y comprueba que no duplica avisos. Verifica también una devolución desde el Dashboard y un fallo recuperable de email. No uses tarjetas reales en staging.
 
-Hay pruebas con D1 real simulado para concurrencia, cupos y solapamientos, tarifas conservadas, buffers, jornadas, antelación, horario de verano/invierno, caducidad, webhooks repetidos/tardíos, importes manipulados, firma inválida, reembolsos y reintentos de email. La agenda privada se revisó en Chrome local a 1440×1000 y 390×844, con veredicto ship del revisor. El historial vacío recibió veredicto ship a esos tamaños; la revisión no incluyó registros poblados ni estados transitorios. También se comprobaron filtros, rechazo HTTP 400 de consultas inválidas, vuelta a la agenda y ausencia de desbordamiento móvil. La revisión visual de la página pública sigue pendiente. La revisión de código conserva el sistema visual existente. Los tests de Stripe usan un cliente simulado: la prueba completa con Checkout y entrega real exige las credenciales y recursos anteriores.
+Hay pruebas con D1 real simulado para concurrencia y solapamientos, tarifas conservadas, buffers, jornadas, antelación, horario de verano/invierno, caducidad, webhooks repetidos/tardíos, importes manipulados, firma inválida, reembolsos y reintentos de email. La agenda privada se revisó en Chrome local a 1440×1000 y 390×844, con veredicto ship del revisor. El historial vacío recibió veredicto ship a esos tamaños; la revisión no incluyó registros poblados ni estados transitorios. También se comprobaron filtros, rechazo HTTP 400 de consultas inválidas, vuelta a la agenda y ausencia de desbordamiento móvil. La revisión visual de la página pública sigue pendiente. La revisión de código conserva el sistema visual existente. Los tests de Stripe usan un cliente simulado: la prueba completa con Checkout y entrega real exige las credenciales y recursos anteriores.
 
 ## Emails, privacidad y observabilidad
 
@@ -125,4 +127,12 @@ npm audit señala avisos transitivos de braces (patrones de glob) y node-forge (
 
 Usa otra DB, otra queue, el dominio definitivo, un remitente verificado y claves Stripe live. Aplica las migraciones, configura precios y confirma los controles de staging. Después establece DEPLOY_PRODUCTION=true y ejecuta npm run deploy -- --production. La activación de reservas se hace desde el panel. Cambiar el entorno no migra reservas de staging a producción; nunca copies datos de pruebas a la agenda real.
 
-El límite diario, intervalo, antelación y horizonte están en shared/booking.ts; los triggers de migrations/0001_booking.sql refuerzan cupos, intervalo y antelación. Cambiar esas reglas requiere una migración nueva coherente con la API y las pruebas.
+El intervalo, antelación y horizonte están en shared/booking.ts. migrations/0002_remove_daily_capacity.sql elimina el cupo diario conservando reservas existentes, separación y antelación; está aplicada en staging y la actualización está desplegada y verificada (versión 2ecaa187-bf92-49db-88c8-afcd68161da7). Cambiar estas reglas requiere una migración nueva coherente con la API y las pruebas.
+
+## Acceso privado de staging
+
+Toda la web y el panel en https://aurora-staging.geonuvia.com usan Cloudflare Access con el proveedor OTP de Geonuvia y el único correo albertoesquivelanias@gmail.com. La sesión dura 24 horas. El código lo envía Cloudflare; Resend sigue enviando las notificaciones de reservas a Melba y a los clientes. ADMIN_EMAIL conserva masajesaurora@gmail.com para los avisos.
+
+El panel acepta la identidad firmada de Access sin pedir otro enlace. Los endpoints de enlace antiguo se deshabilitan cuando Access está configurado. Salir cierra la sesión de Access. workers.dev y las URL de preview están deshabilitados; el Worker verifica firma RS256, emisor, audiencia, caducidad y email antes de servir web, API o imágenes. Configuración pública en config/access.json; npm run setup:access crea/verifica solo la aplicación y política de Aurora, sin modificar Geonuvia. Cada despliegue staging comprueba esa configuración.
+
+El desarrollo y preview locales mantienen el acceso anterior por enlace, con bypass del perímetro limitado a loopback explícitamente configurado. No se envían códigos OTP en las pruebas automatizadas. Stripe sigue deshabilitado; antes de activar pagos, habrá que configurar el acceso del webhook firmado, porque actualmente todo el dominio está protegido.

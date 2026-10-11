@@ -1,6 +1,8 @@
 import nuxt from './nuxt.mjs'
+import {authorizeAccess} from './access.mjs'
 const MAX_BODY=32768
 export default {...nuxt,async fetch(request,env,ctx){
+ try{await authorizeAccess(request,env)}catch{return new Response('Acceso no autorizado',{status:401,headers:{'Cache-Control':'no-store'}})}
  if(Number(request.headers.get('content-length')||0)>MAX_BODY)return new Response('Solicitud demasiado grande',{status:413})
  if(request.body){
   const reader=request.body.getReader(),chunks=[];let size=0

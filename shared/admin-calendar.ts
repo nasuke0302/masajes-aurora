@@ -13,7 +13,7 @@ export function clockMinute(epoch:number) {
  const [hour,minute] = localLabel(epoch).split(':').map(Number)
  return hour!*60+minute!
 }
-export function dayCapacity(rows:AgendaReservation[],date:string) {
+export function dayMassageCount(rows:AgendaReservation[],date:string) {
  return rows.filter(r=>r.service_date===date&&occupiesAgenda(r.status)).reduce((sum,r)=>sum+r.quantity,0)
 }
 export function agendaRange(hours:Hours[],rows:AgendaReservation[]) {

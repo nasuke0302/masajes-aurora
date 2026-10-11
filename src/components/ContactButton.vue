@@ -10,9 +10,9 @@ const contactUrl = computed(
 </script>
 
 <template>
-  <a class="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full bg-ink px-6 py-3 text-center text-base font-medium lg:px-8 lg:py-4 lg:text-xl text-white transition-[background-color,transform] duration-200 hover:bg-[#08767b] active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none sm:w-auto"
+  <a class="landing-button secondary"
     :href="contactUrl" target="_blank" rel="noopener noreferrer">
-    <WhatsApp :size="32" />
+    <WhatsApp :size="20" />
     {{ t('contact.button') }}
 
     <span class="sr-only">{{ t('contact.newTab') }}</span>

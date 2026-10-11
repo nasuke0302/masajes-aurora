@@ -2,6 +2,7 @@ import {spawn} from 'node:child_process'
 import {resolve,dirname,join} from 'node:path'
 import {mkdir,writeFile,unlink} from 'node:fs/promises'
 import {createRequire} from 'node:module'
+import {ensureAccess} from './setup-access.mjs'
 const require=createRequire(import.meta.url)
 try{process.loadEnvFile('.env.local')}catch(e){if(e.code!=='ENOENT')throw e}
 const mode=process.argv.includes('--production')?'production':'staging'
@@ -16,6 +17,7 @@ if(keys.some(k=>process.env[k])&&!keys.every(k=>process.env[k]))throw new Error(
 if(process.env.STRIPE_SECRET_KEY&&!new RegExp('^(sk|rk)_'+(mode==='production'?'live':'test')+'_').test(process.env.STRIPE_SECRET_KEY))throw new Error('STRIPE_MODE_MISMATCH')
 const cli=join(dirname(require.resolve('cf/package.json')),'bin/cf')
 async function run(args){await new Promise((res,rej)=>{const p=spawn(process.execPath,args,{stdio:'inherit',env:{...process.env,CF_SEND_TELEMETRY:'false',DEBUG:''}});p.on('error',rej);p.on('exit',code=>code===0?res():rej(new Error('DEPLOY_COMMAND_FAILED')))})}
+if(mode==='staging'){const access=await ensureAccess(false);if(new URL(process.env.SITE_URL).hostname!==access.host||process.env.WORKER_DOMAIN!==access.host)throw new Error('ACCESS_HOST_MISMATCH')}
 await run(['--import','tsx','scripts/build-cloudflare.mjs',...(mode==='production'?['--production']:[])])
 // Upload only the explicitly selected secrets to each Worker.
 let secretFile,mailSecretFile

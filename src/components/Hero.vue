@@ -15,12 +15,7 @@ const animatedMarble = useRuntimeConfig().public.animatedMarble
       class="absolute inset-0 -z-10 hidden h-full w-full object-cover object-center lg:block" />
     <MarbleMotion v-if="animatedMarble" :src="artwork" class="absolute inset-0 -z-10 hidden h-full w-full lg:block" />
     <header class="relative flex items-center justify-between gap-6 px-[5%] py-5 lg:py-6">
-      <div aria-label="Masajes Aurora, inicio" class="flex items-center gap-5">
-        <span class="font-display text-3xl font-semibold tracking-[-0.04em] lg:text-6xl">Aurora<span
-            class="block h-1 w-16 rounded-full bg-coral"></span></span>
-        <span class="hidden border-l border-ink/30 pl-5 text-sm leading-snug sm:block lg:text-lg">Masajes a
-          domicilio<br />en Ávila capital</span>
-      </div>
+      <BrandLogo />
     </header>
     <div class="px-[5%] pt-7 pb-12 lg:min-h-[min(38vw,660px)] lg:pt-5 lg:pb-[6%]">
       <h1 id="hero-title"
@@ -30,15 +25,18 @@ const animatedMarble = useRuntimeConfig().public.animatedMarble
       <p class="mt-5 max-w-[35ch] text-lg lg:hidden">
         Masajes de bienestar a domicilio, exclusivamente en Ávila capital.
       </p>
-      <ul class="mt-7 flex max-w-[780px] flex-wrap gap-x-6 gap-y-3 text-sm leading-relaxed lg:mt-6 lg:text-base">
+      <ul class="mt-7 flex max-w-[780px] flex-wrap gap-x-6 gap-y-3 text-sm leading-relaxed lg:mt-6">
         <li class="sm:border-r sm:border-coral/60 sm:pr-6">Más de 10 años de experiencia</li>
         <li class="sm:border-r sm:border-coral/60 sm:pr-6">Adaptado a tus preferencias</li>
         <li>Solo en Ávila capital</li>
       </ul>
-      <NuxtLink to="/reservar" class="action mt-7 lg:mt-6 lg:text-xl">Reservar una sesión</NuxtLink><ContactButton class="mt-3" />
+      <div class="landing-actions">
+        <NuxtLink to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>
+        <ContactButton />
+      </div>
       <a href="tel:+34644798063"
-        class="mt-3 mx-auto flex min-h-11 w-fit items-center gap-3 text-lg font-semibold lg:ml-7 lg:text-2xl">
-        <Phone /> +34 644 798 063
+        class="mt-3 flex min-h-11 w-fit items-center gap-2 text-base font-semibold hover:underline underline-offset-4">
+        <Phone :size="18" /> +34 644 798 063
       </a>
     </div>
     <div class="relative lg:hidden">

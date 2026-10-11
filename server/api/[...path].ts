@@ -19,6 +19,7 @@ export default defineEventHandler(async event=>{
    try{stripeEvent=await stripeClient(env).webhooks.constructEventAsync(body,getHeader(event,'stripe-signature')||'',env.STRIPE_WEBHOOK_SECRET,undefined,StripeClient.createSubtleCryptoProvider())}catch{throw createError({statusCode:400,statusMessage:'Firma inválida'})}
    await handleStripeEvent(env,stripeEvent);event.waitUntil(dispatch(env));return {received:true}
   }
+  if(path==='auth-mode'&&method==='GET')return {access:!!env.ACCESS_AUD}
   if(path==='catalog'&&method==='GET'){
    const c=await configuration(env)
    return {...c,accepting:c.accepting&&!!env.ADMIN_EMAIL&&!!env.EMAIL_FROM,onlinePayment:!!env.STRIPE_SECRET_KEY&&!!env.STRIPE_PAYMENT_CONFIGURATION}
@@ -50,6 +51,7 @@ export default defineEventHandler(async event=>{
    const session=await checkout(env,current)
    return {url:session.url}
   }
+  if(env.ACCESS_AUD&&['admin/login','admin/consume'].includes(path))throw createError({statusCode:410,statusMessage:'Utiliza Cloudflare Access'})
   if(path==='admin/login'&&method==='POST'){
    await limit(env,'admin-login:'+(getHeader(event,'cf-connecting-ip')||'local'),5,900)
    await limit(env,'admin-mail',5,900)
@@ -65,6 +67,7 @@ export default defineEventHandler(async event=>{
   if(path.startsWith('admin/')){
    await requireAdmin(event,env)
    if(path==='admin/logout'&&method==='POST'){
+    if(env.ACCESS_AUD)return {ok:true,url:'/cdn-cgi/access/logout'}
     await env.DB.prepare('DELETE FROM admin_sessions WHERE token_hash=?').bind(await hash(getCookie(event,'aurora_admin')||'')).run();deleteCookie(event,'aurora_admin',{path:'/'});return {ok:true}
    }
    if(path==='admin/settings'&&method==='GET')return configuration(env)

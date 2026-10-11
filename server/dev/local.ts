@@ -11,6 +11,7 @@ export default defineNitroPlugin(async app=>{
  const DB=await mf.getD1Database('DB')
  await mkdir('.data',{recursive:true})
  if(!await DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='settings'").first())await DB.exec((await readFile('migrations/0001_booking.sql','utf8')).replace(/--[^\n]*/g,'').replace(/\n/g,' '))
+ if((await DB.prepare("SELECT sql FROM sqlite_master WHERE name='bookings'").first<{sql:string}>())?.sql?.includes('BETWEEN 1 AND 3'))await DB.exec((await readFile('migrations/0002_remove_daily_capacity.sql','utf8')).replace(/\n/g,' '))
  const mailEnv={DB,EMAIL_FROM:process.env.EMAIL_FROM||'reservas@localhost'}
  const localSend=async(_env:unknown,message:{to:unknown;subject:string;text?:string;html?:string})=>{await appendFile('.data/mail.jsonl',JSON.stringify({...message,at:new Date().toISOString()})+'\n');return {messageId:crypto.randomUUID()}}
  const env={DB,ASSETS:undefined,SITE_URL:process.env.SITE_URL?.startsWith('http://localhost')?process.env.SITE_URL:'http://localhost:3000',ADMIN_EMAIL:process.env.ADMIN_EMAIL||'',EMAIL_FROM:process.env.EMAIL_FROM||'',STRIPE_SECRET_KEY:process.env.STRIPE_SECRET_KEY||'',STRIPE_WEBHOOK_SECRET:process.env.STRIPE_WEBHOOK_SECRET||'',STRIPE_PAYMENT_CONFIGURATION:process.env.STRIPE_PAYMENT_CONFIGURATION||'',NOTIFICATIONS:{async send(body:{id:string}){await deliver(mailEnv as Parameters<typeof deliver>[0],body.id,localSend)}}} as unknown as AppEnv

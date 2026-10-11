@@ -10,6 +10,7 @@ import {hash} from '../server/core/security'
 import {localDate,datePlus,dayInstants,localLabel} from '../shared/booking'
 import type {AppEnv,Booking} from '../server/core/types'
 let mf:Miniflare,env:AppEnv,start:number
+let migrationPreserved=false
 const emailSend=vi.fn(),queueSend=vi.fn()
 async function row(id:string){return (await env.DB.prepare('SELECT * FROM bookings WHERE id=?').bind(id).first<Booking>())!}
 function input(q={massage40:0,massage60:1},s=start,method='cash'){return {quantities:q,startAt:s,name:'Cliente prueba',email:'cliente@example.com',phone:'+34644798063',address:'Calle Mayor 10, 1A',city:'Ávila',notes:'Avisar al llegar',method,requestKey:crypto.randomUUID()}}
@@ -24,6 +25,11 @@ beforeAll(async()=>{
  mf=new Miniflare({workers:[{config:{name:'test',compatibilityDate:'2026-10-11',env:{DB:{type:'d1',id:'00000000-0000-0000-0000-000000000001'}},manifest:{mainModule:'index.mjs',modules:{'index.mjs':{type:'esm',contents:'export default {fetch(){return new Response("test")}}'}}}}}]})
  env={DB:await mf.getD1Database('DB'),SITE_URL:'https://aurora.example',ADMIN_EMAIL:'melba@example.com',EMAIL_FROM:'reservas@aurora.example',STRIPE_SECRET_KEY:'rk_test_example',STRIPE_WEBHOOK_SECRET:'whsec_example',STRIPE_PAYMENT_CONFIGURATION:'pmc_test',NOTIFICATIONS:{send:queueSend}} as unknown as AppEnv
  await env.DB.exec((await readFile('migrations/0001_booking.sql','utf8')).replace(/\n/g,' '))
+ await env.DB.prepare('UPDATE settings SET accepting=1').run();await env.DB.prepare('UPDATE products SET price_cents=5000').run()
+ const seedDate=datePlus(localDate(Math.floor(Date.now()/1000)),1),seedStart=dayInstants(seedDate).find(x=>localLabel(x.epoch)==='09:00')!.epoch
+ const seed=await createBooking(env,input({massage40:0,massage60:1},seedStart)),before=await row(seed.id)
+ await env.DB.exec((await readFile('migrations/0002_remove_daily_capacity.sql','utf8')).replace(/\n/g,' '))
+ migrationPreserved=JSON.stringify(before)===JSON.stringify(await row(seed.id))
 },30000)
 beforeEach(async()=>{
  vi.clearAllMocks()
@@ -34,6 +40,7 @@ beforeEach(async()=>{
 })
 afterAll(async()=>{await mf.dispose()})
 describe('D1 bookings and notifications',()=>{
+ it('preserves existing reservations across the capacity-removal migration',()=>expect(migrationPreserved).toBe(true))
  it('sends through Resend with stable idempotency and persists the provider ID',async()=>{
   await createBooking(env,input());const notice=(await env.DB.prepare('SELECT id FROM outbox LIMIT 1').first<{id:string}>())!
   const mail={DB:env.DB,EMAIL_FROM:env.EMAIL_FROM,ADMIN_EMAIL:env.ADMIN_EMAIL,RESEND_API_KEY:'re_test'} as Parameters<typeof deliver>[0]
@@ -56,15 +63,16 @@ describe('D1 bookings and notifications',()=>{
   expect((await env.DB.prepare('SELECT body FROM outbox LIMIT 1').first<{body:string}>())!.body).toContain(String.fromCharCode(10))
   await env.DB.prepare('UPDATE products SET price_cents=9000').run();expect((await row(b.id)).amount_cents).toBe(10000)
  })
- it('atomically rejects simultaneous overcapacity reservations',async()=>{
+ it('allows simultaneous non-overlapping reservations above three daily massages',async()=>{
   const r=await Promise.allSettled([createBooking(env,input({massage40:0,massage60:2})),createBooking(env,input({massage40:0,massage60:2},start+4*3600))])
-  expect(r.filter(x=>x.status==='fulfilled')).toHaveLength(1);expect((await env.DB.prepare('SELECT SUM(quantity) as n FROM bookings').first<{n:number}>())!.n).toBe(2)
+  expect(r.filter(x=>x.status==='fulfilled')).toHaveLength(2);expect((await env.DB.prepare('SELECT SUM(quantity) as n FROM bookings').first<{n:number}>())!.n).toBe(4)
  })
+ it('books more than three consecutive massages in one session',async()=>{const b=await createBooking(env,input({massage40:2,massage60:2}));expect(b.quantity).toBe(4);expect(b.end_at-b.start_at).toBe(200*60)})
  it('rejects simultaneous overlapping sessions',async()=>{const r=await Promise.allSettled([createBooking(env,input()),createBooking(env,input())]);expect(r.filter(x=>x.status==='fulfilled')).toHaveLength(1)})
  it('deduplicates a retried booking request and its notices',async()=>{const body=input();const a=await createBooking(env,body),b=await createBooking(env,body);expect(a.id).toBe(b.id);expect((await env.DB.prepare('SELECT * FROM outbox').all()).results).toHaveLength(2)})
- it('does not release expired holds just because their timestamp passed',async()=>{const b=await createBooking(env,input({massage40:0,massage60:3},start,'online'));await env.DB.prepare('UPDATE bookings SET hold_until=1 WHERE id=?').bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).remaining).toBe(0)})
+ it('does not release expired holds just because their timestamp passed',async()=>{const b=await createBooking(env,input({massage40:0,massage60:3},start,'online'));await env.DB.prepare('UPDATE bookings SET hold_until=1 WHERE id=?').bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).slots.find(s=>s.startAt===start)?.available).toBe(false)})
  it('protects occupied periods against new blocks',async()=>{await createBooking(env,input());await expect(env.DB.prepare('INSERT INTO blocks VALUES(?,?,?,?)').bind('block',start,start+3600,'Test').run()).rejects.toThrow('BOOKING_IN_BLOCK')})
- it('counts completed sessions and releases cancelled ones',async()=>{const b=await createBooking(env,input({massage40:0,massage60:3}));await env.DB.prepare("UPDATE bookings SET status='completed' WHERE id=?").bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).remaining).toBe(0);await env.DB.prepare("UPDATE bookings SET status='cancelled' WHERE id=?").bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).remaining).toBe(3)})
+ it('keeps completed session times occupied and releases cancelled times',async()=>{const b=await createBooking(env,input({massage40:0,massage60:3}));await env.DB.prepare("UPDATE bookings SET status='completed' WHERE id=?").bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).slots.find(s=>s.startAt===start)?.available).toBe(false);await env.DB.prepare("UPDATE bookings SET status='cancelled' WHERE id=?").bind(b.id).run();expect((await available(env,b.service_date,{massage40:1,massage60:0})).slots.find(s=>s.startAt===start)?.available).toBe(true)})
  it('retries email failures without cancelling bookings and acknowledges duplicates',async()=>{
   const b=await createBooking(env,input()),notice=(await env.DB.prepare('SELECT id FROM outbox LIMIT 1').first<{id:string}>())!
   const mail={DB:env.DB,EMAIL_FROM:env.EMAIL_FROM,RESEND_API_KEY:'re_test'} as unknown as Parameters<typeof deliver>[0]

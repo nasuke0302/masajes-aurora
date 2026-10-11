@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import {ref,reactive,computed,watch} from 'vue'
-import {money,localDate,datePlus,localLabel,totals,type Product,type Hours,type Slot} from '#shared/booking'
+import {bookingContactSchema} from '#shared/booking-contact'
+import {money,localDate,datePlus,localLabel,totals,MAX_SESSION_MASSAGES,type Product,type Hours,type Slot} from '#shared/booking'
 const props=withDefaults(defineProps<{admin?:boolean}>(),{admin:false})
 const emit=defineEmits<{saved:[]}>()
 type Catalog={products:Product[];hours:Hours[];accepting:boolean;onlinePayment:boolean}
-type Available={slots:Slot[];remaining:number;duration:number;amount:number;quantity:number}
+type Available={slots:Slot[];duration:number;amount:number;quantity:number}
 const {data:catalog,error:catalogError}=await useFetch<Catalog>('/api/catalog')
 const today=localDate(Math.floor(Date.now()/1000)),lastDay=datePlus(today,30)
 const quantities=reactive({massage40:0,massage60:1})
@@ -13,7 +14,9 @@ const details=reactive({name:'',email:'',phone:'',address:'',city:'Ávila' as co
 let requestKey=''
 let controller:AbortController|undefined
 const total=computed(()=>{try{return totals(quantities,catalog.value?.products||[])}catch{return null}})
+const availableSlots=computed(()=>slots.value?.slots.filter(s=>s.available)||[])
 const selected=computed(()=>slots.value?.slots.find(s=>s.startAt===startAt.value&&s.available))
+const contactValid=computed(()=>bookingContactSchema.safeParse(details).success)
 const ready=computed(()=>catalog.value?.accepting && catalog.value.products.every(p=>p.price_cents!==null&&p.price_cents>0))
 watch([date,()=>quantities.massage40,()=>quantities.massage60],async()=>{
  controller?.abort();controller=new AbortController();const current=controller
@@ -23,10 +26,10 @@ watch([date,()=>quantities.massage40,()=>quantities.massage60],async()=>{
  try{const result=await $fetch<Available>('/api/availability',{query:{date:date.value,...quantities},signal:current.signal});if(!current.signal.aborted)slots.value=result}catch(e){if(!current.signal.aborted)error.value=apiError(e)}finally{if(!current.signal.aborted)loading.value=false}
 },{immediate:true})
 watch(details,()=>{review.value=false;requestKey=''})
-function change(q:'massage40'|'massage60',n:number){if(n>=0&&n<=3&&n+quantities[q==='massage40'?'massage60':'massage40']<=3)quantities[q]=n}
-function showReview(){error.value='';if(!selected.value){error.value='Selecciona una hora disponible.';return}review.value=true}
+function change(q:'massage40'|'massage60',n:number){if(n>=0&&n<=MAX_SESSION_MASSAGES&&n+quantities[q==='massage40'?'massage60':'massage40']<=MAX_SESSION_MASSAGES)quantities[q]=n}
+function showReview(){error.value='';if(!contactValid.value)return;if(!selected.value){error.value='Selecciona una hora disponible.';return}review.value=true}
 async function submit(){
- if(!selected.value||busy.value)return
+ if(!selected.value||!contactValid.value||busy.value)return
  busy.value=true;error.value='';requestKey ||= crypto.randomUUID()
  try{
   const body={quantities:{...quantities},startAt:startAt.value,...details,requestKey}
@@ -41,25 +44,29 @@ async function submit(){
  <div v-else-if="saved" class="notice" role="status">Reserva {{ saved }} guardada. Hemos preparado los emails de confirmación.</div>
  <form v-else class="booking-grid" @submit.prevent="review ? submit() : showReview()">
   <div class="space-y-9">
-   <fieldset><legend class="text-2xl font-bold mb-2">¿Qué masajes queréis?</legend><p class="text-muted mb-5">Una visita, una dirección y hasta tres masajes. Puedes combinar duraciones.</p>
+   <fieldset><legend class="sr-only">Masajes</legend>
     <div v-for="product in catalog?.products" :key="product.id" class="product-line">
      <div><label :for="product.id" class="font-semibold text-lg">{{ product.name }}</label><p class="text-muted">{{ money(product.price_cents!) }} por persona</p></div>
-     <div class="quantity-control"><button type="button" :aria-label="'Quitar '+product.name" :disabled="quantities[product.id]===0||busy" @click="change(product.id,quantities[product.id]-1)">−</button><input :id="product.id" :value="quantities[product.id]" type="number" min="0" max="3" readonly :aria-label="'Cantidad de '+product.name" /><button type="button" :aria-label="'Añadir '+product.name" :disabled="quantities.massage40+quantities.massage60>=3||busy" @click="change(product.id,quantities[product.id]+1)">+</button></div>
+     <div class="quantity-control"><button type="button" :aria-label="'Quitar '+product.name" :disabled="quantities[product.id]===0||busy" @click="change(product.id,quantities[product.id]-1)">−</button><input :id="product.id" :value="quantities[product.id]" type="number" min="0" :max="MAX_SESSION_MASSAGES" readonly :aria-label="'Cantidad de '+product.name" /><button type="button" :aria-label="'Añadir '+product.name" :disabled="quantities.massage40+quantities.massage60>=MAX_SESSION_MASSAGES||busy" @click="change(product.id,quantities[product.id]+1)">+</button></div>
     </div>
    </fieldset>
-   <fieldset><legend class="text-2xl font-bold mb-5">Elige día y hora</legend><label class="field max-w-sm">Día de la sesión<input v-model="date" type="date" :min="today" :max="lastDay" required :disabled="busy" /></label>
-    <p class="mt-4 text-sm text-muted">Hora de Ávila · Reserva con al menos tres horas de antelación.</p>
+   <fieldset><legend class="text-2xl font-bold mb-5">Elige día y hora</legend>
+    <div class="grid grid-cols-2 gap-3 sm:gap-5">
+     <label class="field min-w-0">Día de la sesión<input v-model="date" class="min-w-0 w-full" type="date" :min="today" :max="lastDay" required :disabled="busy" /></label>
+     <label class="field min-w-0">Hora de inicio<select v-model="startAt" class="min-w-0 w-full" aria-label="Hora de inicio" required :disabled="busy||loading||!availableSlots.length" :aria-busy="loading" @change="review=false;requestKey=''">
+      <option :value="null" disabled>{{ loading?'Cargando…':slots&&!availableSlots.length?'Sin horas disponibles':'Selecciona una hora' }}</option>
+      <option v-for="slot in availableSlots" :key="slot.startAt" :value="slot.startAt">{{ slot.label }}–{{ localLabel(slot.endAt) }}</option>
+     </select></label>
+    </div>
     <p v-if="loading" role="status" class="mt-5">Consultando disponibilidad…</p>
-    <template v-else-if="slots"><p class="mt-5 font-semibold" aria-live="polite">{{ slots.remaining }} {{ slots.remaining===1?'masaje disponible':'masajes disponibles' }} este día</p><p v-if="!slots.slots.length" class="mt-4 text-muted">Melba no tiene jornada disponible este día. Elige otra fecha.</p>
-     <div class="slots" role="group" aria-label="Horas de inicio"><button v-for="slot in slots.slots" :key="slot.startAt" type="button" :disabled="!slot.available||busy" :aria-pressed="startAt===slot.startAt" :aria-label="slot.label+(slot.available?' disponible':' no disponible')" @click="startAt=slot.startAt;review=false;requestKey=''">{{ slot.label }}<span>{{ slot.available?'Disponible':'No disponible' }}</span></button></div>
-    </template>
+    <p v-else-if="slots&&!availableSlots.length" class="mt-5 text-muted" role="status">No hay horas disponibles para esta sesión. Elige otra fecha o cambia los masajes.</p>
    </fieldset>
-   <fieldset><legend class="text-2xl font-bold mb-5">Los datos de la visita</legend><div class="form-columns"><label class="field">Nombre<input v-model="details.name" autocomplete="name" required minlength="2" maxlength="100" :disabled="busy" /></label><label class="field">Email<input v-model="details.email" type="email" autocomplete="email" required maxlength="254" :disabled="busy" /></label><label class="field">Teléfono<input v-model="details.phone" type="tel" autocomplete="tel" required maxlength="20" :disabled="busy" /></label><label class="field">Localidad<input value="Ávila capital" readonly /></label></div><label class="field mt-5">Dirección completa<input v-model="details.address" autocomplete="street-address" placeholder="Calle, número, piso y puerta" required minlength="8" maxlength="300" :disabled="busy" /></label><label class="field mt-5">Notas para Melba <span class="font-normal text-muted">(opcional)</span><textarea v-model="details.notes" rows="4" maxlength="1500" placeholder="Preferencias o indicaciones para llegar" :disabled="busy" /></label></fieldset>
+   <fieldset><legend class="text-2xl font-bold mb-5">Los datos de la visita</legend><div class="form-columns"><label class="field">Nombre<input v-model="details.name" autocomplete="name" required minlength="2" maxlength="100" :disabled="busy" /></label><label class="field">Email<input v-model="details.email" type="email" autocomplete="email" required maxlength="254" :disabled="busy" /></label><label class="field">Teléfono<input v-model="details.phone" type="tel" autocomplete="tel" required maxlength="20" :disabled="busy" /></label></div><label class="field mt-5">Dirección completa<input v-model="details.address" autocomplete="street-address" placeholder="Calle, número, piso y puerta" required minlength="8" maxlength="300" :disabled="busy" /></label><label class="field mt-5">Notas <span class="font-normal text-muted">(opcional)</span><textarea v-model="details.notes" rows="4" maxlength="1500" placeholder="Preferencias o indicaciones para llegar" :disabled="busy" /></label></fieldset>
   </div>
   <aside class="booking-summary"><h2 class="text-2xl font-bold">Tu sesión</h2><dl class="summary-list"><div v-for="p in catalog?.products.filter(p=>quantities[p.id])" :key="p.id"><dt>{{ quantities[p.id] }} · {{ p.name }}</dt><dd>{{ money(quantities[p.id]*p.price_cents!) }}</dd></div><div><dt>Duración total</dt><dd>{{ total?.duration }} min</dd></div><div v-if="selected"><dt>{{ date }}</dt><dd>{{ selected.label }}–{{ localLabel(selected.endAt) }}</dd></div><div class="font-bold text-xl"><dt>Total</dt><dd>{{ money(total?.amount||0) }}</dd></div></dl>
    <fieldset class="mt-6"><legend class="font-semibold mb-3">Cómo quieres pagar</legend><label class="radio-line"><input v-model="details.method" type="radio" value="cash" :disabled="busy" /> En efectivo el día de la cita</label><label v-if="!admin" class="radio-line"><input v-model="details.method" type="radio" value="online" :disabled="!catalog?.onlinePayment||busy" /> Pagar ahora la sesión completa</label><p v-if="!admin&&!catalog?.onlinePayment" class="text-sm text-muted mt-2">El pago online todavía no está habilitado.</p></fieldset>
    <template v-if="review"><div class="mt-6 text-sm space-y-2"><p class="font-bold">Revisa antes de confirmar</p><p>{{ details.name }} · {{ details.email }}</p><p>{{ details.address }}, Ávila capital</p><p v-if="details.notes">{{ details.notes }}</p></div><button type="button" class="text-link mt-4" :disabled="busy" @click="review=false">Editar datos</button></template>
-   <p v-if="error" class="notice mt-5" role="alert">{{ error }}</p><button class="action w-full mt-6" :disabled="!selected||loading||busy" type="submit">{{ busy?'Procesando…':review?(details.method==='online'?'Continuar al pago':'Confirmar reserva'):'Revisar reserva' }}</button><p class="text-sm text-muted mt-4">{{ details.method==='online'?'El horario se guarda temporalmente mientras pagas. La reserva se confirma al verificar el pago.':'Tu reserva se confirma al enviarla. Pagarás a Melba el día de la cita.' }}</p><p class="text-sm text-muted mt-3">Los cambios y las cancelaciones se gestionan con Melba: <a href="tel:+34644798063" class="underline">644 798 063</a>.</p>
+   <p v-if="error" class="notice mt-5" role="alert">{{ error }}</p><button class="action w-full mt-6" :disabled="!selected||!contactValid||loading||busy" type="submit">{{ busy?'Procesando…':review?(details.method==='online'?'Continuar al pago':'Confirmar reserva'):'Revisar reserva' }}</button><p class="text-sm text-muted mt-4">{{ details.method==='online'?'El horario se guarda temporalmente mientras pagas. La reserva se confirma al verificar el pago.':'Tu reserva se confirma al enviarla.' }}</p>
   </aside>
  </form>
 </template>

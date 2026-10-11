@@ -1,11 +1,12 @@
 import { createError } from 'h3'
 import { z } from 'zod'
-import { availability, localDate, totals, type Product, type Hours, type Quantities } from '../../shared/booking'
+import { bookingContactSchema } from '../../shared/booking-contact'
+import { availability, localDate, totals, MAX_SESSION_MASSAGES, type Product, type Hours, type Quantities } from '../../shared/booking'
 import type { AppEnv, Booking } from './types'
 import { hash, token, nowSeconds, safeError } from './security'
 import { noticeStatements } from './notifications'
-export const quantitiesSchema=z.object({massage40:z.number().int().min(0).max(3),massage60:z.number().int().min(0).max(3)}).refine(q=>q.massage40+q.massage60>=1 && q.massage40+q.massage60<=3,'Elige entre uno y tres masajes')
-export const bookingSchema=z.object({ quantities:quantitiesSchema,startAt:z.number().int().positive().max(253402300799),name:z.string().trim().min(2).max(100),email:z.email().max(254).transform(s=>s.toLowerCase()),phone:z.string().trim().regex(/^\+?[0-9 ()-]{9,20}$/),address:z.string().trim().min(8).max(300),city:z.literal('Ávila'),notes:z.string().trim().max(1500).default(''),method:z.enum(['cash','online']),requestKey:z.string().uuid() })
+export const quantitiesSchema=z.object({massage40:z.number().int().min(0).max(MAX_SESSION_MASSAGES),massage60:z.number().int().min(0).max(MAX_SESSION_MASSAGES)}).refine(q=>q.massage40+q.massage60>=1 && q.massage40+q.massage60<=MAX_SESSION_MASSAGES,'Elige al menos un masaje dentro de una jornada')
+export const bookingSchema=z.object({ quantities:quantitiesSchema,startAt:z.number().int().positive().max(253402300799),...bookingContactSchema.shape,city:z.literal('Ávila'),notes:z.string().trim().max(1500).default(''),method:z.enum(['cash','online']),requestKey:z.string().uuid() })
 export async function configuration(env:AppEnv):Promise<{products:Product[];hours:Hours[];accepting:boolean}> {
  const [products,hours,settings]=await Promise.all([env.DB.prepare('SELECT * FROM products ORDER BY minutes').all<Product>(),env.DB.prepare('SELECT * FROM hours ORDER BY weekday,open_minute').all<Hours>(),env.DB.prepare('SELECT accepting FROM settings WHERE id=1').first<{accepting:number}>()])
  return {products:products.results,hours:hours.results,accepting:!!settings?.accepting}
