@@ -5,6 +5,7 @@ import {environment,sameOrigin,limit,hash,token,nowSeconds,safeError,privateHead
 import {configuration,available,createBooking,findByToken,publicBooking,quantitiesSchema} from '../core/bookings'
 import {stripeClient,checkout,reconcile,reconcileBooking,handleStripeEvent} from '../core/payments'
 import {dispatch} from '../core/notifications'
+import {createWebBooking} from '../core/turnstile'
 import {requireAdmin,consumeLink,saveSettings,updateBooking} from '../core/admin'
 export default defineEventHandler(async event=>{
  privateHeaders(event)
@@ -32,8 +33,7 @@ export default defineEventHandler(async event=>{
   }
   if(path==='bookings'&&method==='POST'){
    await limit(env,'booking:'+(getHeader(event,'cf-connecting-ip')||'local'),12)
-   await reconcile(env)
-   const b=await createBooking(env,await readBody(event))
+   const b=await createWebBooking(env,await readBody(event),getHeader(event,'cf-connecting-ip'))
    const session=b.status==='held'?await checkout(env,b):null
    event.waitUntil(dispatch(env))
    return {url:b.manage_url,checkoutUrl:session?.url||null,reference:b.reference}

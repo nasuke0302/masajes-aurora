@@ -6,6 +6,7 @@ import {createBooking,available} from '../server/core/bookings'
 import {checkout,reconcileBooking,handleStripeEvent,verifyImmediatePayments} from '../server/core/payments'
 import {deliver,sendResend} from '../workers/notifications'
 import {consumeLink,requireAdmin,saveSettings} from '../server/core/admin'
+import {createWebBooking} from '../server/core/turnstile'
 import {hash} from '../server/core/security'
 import {localDate,datePlus,dayInstants,localLabel} from '../shared/booking'
 import type {AppEnv,Booking} from '../server/core/types'
@@ -126,3 +127,22 @@ describe('admin validation and access',()=>{
  it('does not accept an expired login link',async()=>{const value='a'.repeat(64);await env.DB.prepare('INSERT INTO admin_links VALUES(?,?,NULL)').bind(await hash(value),1).run();await expect(consumeLink({} as never,env,value)).rejects.toThrow()})
 })
 
+
+describe('Turnstile before web bookings',()=>{
+ const token='fresh-token'
+ const response=(success=true,hostname=new URL(env.SITE_URL).hostname,action='booking_create')=>new Response(JSON.stringify({success,hostname,action}))
+ it('creates a reservation only after Siteverify succeeds',async()=>{
+  const request=vi.spyOn(globalThis,'fetch').mockResolvedValue(response())
+  try{const b=await createWebBooking({...env,TURNSTILE_SECRET_KEY:'secret-test'},{...input(),turnstileToken:token},'127.0.0.1');expect(b.status).toBe('confirmed');expect((await env.DB.prepare('SELECT * FROM outbox').all()).results).toHaveLength(2);expect(request.mock.calls[0]![0]).toContain('/siteverify');expect(JSON.parse(request.mock.calls[0]![1]!.body as string)).toMatchObject({response:token,remoteip:'127.0.0.1'})}finally{request.mockRestore()}
+ })
+ it.each(['missing','invalid','expired','replayed','wrong-host','wrong-action','unavailable','malformed','timeout'])('rejects %s without creating a booking or notices',async scenario=>{
+  const request=vi.spyOn(globalThis,'fetch')
+  if(scenario==='timeout')request.mockRejectedValue(new DOMException('Timeout','TimeoutError'))
+  else if(scenario==='unavailable')request.mockResolvedValue(new Response('',{status:503}))
+  else if(scenario==='malformed')request.mockResolvedValue(new Response('not-json'))
+  else request.mockResolvedValue(response(!['invalid','expired','replayed'].includes(scenario),scenario==='wrong-host'?'other.example':new URL(env.SITE_URL).hostname,scenario==='wrong-action'?'contact':'booking_create'))
+  try{await expect(createWebBooking({...env,TURNSTILE_SECRET_KEY:'secret-test'},{...input(),turnstileToken:scenario==='missing'?undefined:token})).rejects.toThrow();expect((await env.DB.prepare('SELECT * FROM bookings').all()).results).toHaveLength(0);expect((await env.DB.prepare('SELECT * FROM outbox').all()).results).toHaveLength(0);expect(queueSend).not.toHaveBeenCalled()}finally{request.mockRestore()}
+ })
+ it('validates contact data before consuming a token',async()=>{const request=vi.spyOn(globalThis,'fetch');try{await expect(createWebBooking({...env,TURNSTILE_SECRET_KEY:'secret-test'},{...input(),email:'invalid',turnstileToken:token})).rejects.toThrow();expect(request).not.toHaveBeenCalled()}finally{request.mockRestore()}})
+ it('keeps booking idempotency when a retry has a fresh token',async()=>{const request=vi.spyOn(globalThis,'fetch').mockImplementation(async()=>response());try{const body={...input(),turnstileToken:token},first=await createWebBooking({...env,TURNSTILE_SECRET_KEY:'secret-test'},body),second=await createWebBooking({...env,TURNSTILE_SECRET_KEY:'secret-test'},{...body,turnstileToken:'new-token'});expect(second.id).toBe(first.id);expect((await env.DB.prepare('SELECT * FROM bookings').all()).results).toHaveLength(1);expect((await env.DB.prepare('SELECT * FROM outbox').all()).results).toHaveLength(2)}finally{request.mockRestore()}})
+})

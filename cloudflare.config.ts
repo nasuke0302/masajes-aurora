@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => ({
   observability: { enabled: true, redactQueryString: true, traces: { enabled: true, headSamplingRate: 0.1 } },
   triggers: [triggers.scheduled({ schedule: '* * * * *' })],
   env: {
+   TURNSTILE_SECRET_KEY:process.env.TURNSTILE_SECRET_KEY?bindings.secret():bindings.text(''),
    LOCAL_DEV:bindings.text('false'),
    ACCESS_TEAM_DOMAIN:bindings.text(access.teamDomain||''), ACCESS_AUD:bindings.text(access.audience||''), ACCESS_EMAIL:bindings.text(access.email||''),
    ASSETS: bindings.assets(),

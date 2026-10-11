@@ -11,6 +11,7 @@ const today=localDate(Math.floor(Date.now()/1000)),lastDay=datePlus(today,30)
 const quantities=reactive({massage40:0,massage60:1})
 const date=ref(today),startAt=ref<number|null>(null),slots=ref<Available|null>(null),loading=ref(false),busy=ref(false),error=ref(''),review=ref(false),saved=ref('')
 const details=reactive({name:'',email:'',phone:'',address:'',city:'Ávila' as const,notes:'',method:'cash' as 'cash'|'online'})
+const turnstileToken=ref<string|null>(null)
 let requestKey=''
 let controller:AbortController|undefined
 const total=computed(()=>{try{return totals(quantities,catalog.value?.products||[])}catch{return null}})
@@ -25,17 +26,18 @@ watch([date,()=>quantities.massage40,()=>quantities.massage60],async()=>{
  loading.value=true
  try{const result=await $fetch<Available>('/api/availability',{query:{date:date.value,...quantities},signal:current.signal});if(!current.signal.aborted)slots.value=result}catch(e){if(!current.signal.aborted)error.value=apiError(e)}finally{if(!current.signal.aborted)loading.value=false}
 },{immediate:true})
-watch(details,()=>{review.value=false;requestKey=''})
+watch(details,()=>{review.value=false;turnstileToken.value=null;requestKey=''})
+watch(review,()=>{turnstileToken.value=null})
 function change(q:'massage40'|'massage60',n:number){if(n>=0&&n<=MAX_SESSION_MASSAGES&&n+quantities[q==='massage40'?'massage60':'massage40']<=MAX_SESSION_MASSAGES)quantities[q]=n}
 function showReview(){error.value='';if(!contactValid.value)return;if(!selected.value){error.value='Selecciona una hora disponible.';return}review.value=true}
 async function submit(){
- if(!selected.value||!contactValid.value||busy.value)return
+ if(!selected.value||!contactValid.value||busy.value||(!props.admin&&!turnstileToken.value))return
  busy.value=true;error.value='';requestKey ||= crypto.randomUUID()
  try{
-  const body={quantities:{...quantities},startAt:startAt.value,...details,requestKey}
+  const body={quantities:{...quantities},startAt:startAt.value,...details,requestKey,...(!props.admin?{turnstileToken:turnstileToken.value}:{})}
   if(props.admin){const r=await $fetch<{reference:string}>('/api/admin/bookings',{method:'POST',body});saved.value=r.reference;emit('saved')}
   else{const r=await $fetch<{url:string;checkoutUrl:string|null}>('/api/bookings',{method:'POST',body});window.location.assign(r.checkoutUrl||r.url)}
- }catch(e){error.value=apiError(e);review.value=false}finally{busy.value=false}
+ }catch(e){error.value=apiError(e);turnstileToken.value=null;review.value=false}finally{busy.value=false}
 }
 </script>
 <template>
@@ -66,7 +68,8 @@ async function submit(){
   <aside class="booking-summary"><h2 class="text-2xl font-bold">Tu sesión</h2><dl class="summary-list"><div v-for="p in catalog?.products.filter(p=>quantities[p.id])" :key="p.id"><dt>{{ quantities[p.id] }} · {{ p.name }}</dt><dd>{{ money(quantities[p.id]*p.price_cents!) }}</dd></div><div><dt>Duración total</dt><dd>{{ total?.duration }} min</dd></div><div v-if="selected"><dt>{{ date }}</dt><dd>{{ selected.label }}–{{ localLabel(selected.endAt) }}</dd></div><div class="font-bold text-xl"><dt>Total</dt><dd>{{ money(total?.amount||0) }}</dd></div></dl>
    <fieldset class="mt-6"><legend class="font-semibold mb-3">Cómo quieres pagar</legend><label class="radio-line"><input v-model="details.method" type="radio" value="cash" :disabled="busy" /> En efectivo el día de la cita</label><label v-if="!admin" class="radio-line"><input v-model="details.method" type="radio" value="online" :disabled="!catalog?.onlinePayment||busy" /> Pagar ahora la sesión completa</label><p v-if="!admin&&!catalog?.onlinePayment" class="text-sm text-muted mt-2">El pago online todavía no está habilitado.</p></fieldset>
    <template v-if="review"><div class="mt-6 text-sm space-y-2"><p class="font-bold">Revisa antes de confirmar</p><p>{{ details.name }} · {{ details.email }}</p><p>{{ details.address }}, Ávila capital</p><p v-if="details.notes">{{ details.notes }}</p></div><button type="button" class="text-link mt-4" :disabled="busy" @click="review=false">Editar datos</button></template>
-   <p v-if="error" class="notice mt-5" role="alert">{{ error }}</p><button class="action w-full mt-6" :disabled="!selected||!contactValid||loading||busy" type="submit">{{ busy?'Procesando…':review?(details.method==='online'?'Continuar al pago':'Confirmar reserva'):'Revisar reserva' }}</button><p class="text-sm text-muted mt-4">{{ details.method==='online'?'El horario se guarda temporalmente mientras pagas. La reserva se confirma al verificar el pago.':'Tu reserva se confirma al enviarla.' }}</p>
+   <ClientOnly><BookingTurnstile v-if="review&&!admin" @verified="turnstileToken=$event" /></ClientOnly>
+   <p v-if="error" class="notice mt-5" role="alert">{{ error }}</p><button class="action w-full mt-6" :disabled="!selected||!contactValid||loading||busy||(review&&!admin&&!turnstileToken)" type="submit">{{ busy?'Procesando…':review?(details.method==='online'?'Continuar al pago':'Confirmar reserva'):'Revisar reserva' }}</button><p class="text-sm text-muted mt-4">{{ details.method==='online'?'El horario se guarda temporalmente mientras pagas. La reserva se confirma al verificar el pago.':'Tu reserva se confirma al enviarla.' }}</p>
   </aside>
  </form>
 </template>

@@ -136,3 +136,17 @@ Toda la web y el panel en https://aurora-staging.geonuvia.com usan Cloudflare Ac
 El panel acepta la identidad firmada de Access sin pedir otro enlace. Los endpoints de enlace antiguo se deshabilitan cuando Access está configurado. Salir cierra la sesión de Access. workers.dev y las URL de preview están deshabilitados; el Worker verifica firma RS256, emisor, audiencia, caducidad y email antes de servir web, API o imágenes. Configuración pública en config/access.json; npm run setup:access crea/verifica solo la aplicación y política de Aurora, sin modificar Geonuvia. Cada despliegue staging comprueba esa configuración.
 
 El desarrollo y preview locales mantienen el acceso anterior por enlace, con bypass del perímetro limitado a loopback explícitamente configurado. No se envían códigos OTP en las pruebas automatizadas. Stripe sigue deshabilitado; antes de activar pagos, habrá que configurar el acceso del webhook firmado, porque actualmente todo el dominio está protegido.
+
+Verificación del despliegue Access (versión 17c36748-5fb1-472a-b6ef-57fd694377fc): 62 tests, type-check y test:worker pasan. Sin sesión, /, /reservar, /admin, /admin/acceso y /api/admin/settings responden 302 hacia geonuvia.cloudflareaccess.com. Chrome muestra el formulario Email / Send login code para Masajes Aurora staging. No se solicitó un OTP ni se completó una sesión real de propietario; esa última comprobación requiere el código del correo autorizado. El despliegue incluye los cambios locales de logo y formulario.
+
+## Turnstile en reservas web
+
+POST /api/bookings exige turnstileToken. El widget Managed aparece al revisar la reserva; el botón de confirmación permanece deshabilitado hasta verificar. Los tokens se renuevan al caducar, editar o fallar el envío, manteniendo datos y requestKey en los reintentos. El panel no requiere Turnstile y mantiene Access.
+
+El servidor comprueba los datos y después Siteverify (timeout de 10 segundos), success, action=booking_create y hostname exacto de SITE_URL. Solo después ejecuta reconciliación, creación de reserva, Checkout y avisos. Las solicitudes inválidas se rechazan con 403 y los fallos del servicio con 503; no se crean citas ni avisos. No se registran tokens ni secretos.
+
+TURNSTILE_SITE_KEY se publica en Nuxt; TURNSTILE_SECRET_KEY se guarda en .env.local ignorado y se sube únicamente como secreto del Worker web. npm run setup:turnstile crea o verifica el widget staging autorizado para aurora-staging.geonuvia.com, localhost y 127.0.0.1 mediante cf CLI. Cada backend solo acepta su propio hostname, nunca una lista conjunta de dominios locales y staging. El dominio definitivo requiere su configuración antes de producción.
+
+Verificación: 74 tests y type-check pasan; Siteverify real rechazó el token de prueba y validó el secreto sin imprimirlo. Chrome local a 1440px y 390px, con APIs/widget simulados, comprobó botón, caducidad, errores, reintento y requestKey conservado sin crear reservas. El script y el frame reales de Turnstile se comprobaron en 127.0.0.1 a 390px, sin desbordamiento y sin enviar la reserva. La prueba final con un usuario autenticado en staging y un token real enviado a la API requiere una reserva manual; no se ejecutó.
+
+Turnstile desplegado en staging: versión 9878a4db-e2d8-4ffe-b2dc-bc22b928e950. test:worker pasa. Se confirmó que el secreto solo está vinculado al Worker web y que /reservar y /admin siguen redirigiendo a Access sin sesión. Para pruebas locales reales, SITE_URL debe coincidir con el hostname utilizado (localhost o 127.0.0.1).

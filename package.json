@@ -16,7 +16,8 @@
     "postinstall": "nuxt prepare",
     "build:cloudflare": "node --import tsx scripts/build-cloudflare.mjs",
     "test:worker": "node scripts/preview.mjs --smoke",
-    "setup:access": "node scripts/setup-access.mjs"
+    "setup:access": "node scripts/setup-access.mjs",
+    "setup:turnstile": "node scripts/setup-turnstile.mjs"
   },
   "dependencies": {
     "@primeicons/vue": "^8.0.2",
