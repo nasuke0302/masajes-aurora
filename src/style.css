@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Urbanist', sans-serif;
+  --font-display: 'Urbanist', sans-serif;
+  --font-serif: Georgia, serif;
+  --color-cream: #fafdfc;
+  --color-ink: #064f58;
+  --color-sage: #08767b;
+  --color-sage-light: #edf8f5;
+  --color-muted: #386369;
+  --color-coral: #c95349;
+}
+@layer base {
+  html {
+    @apply scroll-smooth bg-cream font-sans text-ink antialiased motion-reduce:scroll-auto;
+    scrollbar-color: #08767b #edf8f5;
+  }
+  a,
+  button,
+  select {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink;
+  }
+  ::selection {
+    background: #ffc4c0;
+    color: #064f58;
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "skip": "Saltar al contenido",
+  "home": "Melba Massage, inicio",
+  "navigation": "Navegación principal",
+  "navExperience": "La experiencia",
+  "navMelba": "Conoce a Melba",
+  "hero": {
+    "title": "Un poco menos de prisa.",
+    "subtitle": "Un poco más de",
+    "accent": "ti.",
+    "description": "Soy Melba y llevo el masaje a tu casa, exclusivamente dentro de la ciudad de Ávila. Dedícate un momento de calma sin salir de casa.",
+    "link": "Descubre tu masaje en Ávila",
+    "alt": "Una masajista dando un masaje de espalda en una habitación acogedora con luz suave."
+  },
+  "massage": {
+    "availability": "Disponible los 7 días de la semana, siempre con reserva previa.",
+    "title": "Tu masaje,",
+    "accent": "a tu medida.",
+    "description": "Un masaje a domicilio en Ávila capital, con el tiempo y la atención que te apetezca dedicarte. Elige una sesión completa o adáptala a tus preferencias. Disponible los 7 días de la semana, siempre con reserva previa. Escríbeme para acordar el día, la hora y los detalles de tu sesión.",
+    "options": {
+      "fullBody": {
+        "title": "Cuerpo completo",
+        "duration": "60 min",
+        "description": "La sesión habitual dura 60 minutos e incluye un masaje de cuerpo completo para disfrutar de una pausa sin prisas."
+      },
+      "facial": {
+        "title": "Masaje facial complementario",
+        "duration": "+10 min",
+        "description": "Puedes complementar tu sesión con 10 minutos adicionales de masaje facial."
+      },
+      "personalized": {
+        "title": "Centrado en lo que tú prefieras",
+        "description": "El masaje se adapta a tus deseos. Si lo prefieres, podemos dedicar la sesión solo a la espalda y los hombros, por ejemplo."
+      },
+      "short": {
+        "title": "Una pausa breve",
+        "duration": "30 min",
+        "description": "También puedes elegir una versión corta de 30 minutos, ideal para dedicarte un momento cuando dispones de menos tiempo."
+      }
+    }
+  },
+  "experience": {
+    "eyebrow": "La experiencia",
+    "title": "Tu casa.",
+    "subtitle": "Tu momento de",
+    "accent": "calma.",
+    "description": "Sin cruzar la ciudad. Sin prisas por volver después. Solo un masaje y la comodidad de estar justo donde quieres estar.",
+    "steps": [
+      {
+        "title": "Prepara un pequeño espacio",
+        "description": "Elige un rincón tranquilo de casa donde te sientas a gusto. Un entorno familiar te ayuda a relajarte y desconectar."
+      },
+      {
+        "title": "Un momento a tu medida",
+        "description": "Antes de empezar, hablaremos de cómo te sientes, de tus preferencias y de lo que buscas en tu masaje."
+      },
+      {
+        "title": "Sigue disfrutando de la calma",
+        "description": "Al terminar la sesión, no tienes que ir a ninguna parte. Respira, ponte a gusto y retoma tu día sin prisas."
+      }
+    ]
+  },
+  "about": {
+    "eyebrow": "Un trato cercano",
+    "title": "Hola, soy Melba.",
+    "subtitle": "Voy a",
+    "accent": "tu casa.",
+    "lead": "Tengo más de 10 años de experiencia como masajista.",
+    "description": "Creo que dedicarte tiempo debería encajar en tu día a día. Por eso ofrezco masajes a domicilio. Empiezo por escucharte y adaptar la sesión a tus preferencias, para que te sientas a gusto en tu propio entorno.",
+    "signature": "Nos vemos en casa,"
+  },
+  "contact": {
+    "title": "Reserva tu momento de calma",
+    "description": "Escríbeme por WhatsApp para consultar disponibilidad, resolver tus dudas o reservar tu masaje a domicilio.",
+    "location": "Servicio exclusivamente en Ávila capital.",
+    "button": "Reservar por WhatsApp",
+    "message": "Hola, Melba. Me gustaría consultar disponibilidad para un masaje a domicilio en Ávila.",
+    "newTab": "(se abre en una nueva pestaña)"
+  },
+  "footer": "Un momento para ti. Sin salir de casa.",
+  "backToTop": "Volver arriba",
+  "meta": {
+    "title": "Masajes a domicilio en Ávila capital | Melba Massage",
+    "description": "Dedícate un momento con Melba Massage. Masajes a domicilio exclusivamente en Ávila capital. Contacta por WhatsApp para reservar."
+  }
+}
