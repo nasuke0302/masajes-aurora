@@ -27,3 +27,43 @@
     color: #064f58;
   }
 }
+
+@layer components {
+ .action { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-7 py-3 font-semibold text-cream transition-colors hover:bg-sage disabled:cursor-not-allowed disabled:opacity-50; }
+ .text-link { @apply underline underline-offset-4 hover:text-coral; }
+ .page-shell { @apply mx-auto max-w-7xl px-5 pb-12 sm:px-8; }
+ .page-shell.narrow { @apply max-w-3xl; }
+ .page-header { @apply flex flex-wrap items-center justify-between gap-4 py-7 mb-8 border-b border-ink/15; }
+ .brand { @apply text-2xl font-bold tracking-tight; }
+ .page-title { @apply text-4xl sm:text-5xl font-bold leading-[1.08] tracking-tight mb-5; text-wrap: balance; }
+ .page-intro { @apply text-lg text-muted max-w-2xl mb-10; }
+ .page-footer { @apply border-t border-ink/15 mt-12 pt-6 text-sm underline underline-offset-4; }
+ .booking-grid { @apply grid gap-10 lg:grid-cols-[1fr_360px] lg:gap-14; }
+ .booking-summary { @apply rounded-2xl bg-sage-light p-6 h-fit lg:sticky lg:top-6; }
+ .product-line { @apply flex items-center justify-between gap-4 border-b border-ink/15 py-5; }
+ .quantity-control { @apply flex items-center rounded-full border border-ink/30 overflow-hidden shrink-0; }
+ .quantity-control button { @apply size-11 text-xl hover:bg-sage-light disabled:opacity-30 disabled:cursor-not-allowed; }
+ .quantity-control input { @apply w-9 bg-transparent text-center font-semibold appearance-none; -moz-appearance:textfield; }
+ .quantity-control input::-webkit-inner-spin-button { display:none; }
+ .field { @apply flex flex-col gap-2 font-semibold; }
+ .field input,.field select,.field textarea { @apply min-h-12 rounded-xl border border-ink/30 bg-cream px-4 py-3 font-normal text-ink outline-offset-4 placeholder:text-muted focus-visible:outline-2 focus-visible:outline-ink disabled:opacity-60; font-size:16px; }
+ .form-columns { @apply grid gap-5 sm:grid-cols-2; }
+ .slots { @apply grid grid-cols-3 sm:grid-cols-4 gap-2 mt-4; }
+ .slots button { @apply rounded-xl border border-ink/25 p-3 text-sm font-semibold hover:bg-sage-light; }
+ .slots button span { @apply block text-xs font-normal mt-1; }
+ .slots button[aria-pressed=true] { @apply bg-ink text-cream; }
+ .slots button:disabled { @apply bg-sage-light/50 text-muted border-transparent cursor-not-allowed; }
+ .summary-list { @apply mt-5 space-y-4; }
+ .summary-list>div { @apply flex justify-between gap-5 border-b border-ink/15 pb-3; }
+ .summary-list dd { @apply text-right tabular-nums shrink-0; }
+ .radio-line { @apply flex items-start gap-3 py-2; }
+ .radio-line input { @apply size-5 mt-0.5 accent-ink shrink-0; }
+ .notice { @apply rounded-xl bg-sage-light p-4 text-ink leading-relaxed; }
+ .surface { @apply rounded-2xl border border-ink/20 p-5 sm:p-7; }
+ .admin-tabs { @apply flex flex-wrap gap-2 mb-8; }
+ .admin-tabs button { @apply min-h-11 px-5 py-2 rounded-full border border-ink/25; }
+ .admin-tabs button[aria-pressed=true] { @apply bg-ink text-cream; }
+ .admin-list>article { @apply border-b border-ink/20 py-6; }
+ input,textarea { caret-color:#08767b; }
+ button,a,input,select,textarea { -webkit-tap-highlight-color:transparent; }
+}

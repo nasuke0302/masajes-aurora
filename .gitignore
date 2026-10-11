@@ -37,3 +37,17 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+.nuxt/
+.output/
+.cloudflare/
+.wrangler/
+.dev.vars
+.data/
+worker-configuration.d.ts
+
+.audit.json
+
+# Temporary design workflow state
+.impeccable/build/
+.impeccable/questions/

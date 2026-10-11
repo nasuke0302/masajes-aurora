@@ -1,5 +1,5 @@
 ﻿---
-name: Melba — A tu ritmo
+name: Masajes Aurora — A tu ritmo
 description: Approved fluid identity for wellbeing massage in Ávila.
 colors:
   cream: '#fafdfc'
@@ -33,7 +33,7 @@ Urbanist, geometric and approachable. Bold compact headings, readable regular bo
 
 ## Layout
 
-Desktop: broad hero with semantic text above a generated text-free image and marbled pigment ribbon; open three-column session details below. Narrow screens: normal-flow text then image, service columns stack, compact header navigation. Content capped at 1800px.
+Desktop: broad hero with semantic text above a generated text-free image and marbled pigment ribbon; open two-column session details below. Narrow screens: normal-flow text then image, service columns stack, compact header navigation. Content capped at 1800px.
 
 ## Elevation & Depth
 
@@ -45,7 +45,7 @@ Pill contact controls; circular service pictograms; softly rounded cream-informa
 
 ## Components
 
-Header anchors to sessions, Melba and contact. WhatsApp opens a prefilled enquiry in a new tab. Telephone links dial +34 644 798 063. Session details show 60 minutes, 30 minutes and an additional 10-minute facial.
+Header anchors to sessions, Melba and contact. WhatsApp opens a prefilled enquiry in a new tab. Telephone links dial +34 644 798 063. Session details show 60 and 40 minutes. The booking flow combines quantities in one visit with one joint payment; its summary sits beside the form on desktop and below it on mobile. The private agenda uses native form controls, 16px fields, visible focus and the incumbent palette.
 
 ## Do's and Don'ts
 

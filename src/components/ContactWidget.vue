@@ -22,8 +22,9 @@ import Phone from '@primeicons/vue/phone'
           href="tel:+34644798063">
           <Phone /> +34 644 798 063
         </a>
+        <NuxtLink to="/reservar" class="action">Reservar una sesión</NuxtLink>
         <ContactButton />
-        <p class="text-sm text-muted">La reserva se confirma directamente con Melba.</p>
+        <p class="text-sm text-muted">Recibir?s la confirmación de tu reserva por email.</p>
       </div>
     </div>
   </section>

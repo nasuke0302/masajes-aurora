@@ -7,16 +7,10 @@ const sessions = [
     icon: 'waves',
   },
   {
-    duration: '30 min',
+    duration: '40 min',
     title: 'Una pausa breve',
     description: 'Una opción más corta para dedicarte un momento en tu día.',
     icon: 'wave',
-  },
-  {
-    duration: '+10 min',
-    title: 'Masaje facial',
-    description: 'Un complemento de diez minutos para añadir a tu sesión.',
-    icon: 'face',
   },
 ]
 </script>
@@ -34,7 +28,7 @@ const sessions = [
         </p>
         <span class="mt-7 block h-0.5 w-12 bg-coral" aria-hidden="true"></span>
       </div>
-      <div class="grid gap-7 sm:grid-cols-3 sm:gap-0">
+      <div class="grid gap-7 sm:grid-cols-2 sm:gap-0">
         <article v-for="(session, index) in sessions" :key="session.duration"
           class="border-ink/15 sm:border-l sm:px-6 sm:first:border-0 sm:first:pl-0 sm:last:pr-0">
           <div class="flex items-center gap-4 sm:block">

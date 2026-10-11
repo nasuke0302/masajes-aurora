@@ -1,0 +1,3 @@
+import {bindings,defineConfig,triggers} from 'cf/config'
+export default defineConfig(({mode})=>({worker:{name:mode==='production'?'masajes-aurora-email':'masajes-aurora-email-staging',entrypoint:'./workers/notifications.ts',compatibilityDate:'2026-10-11',compatibilityFlags:['nodejs_compat'],observability:{enabled:true,traces:{enabled:true,headSamplingRate:0.1}},triggers:[triggers.queue({name:process.env.NOTIFICATIONS_QUEUE||'masajes-aurora-notifications-staging',maxBatchSize:5,maxRetries:5,retryDelay:60,maxConcurrency:1})],env:{DB:bindings.d1({id:process.env.D1_DATABASE_ID||'00000000-0000-0000-0000-000000000001',dev:{remote:false}}),EMAIL:bindings.sendEmail(),EMAIL_FROM:bindings.text(process.env.EMAIL_FROM||'')}}}))
+

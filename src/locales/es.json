@@ -1,6 +1,6 @@
 {
   "skip": "Saltar al contenido",
-  "home": "Melba Massage, inicio",
+  "home": "Masajes Aurora, inicio",
   "navigation": "Navegación principal",
   "navExperience": "La experiencia",
   "navMelba": "Conoce a Melba",
@@ -23,19 +23,14 @@
         "duration": "60 min",
         "description": "La sesión habitual dura 60 minutos e incluye un masaje de cuerpo completo para disfrutar de una pausa sin prisas."
       },
-      "facial": {
-        "title": "Masaje facial complementario",
-        "duration": "+10 min",
-        "description": "Puedes complementar tu sesión con 10 minutos adicionales de masaje facial."
-      },
       "personalized": {
         "title": "Centrado en lo que tú prefieras",
         "description": "El masaje se adapta a tus deseos. Si lo prefieres, podemos dedicar la sesión solo a la espalda y los hombros, por ejemplo."
       },
       "short": {
         "title": "Una pausa breve",
-        "duration": "30 min",
-        "description": "También puedes elegir una versión corta de 30 minutos, ideal para dedicarte un momento cuando dispones de menos tiempo."
+        "duration": "40 min",
+        "description": "También puedes elegir una versión corta de 40 minutos, ideal para dedicarte un momento cuando dispones de menos tiempo."
       }
     }
   },
@@ -73,14 +68,14 @@
     "title": "Reserva tu momento de calma",
     "description": "Escríbeme por WhatsApp para consultar disponibilidad, resolver tus dudas o reservar tu masaje a domicilio.",
     "location": "Servicio exclusivamente en Ávila capital.",
-    "button": "Reservar por WhatsApp",
+    "button": "Consultar por WhatsApp",
     "message": "Hola, Melba. Me gustaría consultar disponibilidad para un masaje a domicilio en Ávila.",
     "newTab": "(se abre en una nueva pestaña)"
   },
   "footer": "Un momento para ti. Sin salir de casa.",
   "backToTop": "Volver arriba",
   "meta": {
-    "title": "Masajes a domicilio en Ávila capital | Melba Massage",
-    "description": "Dedícate un momento con Melba Massage. Masajes a domicilio exclusivamente en Ávila capital. Contacta por WhatsApp para reservar."
+    "title": "Masajes a domicilio en Ávila capital | Masajes Aurora",
+    "description": "Dedícate un momento con Masajes Aurora. Masajes a domicilio exclusivamente en Ávila capital. Contacta por WhatsApp para reservar."
   }
 }
