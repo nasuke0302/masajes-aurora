@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
  compatibilityDate: '2026-10-11', devtools: { enabled: false },
- srcDir: 'src/', serverDir: 'server', css: ['~/style.css'],
+ srcDir: 'src/', serverDir: 'server', css: ['@fontsource/urbanist/latin-400.css', '@fontsource/urbanist/latin-500.css', '@fontsource/urbanist/latin-600.css', '@fontsource/urbanist/latin-700.css', '@fontsource/urbanist/latin-800.css', '~/style.css'],
  components: [{ path: '~/components', pathPrefix: false }],
  vite: { plugins: [tailwindcss()] },
  nitro: { preset: process.env.NODE_ENV === 'development' ? 'node-server' : 'cloudflare_module', plugins: process.env.NODE_ENV === 'development' ? ['./dev/local.ts'] : [], cloudflare: { deployConfig: false, nodeCompat: true } },

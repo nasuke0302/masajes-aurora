@@ -14,7 +14,7 @@ export function sameOrigin(event:H3Event, env:AppEnv) {
 }
 export async function limit(env:AppEnv,key:string,max:number,seconds=3600) {
  const bucket=Math.floor(nowSeconds()/seconds)
- const r=await env.DB.prepare('INSERT INTO rate_limits(key,bucket,count) VALUES(?,?,1) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN bucket=excluded.bucket THEN count+1 ELSE 1 END,bucket=excluded.bucket RETURNING count').bind(await hash(key),bucket).first<{count:number}>()
+ const r=await env.DB.prepare('INSERT INTO rate_limits(key,bucket,count,updated_at) VALUES(?,?,1,?) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN bucket=excluded.bucket THEN count+1 ELSE 1 END,bucket=excluded.bucket,updated_at=excluded.updated_at RETURNING count').bind(await hash(key),bucket,nowSeconds()).first<{count:number}>()
  if(r!.count>max) throw createError({statusCode:429,statusMessage:'Demasiadas solicitudes. Inténtalo más tarde.'})
 }
 export function safeError(error:unknown):never {

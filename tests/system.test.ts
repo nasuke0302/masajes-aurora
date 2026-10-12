@@ -8,11 +8,15 @@ import {createWebBooking} from '../server/core/turnstile'
 import {hash} from '../server/core/security'
 import {localDate,datePlus,dayInstants,localLabel} from '../shared/booking'
 import type {AppEnv,Booking} from '../server/core/types'
+import {TERMS_VERSION} from '../shared/legal'
+import {purgeExpiredData,retentionCutoff} from '../server/core/retention'
+import {setRetentionHold} from '../server/core/admin'
 let mf:Miniflare,env:AppEnv,start:number
 let migrationPreserved=false
 const emailSend=vi.fn(),queueSend=vi.fn()
+function rescheduleWithConsent(env:AppEnv,id:string,startAt:number,expected:number){return rescheduleBooking(env,id,startAt,expected,{earlyServiceRequested:true,withdrawalAcknowledged:true})}
 async function row(id:string){return (await env.DB.prepare('SELECT * FROM bookings WHERE id=?').bind(id).first<Booking>())!}
-function input(q={massage40:0,massage60:1},s=start,method='cash'){return {quantities:q,startAt:s,name:'Cliente prueba',email:'cliente@example.com',phone:'+34644798063',address:'Calle Mayor 10, 1A',city:'Ávila',notes:'Avisar al llegar',addressSelection:{id:'07.05.G05_050190111614',portal:'2'},addressExtra:'1A',method,requestKey:crypto.randomUUID()}}
+function input(q={massage40:0,massage60:1},s=start,method='cash'){return {quantities:q,startAt:s,name:'Cliente prueba',email:'cliente@example.com',phone:'+34644798063',address:'Calle Mayor 10, 1A',city:'Ávila',notes:'Avisar al llegar',addressSelection:{id:'07.05.G05_050190111614',portal:'2'},addressExtra:'1A',method,requestKey:crypto.randomUUID(),termsVersion:TERMS_VERSION,acceptTerms:true,adultsOnly:true,earlyServiceRequested:true,withdrawalAcknowledged:true}}
 beforeAll(async()=>{
  mf=new Miniflare({workers:[{config:{name:'test',compatibilityDate:'2026-10-11',env:{DB:{type:'d1',id:'00000000-0000-0000-0000-000000000001'}},manifest:{mainModule:'index.mjs',modules:{'index.mjs':{type:'esm',contents:'export default {fetch(){return new Response("test")}}'}}}}}]})
  env={DB:await mf.getD1Database('DB'),SITE_URL:'https://aurora.example',ADMIN_EMAIL:'melba@example.com',EMAIL_FROM:'reservas@aurora.example',NOTIFICATIONS:{send:queueSend}} as unknown as AppEnv
@@ -23,6 +27,7 @@ beforeAll(async()=>{
  await env.DB.exec((await readFile('migrations/0002_remove_daily_capacity.sql','utf8')).replace(/\n/g,' '))
  migrationPreserved=JSON.stringify(before)===JSON.stringify(await row(seed.id))
  await env.DB.exec((await readFile('migrations/0003_cash_only.sql','utf8')).replace(/\n/g,' '))
+ await env.DB.exec((await readFile('migrations/0004_privacy.sql','utf8')).replace(/\n/g,' '))
  const cash=await row(seed.id);migrationPreserved= migrationPreserved&&Object.entries(cash).every(([key,value])=>value===before[key as keyof Booking])
 },30000)
 beforeEach(async()=>{
@@ -109,10 +114,10 @@ describe('Turnstile before web bookings',()=>{
 describe('admin rescheduling',()=>{
  it('preserves duration, prices, private link and payment, with an email for each move',async()=>{
   const b=await createBooking(env,input({massage40:2,massage60:0}))
-  await rescheduleBooking(env,b.id,start+86400,b.start_at)
+  await rescheduleWithConsent(env,b.id,start+86400,b.start_at)
   const changed=await row(b.id)
   expect(changed).toMatchObject({start_at:start+86400,end_at:start+86400+4800,service_date:localDate(start+86400),amount_cents:b.amount_cents,lines_json:b.lines_json,manage_url:b.manage_url,payment_status:b.payment_status})
-  await rescheduleBooking(env,b.id,start+90000,changed.start_at)
+  await rescheduleWithConsent(env,b.id,start+90000,changed.start_at)
   const notices=(await env.DB.prepare("SELECT * FROM outbox WHERE subject LIKE 'Reserva reprogramada%'").all<{recipient:string;body:string}>()).results
   expect(notices).toHaveLength(4)
   expect(notices.filter(n=>n.recipient===b.email)).toHaveLength(2)
@@ -121,29 +126,64 @@ describe('admin rescheduling',()=>{
  })
  it('rejects occupied slots and the travel buffer without changing the booking or sending email',async()=>{
   const b=await createBooking(env,input()),other=await createBooking(env,input({massage40:0,massage60:1},start+86400))
-  for(const target of [other.start_at,other.end_at+600])await expect(rescheduleBooking(env,b.id,target,b.start_at)).rejects.toThrow()
+  for(const target of [other.start_at,other.end_at+600])await expect(rescheduleWithConsent(env,b.id,target,b.start_at)).rejects.toThrow()
   expect((await row(b.id)).start_at).toBe(start)
   expect((await env.DB.prepare('SELECT * FROM outbox').all()).results).toHaveLength(4)
  })
  it('rejects blocks, outside hours, past times, horizon and stale edits',async()=>{
   const b=await createBooking(env,input())
   await env.DB.prepare('INSERT INTO blocks VALUES(?,?,?,?)').bind('blocked',start+86400,start+90000,'No disponible').run()
-  for(const target of [start+86400,start+12*3600,1,start+40*86400])await expect(rescheduleBooking(env,b.id,target,b.start_at)).rejects.toThrow()
-  await expect(rescheduleBooking(env,b.id,start+2*86400,b.start_at+600)).rejects.toThrow()
+  for(const target of [start+86400,start+12*3600,1,start+40*86400])await expect(rescheduleWithConsent(env,b.id,target,b.start_at)).rejects.toThrow()
+  await expect(rescheduleWithConsent(env,b.id,start+2*86400,b.start_at+600)).rejects.toThrow()
   expect((await env.DB.prepare('SELECT * FROM outbox').all()).results).toHaveLength(2)
  })
  it('rejects cancelled/completed sessions and makes identical moves a no-op',async()=>{
   const b=await createBooking(env,input())
-  await rescheduleBooking(env,b.id,b.start_at,b.start_at)
+  await rescheduleWithConsent(env,b.id,b.start_at,b.start_at)
   expect((await env.DB.prepare('SELECT * FROM outbox').all()).results).toHaveLength(2)
   await updateBooking(env,b.id,'cancel')
-  await expect(rescheduleBooking(env,b.id,start+86400,b.start_at)).rejects.toThrow()
+  await expect(rescheduleWithConsent(env,b.id,start+86400,b.start_at)).rejects.toThrow()
  })
  it('allows only one of two simultaneous moves from the same original time',async()=>{
   const b=await createBooking(env,input())
-  const moves=await Promise.allSettled([rescheduleBooking(env,b.id,start+86400,b.start_at),rescheduleBooking(env,b.id,start+2*86400,b.start_at)])
+  const moves=await Promise.allSettled([rescheduleWithConsent(env,b.id,start+86400,b.start_at),rescheduleWithConsent(env,b.id,start+2*86400,b.start_at)])
   expect(moves.filter(r=>r.status==='fulfilled')).toHaveLength(1)
   expect((await env.DB.prepare("SELECT * FROM outbox WHERE subject LIKE 'Reserva reprogramada%'").all()).results).toHaveLength(2)
+ })
+})
+
+describe('booking legal records and retention',()=>{
+ it('requires current terms, adult confirmation and explicit early service for web/admin bookings',async()=>{
+  for(const change of [{acceptTerms:false},{adultsOnly:false},{termsVersion:'old'},{earlyServiceRequested:false},{withdrawalAcknowledged:false}])await expect(createBooking(env,{...input(),...change},'admin')).rejects.toThrow()
+  const b=await createBooking(env,input(),'admin')
+  const acceptance=await env.DB.prepare('SELECT * FROM booking_legal WHERE booking_id=?').bind(b.id).first()
+  expect(acceptance).toMatchObject({terms_version:TERMS_VERSION,source:'admin',adults_confirmed:1,early_service_requested:1,withdrawal_acknowledged:1})
+  expect(acceptance?.accepted_at).toBeGreaterThan(0)
+  const notices=(await env.DB.prepare('SELECT body FROM outbox').all<{body:string}>()).results
+  expect(notices.every(n=>!n.body.includes('Avisar al llegar')&&!n.body.includes('Notas:'))).toBe(true)
+  expect(notices[0]!.body).toContain('/condiciones-reserva')
+ })
+ it('validates legal confirmations before using Turnstile or address services',async()=>{const request=vi.spyOn(globalThis,'fetch');try{await expect(createWebBooking(env,{...input(),acceptTerms:false,turnstileToken:'token'})).rejects.toThrow();expect(request).not.toHaveBeenCalled()}finally{request.mockRestore()}})
+ it('does not require early service confirmation outside the fourteen-day period',async()=>{const date=datePlus(localDate(start),20),target=dayInstants(date).find(p=>localLabel(p.epoch)==='10:00')!.epoch;const b=await createBooking(env,{...input({massage40:0,massage60:1},target),earlyServiceRequested:false,withdrawalAcknowledged:false},'web');expect((await env.DB.prepare('SELECT * FROM booking_legal WHERE booking_id=?').bind(b.id).first())?.early_service_requested).toBe(0)})
+ it('requires explicit early service when an unrecorded reservation is moved into the period',async()=>{const b=await createBooking(env,input());await expect(rescheduleBooking(env,b.id,start+86400,b.start_at)).rejects.toThrow();expect((await row(b.id)).start_at).toBe(start)})
+ it('uses twelve calendar months, including leap-year anniversaries',()=>{expect(retentionCutoff(Date.parse('2028-02-29T12:00:00Z')/1000)).toBe('2027-02-28');expect(retentionCutoff(Date.parse('2026-10-12T12:00:00Z')/1000)).toBe('2025-10-12')})
+ it('deletes expired bookings/emails and technical records, while preserving open claims and recent reservations',async()=>{
+  const now=Math.floor(Date.now()/1000),expired=await createBooking(env,input(),'admin'),held=await createBooking(env,input({massage40:0,massage60:1},start+86400),'admin'),recent=await createBooking(env,input({massage40:0,massage60:1},start+2*86400),'admin')
+  const date=datePlus(retentionCutoff(now),-1)
+  for(const b of [expired,held])await env.DB.prepare("UPDATE bookings SET status='cancelled',service_date=? WHERE id=?").bind(date,b.id).run()
+  await setRetentionHold(env,held.id,true)
+  await env.DB.prepare('UPDATE outbox SET created_at=?').bind(now-31*86400).run()
+  await env.DB.prepare('INSERT INTO admin_links VALUES(?,?,NULL)').bind('expired-link',now-1).run()
+  await env.DB.prepare('INSERT INTO admin_sessions VALUES(?,?)').bind('expired-session',now-1).run()
+  await env.DB.prepare('INSERT INTO rate_limits VALUES(?,?,?,?)').bind('expired-rate',1,1,now-2*86400).run()
+  await purgeExpiredData(env,now)
+  expect(await env.DB.prepare('SELECT id FROM bookings WHERE id=?').bind(expired.id).first()).toBeNull()
+  expect(await env.DB.prepare('SELECT * FROM booking_legal WHERE booking_id=?').bind(expired.id).first()).toBeNull()
+  expect((await row(held.id)).id).toBe(held.id);expect((await row(recent.id)).id).toBe(recent.id)
+  expect((await env.DB.prepare('SELECT id FROM outbox').all()).results).toHaveLength(2)
+  for(const table of ['admin_links','admin_sessions','rate_limits'])expect((await env.DB.prepare('SELECT * FROM '+table).all()).results).toHaveLength(0)
+  await setRetentionHold(env,held.id,false);await purgeExpiredData(env,now)
+  expect(await env.DB.prepare('SELECT id FROM bookings WHERE id=?').bind(held.id).first()).toBeNull()
  })
 })
 

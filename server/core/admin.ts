@@ -6,13 +6,18 @@ import {hash,token,nowSeconds,safeError} from './security'
 import {configuration} from './bookings'
 import {noticeStatements} from './notifications'
 import {dayInstants,localDate,datePlus,LEAD_SECONDS,HORIZON_DAYS} from '../../shared/booking'
+import {EARLY_SERVICE_SECONDS} from '../../shared/legal'
 
-export async function rescheduleBooking(env:AppEnv,id:string,startAt:number,expectedStartAt:number) {
+export async function rescheduleBooking(env:AppEnv,id:string,startAt:number,expectedStartAt:number,early?:{earlyServiceRequested:boolean;withdrawalAcknowledged:boolean}) {
  const b=await env.DB.prepare('SELECT * FROM bookings WHERE id=?').bind(id).first<Booking>()
  if(!b)throw createError({statusCode:404,statusMessage:'Reserva no encontrada'})
  if(b.status!=='confirmed'||b.start_at<=nowSeconds())throw createError({statusCode:409,statusMessage:'Solo se pueden mover reservas confirmadas futuras'})
  if(b.start_at!==expectedStartAt)throw createError({statusCode:409,statusMessage:'La reserva ha cambiado. Recarga la agenda.'})
  if(startAt===b.start_at)return
+ const acceptance=await env.DB.prepare('SELECT early_service_requested,withdrawal_acknowledged FROM booking_legal WHERE booking_id=?').bind(id).first<{early_service_requested:number;withdrawal_acknowledged:number}>()
+ const needsEarly=startAt<b.created_at+EARLY_SERVICE_SECONDS
+ const recordEarly=needsEarly&&!(acceptance?.early_service_requested&&acceptance.withdrawal_acknowledged)
+ if(needsEarly&&!(acceptance?.early_service_requested&&acceptance.withdrawal_acknowledged)&&!(early?.earlyServiceRequested&&early.withdrawalAcknowledged))throw createError({statusCode:409,statusMessage:'El cliente debe solicitar expresamente el inicio anticipado y reconocer la pérdida del desistimiento al completar el servicio.'})
  const now=nowSeconds(),date=localDate(startAt),endAt=startAt+b.end_at-b.start_at
  const instants=dayInstants(date),config=await configuration(env)
  const weekday=new Date(date+'T12:00:00Z').getUTCDay(),minute=instants.find(p=>p.epoch===startAt)?.minute
@@ -24,12 +29,18 @@ export async function rescheduleBooking(env:AppEnv,id:string,startAt:number,expe
   await env.DB.batch([
    env.DB.prepare("UPDATE bookings SET service_date=?,start_at=?,end_at=? WHERE id=? AND status='confirmed' AND start_at=?").bind(date,startAt,endAt,id,expectedStartAt),
    env.DB.prepare("INSERT INTO outbox(id,recipient,subject,body,created_at) SELECT ?,NULL,'','',? WHERE changes()=0").bind(revision,now),
+   ...(recordEarly?[env.DB.prepare("INSERT INTO booking_legal(booking_id,early_service_requested,withdrawal_acknowledged,early_requested_at,withdrawal_acknowledged_at,early_source) VALUES(?,1,1,?,?,'admin') ON CONFLICT(booking_id) DO UPDATE SET early_service_requested=1,withdrawal_acknowledged=1,early_requested_at=excluded.early_requested_at,withdrawal_acknowledged_at=excluded.withdrawal_acknowledged_at,early_source='admin'").bind(id,now,now)]:[]),
    ...noticeStatements(env,changed,'rescheduled',revision)
   ])
  }catch(error){
   if(error instanceof Error&&/NOT NULL/.test(error.message))throw createError({statusCode:409,statusMessage:'La reserva ha cambiado. Recarga la agenda.'})
   safeError(error)
  }
+}
+export async function setRetentionHold(env:AppEnv,id:string,hold:boolean){
+ const row=await env.DB.prepare('SELECT id FROM bookings WHERE id=?').bind(id).first()
+ if(!row)throw createError({statusCode:404,statusMessage:'Reserva no encontrada'})
+ await env.DB.prepare('INSERT INTO booking_legal(booking_id,retention_hold) VALUES(?,?) ON CONFLICT(booking_id) DO UPDATE SET retention_hold=excluded.retention_hold').bind(id,Number(hold)).run()
 }
 export async function requireAdmin(event:H3Event,env:AppEnv){
  if(env.ACCESS_AUD){try{await verifyAccessToken(getHeader(event,'cf-access-jwt-assertion')||'',env);return}catch{throw createError({statusCode:401,statusMessage:'Accede mediante Cloudflare Access'})}}

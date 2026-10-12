@@ -19,8 +19,8 @@ try{
  const DB=await mf.getD1Database('DB')
  if(!await DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='settings'").first())await DB.exec((await readFile('migrations/0001_booking.sql','utf8')).replace(/\n/g,' '))
  if((await DB.prepare("SELECT sql FROM sqlite_master WHERE name='bookings'").first())?.sql?.includes('BETWEEN 1 AND 3'))await DB.exec((await readFile('migrations/0002_remove_daily_capacity.sql','utf8')).replace(/\n/g,' '))
- if((await DB.prepare("SELECT sql FROM sqlite_master WHERE name='bookings'").first())?.sql?.includes('checkout_url'))await DB.exec((await readFile('migrations/0003_cash_only.sql','utf8')).replace(/\n/g,' ')); if(smoke){
-  for(const path of ['/','/reservar','/admin/acceso','/api/catalog','/images/masaje-fluido-hero.png']){
+ if((await DB.prepare("SELECT sql FROM sqlite_master WHERE name='bookings'").first())?.sql?.includes('checkout_url'))await DB.exec((await readFile('migrations/0003_cash_only.sql','utf8')).replace(/\n/g,' ')); if(!await DB.prepare("SELECT name FROM sqlite_master WHERE name='booking_legal'" ).first())await DB.exec((await readFile('migrations/0004_privacy.sql','utf8')).replace(/\n/g,' ')); if(smoke){
+  for(const path of ['/','/reservar','/admin/acceso','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/api/catalog','/images/masaje-fluido-hero.png']){
    const r=await mf.dispatchFetch('http://localhost:8888'+path);if(r.status!==200)console.error(await r.clone().text());assert.equal(r.status,200,path)
    if(path==='/')assert.match(await r.text(),/Masajes Aurora/)
   }
@@ -30,7 +30,7 @@ try{
   const form=await (await mf.dispatchFetch('http://localhost:8888/reservar')).text();assert.match(form,/Pago en efectivo/);assert.doesNotMatch(form,/Pagar ahora|Continuar al pago/)
   const headers={'Origin':'http://localhost:8888','Content-Type':'application/json'}
   for(const path of ['/api/checkout/obsolete','/api/stripe/webhook'])assert.equal((await mf.dispatchFetch('http://localhost:8888'+path,{method:'POST',headers,body:'{}'})).status,404)
-  const invalid=await mf.dispatchFetch('http://localhost:8888/api/bookings',{method:'POST',headers,body:JSON.stringify({quantities:{massage40:0,massage60:1},startAt:Math.floor(Date.now()/1000)+86400,name:'Test Client',email:'client@example.com',phone:'+34644798063',address:'Calle Mayor 12',city:'Ávila',addressSelection:{id:'07.05.G05_050190111614',portal:'2'},addressExtra:'',requestKey:crypto.randomUUID()})});assert.equal(invalid.status,403)
+  const invalid=await mf.dispatchFetch('http://localhost:8888/api/bookings',{method:'POST',headers,body:JSON.stringify({quantities:{massage40:0,massage60:1},startAt:Math.floor(Date.now()/1000)+86400,name:'Test Client',email:'client@example.com',phone:'+34644798063',address:'Calle Mayor 12',city:'Ávila',addressSelection:{id:'07.05.G05_050190111614',portal:'2'},addressExtra:'',requestKey:crypto.randomUUID(),termsVersion:'2026-10-12.1',acceptTerms:true,adultsOnly:true,earlyServiceRequested:true,withdrawalAcknowledged:true})});assert.equal(invalid.status,403)
   assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM bookings').first()).n,0);assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM outbox').first()).n,0)
   assert.equal((await mf.dispatchFetch('http://localhost:8888/api/admin/settings')).status,401)
   assert.equal((await mf.dispatchFetch('http://localhost:8888/api/bookings',{method:'POST',body:'x'.repeat(32769)})).status,413)

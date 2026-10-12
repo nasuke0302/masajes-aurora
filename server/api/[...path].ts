@@ -5,7 +5,7 @@ import {configuration,available,createBooking,findByToken,publicBooking,quantiti
 import {dispatch} from '../core/notifications'
 import {createWebBooking} from '../core/turnstile'
 import {searchAddresses,validatedAddress} from '../core/addresses'
-import {requireAdmin,consumeLink,saveSettings,updateBooking,rescheduleBooking} from '../core/admin'
+import {requireAdmin,consumeLink,saveSettings,updateBooking,rescheduleBooking,setRetentionHold} from '../core/admin'
 export default defineEventHandler(async event=>{
  privateHeaders(event)
  const env=environment(event),path=getRouterParam(event,'path')||'',method=event.method
@@ -67,15 +67,16 @@ export default defineEventHandler(async event=>{
     if(agenda&&(!Number.isFinite(Date.parse(from))||!Number.isFinite(Date.parse(to))||Date.parse(to)-Date.parse(from)>41*86400000))throw createError({statusCode:400,statusMessage:'El calendario admite hasta seis semanas por consulta'})
     // A complete month grid can exceed the history's 300-record page. Within
     // six weeks, the minimum visit duration and buffer bound active visits below 1000.
-    return (await env.DB.prepare('SELECT id,reference,service_date,start_at,end_at,quantity,amount_cents,lines_json,name,email,phone,address,notes,method,status,payment_status FROM bookings WHERE service_date BETWEEN ? AND ? AND (? = \'\' OR status = ?)'+(agenda?" AND status IN('confirmed','completed')":'')+' ORDER BY start_at LIMIT '+(agenda?'1000':'300')).bind(from,to,state,state).all()).results
+    return (await env.DB.prepare('SELECT id,reference,service_date,start_at,end_at,quantity,amount_cents,lines_json,name,email,phone,address,notes,method,status,payment_status,b.created_at,COALESCE(l.retention_hold,0) AS retention_hold,COALESCE(l.early_service_requested,0) AS early_service_requested FROM bookings b LEFT JOIN booking_legal l ON l.booking_id=b.id WHERE service_date BETWEEN ? AND ? AND (? = \'\' OR status = ?)'+(agenda?" AND status IN('confirmed','completed')":'')+' ORDER BY start_at LIMIT '+(agenda?'1000':'300')).bind(from,to,state,state).all()).results
    }
    if(path==='admin/bookings'&&method==='POST'){
-    const body=await readBody(event);const b=await createBooking(env,{...body,address:await validatedAddress(body),method:'cash'});event.waitUntil(dispatch(env));return {reference:b.reference}
+    const body=await readBody(event);const b=await createBooking(env,{...body,address:await validatedAddress(body),method:'cash'},'admin');event.waitUntil(dispatch(env));return {reference:b.reference}
    }
    if(path.startsWith('admin/bookings/')&&method==='PATCH'){
-    const body=z.discriminatedUnion('action',[z.object({action:z.enum(['cancel','complete','cash-paid'])}),z.object({action:z.literal('reschedule'),startAt:z.number().int().positive().max(253402300799),expectedStartAt:z.number().int().positive()})]).safeParse(await readBody(event));if(!body.success)throw createError({statusCode:400})
+    const body=z.discriminatedUnion('action',[z.object({action:z.enum(['cancel','complete','cash-paid'])}),z.object({action:z.literal('retention-hold'),hold:z.boolean()}),z.object({action:z.literal('reschedule'),startAt:z.number().int().positive().max(253402300799),expectedStartAt:z.number().int().positive(),earlyServiceRequested:z.boolean().default(false),withdrawalAcknowledged:z.boolean().default(false)})]).safeParse(await readBody(event));if(!body.success)throw createError({statusCode:400})
     const id=path.slice('admin/bookings/'.length)
-    if(body.data.action==='reschedule')await rescheduleBooking(env,id,body.data.startAt,body.data.expectedStartAt)
+    if(body.data.action==='reschedule')await rescheduleBooking(env,id,body.data.startAt,body.data.expectedStartAt,body.data)
+    else if(body.data.action==='retention-hold')await setRetentionHold(env,id,body.data.hold)
     else await updateBooking(env,id,body.data.action)
     event.waitUntil(dispatch(env));return {ok:true}
    }

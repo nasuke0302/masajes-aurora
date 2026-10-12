@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import {money,localLabel} from '#shared/booking'
-import {calendarWallTime,calendarInstant,type AgendaReservation} from '#shared/admin-calendar'
+import {type AgendaReservation} from '#shared/admin-calendar'
 const props=defineProps<{reservation:AgendaReservation;busy:boolean;now:number}>()
-const emit=defineEmits<{action:[action:'cancel'|'complete'|'cash-paid'];move:[reservation:AgendaReservation,startAt:number]}>()
-const moveTo=ref(''),moveError=ref('')
-watch(()=>[props.reservation.id,props.reservation.start_at],()=>{moveTo.value=calendarWallTime(props.reservation.start_at).replace(' ','T');moveError.value=''},{immediate:true})
-function reschedule(){try{moveError.value='';emit('move',props.reservation,calendarInstant(moveTo.value))}catch(e){moveError.value=(e as Error).message}}
+defineEmits<{action:[action:'cancel'|'complete'|'cash-paid'];hold:[hold:boolean]}>()
 const labels:Record<string,string>={confirmed:'Confirmada',completed:'Realizada',cancelled:'Cancelada',pending:'Pendiente de pago',paid:'Pagado'}
 const paymentLabel=computed(()=>props.reservation.payment_status==='pending'&&props.reservation.method==='cash'?'Pendiente de cobro':labels[props.reservation.payment_status]||props.reservation.payment_status)
 const lines=computed(()=>JSON.parse(props.reservation.lines_json) as {id:string;quantity:number;name:string;minutes:number}[])
@@ -24,7 +21,7 @@ const dateLabel=computed(()=>new Intl.DateTimeFormat('es-ES',{dateStyle:'medium'
   <div v-if="reservation.notes"><dt><AdminIcon name="note" /><span class="sr-only">Notas</span></dt><dd class="whitespace-pre-wrap">{{ reservation.notes }}</dd></div>
  </dl>
  <dl class="detail-total"><div><dt>Sesión completa</dt><dd>{{ money(reservation.amount_cents) }}</dd></div></dl>
- <form v-if="reservation.status==='confirmed'&&reservation.start_at>now" class="space-y-3 mb-5" @submit.prevent="reschedule"><label class="field">Cambiar fecha y hora (Ávila)<input v-model="moveTo" type="datetime-local" step="600" required :disabled="busy" /></label><p class="text-sm text-muted">Se conservará la duración y se avisará al cliente por email.</p><p v-if="moveError" class="notice" role="alert">{{ moveError }}</p><button class="admin-button secondary" :disabled="busy" type="submit">Reprogramar reserva</button></form>
+ <div class="mt-5 mb-5"><p class="text-sm text-muted mb-3">Los datos se eliminan 12 meses después de la cita. Marca la excepción solo para una reclamación abierta y retírala al resolverla.</p><button class="admin-button secondary" :disabled="busy" :aria-pressed="!!reservation.retention_hold" @click="$emit('hold',!reservation.retention_hold)">{{ reservation.retention_hold?'Reclamación resuelta: retirar conservación':'Conservar por reclamación abierta' }}</button></div>
  <div class="detail-actions">
   <a class="admin-button secondary" :href="'tel:'+reservation.phone"><AdminIcon name="phone" />Llamar</a>
   <button v-if="reservation.payment_status==='pending'&&['confirmed','completed'].includes(reservation.status)" class="admin-button primary" :disabled="busy" @click="$emit('action','cash-paid')">Marcar cobrado</button>

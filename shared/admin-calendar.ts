@@ -1,5 +1,5 @@
 import { datePlus, localDate, localLabel, dayInstants, type Hours } from './booking'
-export type AgendaReservation = { id:string; reference:string; service_date:string; start_at:number; end_at:number; quantity:number; amount_cents:number; lines_json:string; name:string; email:string; phone:string; address:string; notes:string; method:string; status:string; payment_status:string }
+export type AgendaReservation = { id:string; reference:string; service_date:string; start_at:number; end_at:number; quantity:number; amount_cents:number; lines_json:string; name:string; email:string; phone:string; address:string; notes:string; method:string; status:string; payment_status:string;created_at?:number;retention_hold?:number;early_service_requested?:number }
 export type AgendaBlock = { id:string; start_at:number; end_at:number; reason:string }
 export const occupiesAgenda = (status:string) => ['confirmed','completed'].includes(status)
 export function monday(date:string) {

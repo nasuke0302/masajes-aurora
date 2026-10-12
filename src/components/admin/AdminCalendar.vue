@@ -6,9 +6,43 @@ import {agendaRange,calendarWallTime,calendarInstant,calendarDateText,closedHour
 const props=defineProps<{anchor:string;view:'week'|'month';dates:string[];rows:AgendaReservation[];blocks:AgendaBlock[];hours:Hours[];selectedId:string|null;loading:boolean;revision:number}>()
 const emit=defineEmits<{select:[reservation:AgendaReservation];create:[startAt:number];move:[reservation:AgendaReservation,startAt:number];invalid:[message:string]}>()
 const range=computed(()=>agendaRange(props.hours,props.rows))
+const calendarRoot=ref<HTMLElement|null>(null)
+const dragPreview=ref<{day:string;time:string;x:number;y:number}|null>(null)
+let dragged:{row:AgendaReservation;grab:number}|null=null
+function clearDrag(){dragged=null;dragPreview.value=null}
+watch(()=>[props.view,props.anchor,props.revision,props.loading],clearDrag)
+function startDrag(e:DragEvent){
+ clearDrag()
+ if(props.view!=='week'||props.loading||!e.dataTransfer)return
+ try{
+  const event=JSON.parse(e.dataTransfer.getData('event')) as {id:string}
+  const row=props.rows.find(r=>r.id===event.id)
+  if(row&&row.status==='confirmed'&&row.start_at>Date.now()/1000)dragged={row,grab:Number(e.dataTransfer.getData('cursor-grab-at'))||0}
+ }catch{/* Ignore unrelated native drags. */}
+}
+function previewDrag(e:DragEvent){
+ if(!dragged||!calendarRoot.value)return
+ const cell=(e.target as Element).closest<HTMLElement>('.vuecal__cell')
+ const cells=Array.from(calendarRoot.value.querySelectorAll<HTMLElement>('.vuecal__cell'))
+ const date=cell?props.dates[cells.indexOf(cell)]:undefined
+ if(!cell||!date){dragPreview.value=null;return}
+ // Match Vue Cal's drop calculation, including where the event was grabbed.
+ // Its cellsEl is the common parent of the weekly cells, inside the scroll area.
+ const top=cell.parentElement!.getBoundingClientRect().top
+ const minute=Math.max(Math.round((e.clientY-top-dragged.grab)*60/81+range.value.start),0)
+ const snapped=Math.floor((minute+5)/10)*10
+ const start=new Date(date+'T00:00:00');start.setMinutes(snapped)
+ const end=new Date(start);end.setMinutes(end.getMinutes()+(dragged.row.end_at-dragged.row.start_at)/60)
+ const clock=(d:Date)=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')
+ dragPreview.value={day:new Intl.DateTimeFormat('es-ES',{weekday:'short',day:'numeric',month:'short'}).format(start),time:clock(start)+'–'+clock(end),x:Math.max(8,Math.min(e.clientX+16,window.innerWidth-184)),y:Math.max(8,Math.min(e.clientY+18,window.innerHeight-68))}
+}
+function leaveDrag(e:DragEvent){
+ const bounds=calendarRoot.value?.getBoundingClientRect()
+ if(bounds&&(e.clientX<=bounds.left||e.clientX>=bounds.right||e.clientY<=bounds.top||e.clientY>=bounds.bottom))dragPreview.value=null
+}
 type CalendarEvent={id:string;start:string;end:string;title:string;class:string;background?:boolean;draggable:boolean;resizable:boolean;deletable:boolean}
 const events=computed(()=>{
- const result:CalendarEvent[]=props.rows.filter(r=>occupiesAgenda(r.status)).map(r=>({id:r.id,start:calendarWallTime(r.start_at),end:calendarWallTime(r.end_at),title:r.name,class:['aurora-session',r.status==='completed'?'is-completed':'',props.selectedId===r.id?'is-selected':''].join(' '),draggable:!props.loading&&r.status==='confirmed'&&r.start_at>Date.now()/1000,resizable:false,deletable:false}))
+ const result:CalendarEvent[]=props.rows.filter(r=>occupiesAgenda(r.status)).map(r=>({id:r.id,start:calendarWallTime(r.start_at),end:calendarWallTime(r.end_at),title:r.name,class:['aurora-session',r.status==='completed'?'is-completed':'',props.selectedId===r.id?'is-selected':''].join(' '),draggable:props.view==='week'&&!props.loading&&r.status==='confirmed'&&r.start_at>Date.now()/1000,resizable:false,deletable:false}))
  if(props.view==='month')return result
  const add=(id:string,start:string,end:string,title:string,css:string)=>result.push({id,start,end,title,class:css,background:true,draggable:false,resizable:false,deletable:false})
  const time=(date:string,m:number)=>m===1440?datePlus(date,1)+' 00:00':date+' '+String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')
@@ -22,21 +56,23 @@ const events=computed(()=>{
 function select(event:{id:string}){const row=props.rows.find(r=>r.id===event.id);if(row)emit('select',row)}
 function label(id:string){const row=props.rows.find(r=>r.id===id);return row?localLabel(row.start_at)+'–'+localLabel(row.end_at):''}
 function massages(id:string){const row=props.rows.find(r=>r.id===id);return row?(JSON.parse(row.lines_json) as {quantity:number;minutes:number}[]).map(l=>l.quantity+' × '+l.minutes+' min').join(' · '):''}
-function monthHours(date:string){const weekday=new Date(date+'T12:00:00Z').getUTCDay(),windows=props.hours.filter(h=>h.weekday===weekday);const time=(m:number)=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');return windows.length?'Jornada '+windows.map(h=>time(h.open_minute)+'–'+time(h.close_minute)).join(', '):'Fuera de jornada'}
-function monthBlocks(date:string){return props.blocks.filter(b=>calendarWallTime(b.start_at)<datePlus(date,1)+' 00:00'&&calendarWallTime(b.end_at)>date+' 00:00').length}
 function create(date:Date){if(props.loading)return;try{const chosen=new Date(date);if(props.view==='month'){const first=props.hours.filter(h=>h.weekday===chosen.getDay()).sort((a,b)=>a.open_minute-b.open_minute)[0];if(!first)throw new Error('Melba no tiene jornada disponible ese día.');chosen.setHours(0,first.open_minute,0,0)}emit('create',calendarInstant(chosen))}catch(e){emit('invalid',(e as Error).message)}}
 function move({event}:{event:{id:string;start:Date}}){const row=props.rows.find(r=>r.id===event.id);if(!row)return;try{emit('move',row,calendarInstant(event.start))}catch(e){emit('invalid',(e as Error).message)}}
 </script>
 <template>
- <div class="calendar-scroll aurora-vuecal" :aria-busy="loading" tabindex="0" aria-label="Agenda en hora de Ávila. Doble clic para crear una reserva.">
-  <ClientOnly><VueCal :key="revision" :selected-date="anchor" :active-view="view" :disable-views="['years','year','day']" hide-view-selector hide-title-bar locale="es" :events="events" events-on-month-view="short" :editable-events="{title:false,drag:!loading&&view==='week',resize:false,create:false,delete:false}" :time-from="range.start" :time-to="range.end" :time-step="60" :time-cell-height="81" :snap-to-time="10" :dblclick-to-navigate="false" :click-to-navigate="false" :cell-click-hold="false" :drag-to-create-event="false" :transitions="false" :on-event-click="select" @cell-dblclick="create" @event-drop="move">
+ <div ref="calendarRoot" class="calendar-scroll aurora-vuecal" @dragstart="startDrag" @dragover="previewDrag" @dragleave="leaveDrag" @drop="clearDrag" @dragend="clearDrag" :aria-busy="loading" tabindex="0" aria-label="Agenda en hora de Ávila. Doble clic para crear una reserva.">
+  <ClientOnly><VueCal :key="revision+':'+view" :selected-date="anchor" :active-view="view" :disable-views="['years','year','day']" hide-view-selector hide-title-bar locale="es" :events="events" :events-on-month-view="false" :editable-events="{title:false,drag:view==='week',resize:false,create:false,delete:false}" :time-from="range.start" :time-to="range.end" :time-step="60" :time-cell-height="81" :snap-to-time="10" :dblclick-to-navigate="false" :click-to-navigate="false" :cell-click-hold="false" :drag-to-create-event="false" :transitions="false" :on-event-click="select" @cell-dblclick="create" @event-drop="move">
    <template #weekday-heading="{heading}"><span>{{ heading.label }}<template v-if="view==='week'&&heading.date"> {{ heading.date.getDate() }}<small class="aurora-day-count">{{ dayMassageCount(rows,calendarDateText(heading.date)) }} masajes</small></template></span></template>
-   <template #cell-content="{cell,view}"><template v-if="view.id==='month'"><div class="vuecal__cell-date">{{ cell.content }}</div><p class="aurora-month-availability">{{ monthHours(cell.formattedDate) }}<span v-if="monthBlocks(cell.formattedDate)"> · {{ monthBlocks(cell.formattedDate) }} bloqueo(s)</span></p></template></template>
-   <template #event="{event}"><button v-if="!event.background" type="button" class="aurora-event-button" :aria-pressed="selectedId===event.id" @click.stop="select(event)" @dblclick.stop><span>{{ label(event.id) }}</span><strong>{{ event.title }}</strong><span>{{ massages(event.id) }}</span></button><span v-else class="aurora-background-label">{{ event.title }}</span></template>
+   <template #cell-content="{cell,view,events}"><template v-if="view.id==='month'"><div class="vuecal__cell-date">{{ cell.content }}</div><p class="aurora-month-count">{{ events.length }} {{ events.length===1?'cita':'citas' }}</p></template></template>
+   <template #event="{event}"><div v-if="!event.background" role="button" tabindex="0" class="aurora-event-button" :aria-pressed="selectedId===event.id" @click.stop="select(event)" @keydown.enter.prevent="select(event)" @keydown.space.prevent="select(event)" @dblclick.stop><span>{{ label(event.id) }}</span><strong>{{ event.title }}</strong><span>{{ massages(event.id) }}</span></div><span v-else class="aurora-background-label">{{ event.title }}</span></template>
   </VueCal><template #fallback><p class="calendar-feedback">Cargando agenda…</p></template></ClientOnly>
  </div>
+ <Teleport to="body"><div v-if="dragPreview" class="aurora-drag-preview" :style="{left:dragPreview.x+'px',top:dragPreview.y+'px'}"><span>{{ dragPreview.day }}</span><strong>{{ dragPreview.time }}</strong></div></Teleport>
 </template>
 <style>
+.aurora-drag-preview {position:fixed;z-index:1000;pointer-events:none;background:#064f58;color:#fff;border-radius:8px;padding:8px 12px;box-shadow:0 4px 16px #064f5826;display:flex;flex-direction:column;gap:2px;white-space:nowrap;}
+.aurora-drag-preview span {font-size:11px;line-height:1.3;}
+.aurora-drag-preview strong {font-size:15px;line-height:1.3;font-variant-numeric:tabular-nums;}
 .aurora-vuecal {height:720px;max-height:75vh;}
 .aurora-vuecal .vuecal {min-width:720px;font-family:inherit;box-shadow:none;color:#064f58;}
 .aurora-vuecal .vuecal__heading {background:#edf8f5;min-height:48px;}
@@ -44,14 +80,15 @@ function move({event}:{event:{id:string;start:Date}}){const row=props.rows.find(
 .aurora-vuecal .vuecal__event.aurora-session {background:#edf8f5;color:#064f58;border:1px solid #08767b;border-radius:6px;}
 .aurora-vuecal .vuecal__event.is-selected {outline:2px solid #064f58;outline-offset:-2px;}
 .aurora-vuecal .vuecal__event.is-completed {background:#edf8f5;opacity:.8;}
-.aurora-vuecal .vuecal__event.aurora-unavailable {background:#38636918;}
+.aurora-vuecal .vuecal__event.aurora-unavailable {background:#cbdadb;color:#214d53;border-top:1px solid #8aaeb2;border-bottom:1px solid #8aaeb2;}
+.aurora-vuecal .aurora-unavailable .aurora-background-label {font-weight:600;}
 .aurora-vuecal .vuecal__event.aurora-block {background:#c9534920;}
 .aurora-vuecal .vuecal__event.aurora-buffer {background:#edf8f5;color:#386369;}
 .aurora-background-label {font-size:12px;line-height:1.3;padding:2px 4px;display:block;}
 .calendar-help {font-size:12px;color:#386369;padding:12px 16px;}
-.aurora-month-availability {font-size:12px;line-height:1.3;color:#386369;padding:3px;overflow-wrap:anywhere;}
+.aurora-month-count {margin:8px 0 0;font-size:13px;line-height:1.3;color:#386369;font-variant-numeric:tabular-nums;}
 .aurora-day-count {display:block;font-size:12px;color:#386369;}
-.aurora-event-button {width:100%;height:100%;padding:4px 6px;text-align:left;display:flex;flex-direction:column;overflow:hidden;cursor:grab;}
+.aurora-event-button {user-select:none;width:100%;height:100%;padding:4px 6px;text-align:left;display:flex;flex-direction:column;overflow:hidden;cursor:grab;}
 .aurora-event-button span {font-size:12px;font-variant-numeric:tabular-nums;}
 .aurora-event-button strong {font-size:14px;line-height:1.3;overflow-wrap:anywhere;}
 .aurora-event-button:focus-visible {outline:2px solid #064f58;outline-offset:-2px;}

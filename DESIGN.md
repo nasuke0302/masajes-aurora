@@ -1,4 +1,4 @@
-﻿---
+---
 name: Masajes Aurora — A tu ritmo
 description: Approved fluid identity for wellbeing massage in Ávila.
 colors:
@@ -29,7 +29,7 @@ Deep teal text and actions, near-white ground, pale mint supporting fields, cora
 
 ## Typography
 
-Urbanist, geometric and approachable. Bold compact headings, readable regular body text. No italic serif headings.
+Urbanist, geometric and approachable. Bold compact headings, readable regular body text. No italic serif headings. The same typefaces are served locally through @fontsource/urbanist rather than Google Fonts; the public OFL license is available at /urbanist-license.txt.
 
 ## Layout
 
@@ -57,6 +57,10 @@ Agenda navigation uses previous/next arrows, a date range, a Semana/Mes switch a
 
 The main navigation does not repeat the reservations list. A quiet Historial de reservas link below the agenda opens native date and status filters, including cancelled records. The return action restores the selected weekly or monthly calendar range. History filters and controls wrap within the phone viewport.
 
+LegalPage reuses the narrow page shell, BrandLogo and return link for the four public legal pages. Long text stays within 70 characters per line with generous line height, clear section headings and underlined links; long contact details wrap. LegalLinks is a wrapping footer navigation with underlined links and minimum 44px targets, shared by the home, booking and private confirmation pages.
+
+Booking review places labeled, initially unchecked acknowledgment boxes beside the final action, with direct links to conditions and privacy. Early-service request and withdrawal acknowledgment appear only when the appointment falls within 14 days. Admin entry uses wording that records what the client communicated. Confirmation requires these acknowledgments as well as Turnstile on public entry; changing the start clears the early-service acknowledgments. Selected admin reservation details and history expose a reversible open-claim retention button with a pressed state; the details explain when to remove the exception. Moving a visit into the early period uses an explicit native confirmation of the client's request when that acknowledgment is missing.
+
 ## Do's and Don'ts
 
 Use actual semantic text and controls, never a flattened mockup. Generated photography is illustrative, not a portrait of Melba. Preserve the non-therapeutic description and agreed neutral-cream wording. Honor reduced motion. The previous custom private admin agenda was checked in local Chrome at 1440×1000 and 390×844; its finish reviewer returned ship. That review does not cover the Vue Cal replacement: current screenshots and browser interaction verification remain pending because the available browser inventory was empty. Source review returned ship scoped to its three resolved source fixes. Empty-history captures were also checked at those sizes for filters, return navigation and mobile fit, with reviewer disposition ship; populated records and transient states were outside that review. The public hero/contact CTA refinement was checked in local Chrome captures at 1440px and 390px widths; measurements at 1440px, 768px and 390px confirmed 14px button text, 44px height and no horizontal overflow. The finish reviewer returned ship for these four hero/contact captures, scoped to the CTA refinement; hover/focus captures and a full public landing visual audit remain pending.
@@ -74,3 +78,7 @@ Address entry uses a labeled Calle y número combobox with official portal choic
 Booking labels keep (opcional) inline. Required date/time/contact/address fields show a coral red asterisk with aria-hidden; native required attributes remain. Address suggestions are an absolute dropdown under the input, above other controls, with a bounded scroll area and no layout displacement.
 
 Selected reservation details lead with large date/time and smaller client name underneath. The reservation reference is small and aligned top right. No Reserva seleccionada heading or separate payment-method row; pending collection is labeled Pendiente de cobro.
+
+Selected reservation details omit the manual date/time reschedule form. Weekly event drag on desktop uses the calendar event wrapper with keyboard-accessible inner content; event permissions gate moves while loading and for past/completed reservations.
+
+The legal pages, acknowledgment controls and retention actions have source review only; browser inventory was empty, so responsive visual approval, live interaction checks and a deployed cookie inventory remain pending.

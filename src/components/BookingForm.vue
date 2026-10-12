@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import { bookingContactSchema } from '#shared/booking-contact'
+import {legalOwner,TERMS_VERSION,EARLY_SERVICE_SECONDS} from '#shared/legal'
 import { money, localDate, datePlus, localLabel, totals, MAX_SESSION_MASSAGES, type Product, type Hours, type Slot } from '#shared/booking'
 const props = withDefaults(defineProps<{ admin?: boolean; initialStartAt?: number | null }>(), { admin: false, initialStartAt: null })
 const emit = defineEmits<{ saved: [] }>()
@@ -15,6 +16,10 @@ const details = reactive({ name: '', email: '', phone: '', address: '', city: '�
 const addressSelection = ref<{ id: string; portal: string } | null>(null)
 function selectAddress(value: { id: string; portal: string; street: string } | null) { addressSelection.value = value ? { id: value.id, portal: value.portal } : null; details.address = value?.street || '' }
 const turnstileToken = ref<string | null>(null)
+const acceptTerms=ref(false),adultsOnly=ref(false),earlyService=ref(false),withdrawalAcknowledged=ref(false)
+const legalClock=ref(Math.floor(Date.now()/1000))
+const needsEarlyService=computed(()=>!!startAt.value&&startAt.value<legalClock.value+EARLY_SERVICE_SECONDS)
+const legalReady=computed(()=>acceptTerms.value&&adultsOnly.value&&(!needsEarlyService.value||(earlyService.value&&withdrawalAcknowledged.value)))
 let requestKey = ''
 let controller: AbortController | undefined
 const total = computed(() => { try { return totals(quantities, catalog.value?.products || []) } catch { return null } })
@@ -31,16 +36,20 @@ watch([date, () => quantities.massage40, () => quantities.massage60], async () =
 }, { immediate: true })
 watch(details, () => { review.value = false; turnstileToken.value = null; requestKey = '' })
 watch(review, () => { turnstileToken.value = null })
+watch(startAt,()=>{earlyService.value=false;withdrawalAcknowledged.value=false})
+watch([acceptTerms,adultsOnly,earlyService,withdrawalAcknowledged],()=>{requestKey=''})
 function change(q: 'massage40' | 'massage60', n: number) { if (n >= 0 && n <= MAX_SESSION_MASSAGES && n + quantities[q === 'massage40' ? 'massage60' : 'massage40'] <= MAX_SESSION_MASSAGES) quantities[q] = n }
-function showReview() { error.value = ''; if (!contactValid.value) return; if (!selected.value) { error.value = 'Selecciona una hora disponible.'; return } review.value = true }
+function showReview() { legalClock.value=Math.floor(Date.now()/1000);error.value = ''; if (!contactValid.value) return; if (!selected.value) { error.value = 'Selecciona una hora disponible.'; return } review.value = true }
 async function submit() {
-  if (!selected.value || !contactValid.value || busy.value || (!props.admin && !turnstileToken.value)) return
+  legalClock.value=Math.floor(Date.now()/1000)
+  if(!legalReady.value){error.value='Completa las confirmaciones antes de reservar.';return}
+  if (!selected.value || !contactValid.value || !legalReady.value || busy.value || (!props.admin && !turnstileToken.value)) return
   busy.value = true; error.value = ''; requestKey ||= crypto.randomUUID()
   try {
-    const body = { quantities: { ...quantities }, startAt: startAt.value, ...details, addressSelection: addressSelection.value, requestKey, ...(!props.admin ? { turnstileToken: turnstileToken.value } : {}) }
+    const body = { quantities: { ...quantities }, startAt: startAt.value, ...details, addressSelection: addressSelection.value, requestKey, termsVersion:TERMS_VERSION,acceptTerms:acceptTerms.value,adultsOnly:adultsOnly.value,earlyServiceRequested:earlyService.value,withdrawalAcknowledged:withdrawalAcknowledged.value,...(!props.admin ? { turnstileToken: turnstileToken.value } : {}) }
     if (props.admin) { const r = await $fetch<{ reference: string }>('/api/admin/bookings', { method: 'POST', body }); saved.value = r.reference; emit('saved') }
     else { const r = await $fetch<{ url: string }>('/api/bookings', { method: 'POST', body }); window.location.assign(r.url) }
-  } catch (e) { error.value = apiError(e); turnstileToken.value = null; review.value = false } finally { busy.value = false }
+  } catch (e) { legalClock.value=Math.floor(Date.now()/1000);error.value = apiError(e); turnstileToken.value = null; review.value = false } finally { busy.value = false }
 }
 </script>
 <template>
@@ -101,9 +110,10 @@ async function submit() {
         <BookingAddress :disabled="busy" @selected="selectAddress" /><label class="field mt-5"><span>Piso y puerta <span
               class="font-normal text-muted text-sm">(opcional)</span></span><input v-model="details.addressExtra"
             autocomplete="address-line2" maxlength="100" :disabled="busy" /></label><label
-          class="field mt-5"><span>Notas <span class="font-normal text-muted text-sm">(opcional)</span></span><textarea
-            v-model="details.notes" rows="4" maxlength="1500" placeholder="Preferencias o indicaciones para llegar"
-            :disabled="busy" /></label>
+          class="field mt-5"><span>Indicaciones para acceder al domicilio <span class="font-normal text-muted text-sm">(opcional)</span></span><textarea
+            v-model="details.notes" rows="4" maxlength="1500" placeholder="Por ejemplo, cómo encontrar el portal o usar el timbre"
+            aria-describedby="booking-notes-help" :disabled="busy" /></label><p id="booking-notes-help" class="text-sm text-muted mt-2">Solo indicaciones logísticas. No incluyas enfermedades, lesiones, medicación ni otros datos de salud. Estas notas no se enviarán por email.</p>
+        <p class="text-sm text-muted mt-5">Responsable: {{ legalOwner.name }}. Usaremos estos datos para gestionar la visita, sobre la base de la contratación del servicio. Puedes ejercer tus derechos en <a :href="'mailto:'+legalOwner.email" class="text-link">{{ legalOwner.email }}</a>. <NuxtLink to="/privacidad" class="text-link" target="_blank">Información completa de privacidad</NuxtLink>.</p>
       </fieldset>
     </div>
     <aside class="booking-summary">
@@ -128,6 +138,11 @@ async function submit() {
       </dl>
       <p class="mt-6 font-semibold">Pago en efectivo</p>
       <template v-if="review">
+        <fieldset class="mt-6 space-y-3"><legend class="font-semibold mb-3">{{ admin?'Confirmaciones comunicadas por el cliente':'Antes de confirmar' }}</legend><p v-if="admin" class="text-sm text-muted">Marca estas casillas únicamente si el cliente ha recibido las condiciones y ha comunicado estas confirmaciones. Se registrará como reserva introducida por Melba.</p>
+          <label class="flex items-start gap-3 text-sm"><input v-model="acceptTerms" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente acepta las':'Acepto las' }} <NuxtLink to="/condiciones-reserva" target="_blank" class="text-link">condiciones de reserva</NuxtLink>, incluido el pago en efectivo del servicio.</span></label>
+          <label class="flex items-start gap-3 text-sm"><input v-model="adultsOnly" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente confirma':'Confirmo' }} que todas las personas que recibirán un masaje son mayores de 18 años.</span></label>
+          <template v-if="needsEarlyService"><label class="flex items-start gap-3 text-sm"><input v-model="earlyService" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente solicita expresamente':'Solicito expresamente' }} que el servicio comience antes de finalizar los 14 días de desistimiento.</span></label><label class="flex items-start gap-3 text-sm"><input v-model="withdrawalAcknowledged" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente reconoce':'Reconozco' }} que perderá el derecho de desistimiento cuando el servicio se haya prestado íntegramente. Puede cancelar gratuitamente antes de que empiece.</span></label></template>
+        </fieldset>
         <div class="mt-6 text-sm space-y-2">
           <p class="font-bold">Revisa antes de confirmar</p>
           <p>{{ details.name }} · {{ details.email }}</p>
@@ -140,9 +155,9 @@ async function submit() {
         <BookingTurnstile v-if="review && !admin" @verified="turnstileToken = $event" />
       </ClientOnly>
       <p v-if="error" class="notice mt-5" role="alert">{{ error }}</p><button class="action w-full mt-6"
-        :disabled="!selected || !contactValid || loading || busy || (review && !admin && !turnstileToken)"
+        :disabled="!selected || !contactValid || loading || busy || (review&&(!legalReady||(!admin&&!turnstileToken)))"
         type="submit">{{
-          busy ? 'Procesando…' : review ? 'Confirmar reserva' : 'Revisar reserva' }}</button>
+          busy ? 'Procesando…' : review ? 'Reservar con obligación de pago' : 'Revisar reserva' }}</button>
       <p class="text-sm text-muted mt-4">Tu reserva se confirma al enviarla.</p>
     </aside>
   </form>

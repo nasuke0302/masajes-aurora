@@ -20,6 +20,7 @@
     "setup:turnstile": "node scripts/setup-turnstile.mjs"
   },
   "dependencies": {
+    "@fontsource/urbanist": "^5.3.0",
     "@primeicons/vue": "^8.0.2",
     "jose": "^6.2.12",
     "nuxt": "^4.6.1",

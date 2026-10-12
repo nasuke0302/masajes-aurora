@@ -48,6 +48,10 @@ Los triggers de D1 reservan franjas y evitan solapamientos de forma atómica, in
 
 ## Preparar staging en Cloudflare
 
+El build automático del Worker web de staging usa `npm run build:cloudflare` y despliega con `npm exec -- cf deploy --mode staging --prebuilt`. Debe conservar las variables de build `D1_DATABASE_ID`, `SITE_URL`, `WORKER_DOMAIN`, `NOTIFICATIONS_QUEUE`, `ADMIN_EMAIL`, `EMAIL_FROM` y `TURNSTILE_SITE_KEY`; `TURNSTILE_SECRET_KEY` se guarda como secreto del build. `config/access.json` aporta la configuración de Access. El Worker de emails se despliega junto al web mediante `npm run deploy` cuando cambie su código.
+
+No sustituir este pipeline por el despliegue genérico de Nuxt con `npx wrangler deploy`: su configuración autogenerada no incluye D1, la cola ni las variables de Aurora y puede sobrescribir los bindings del Worker, causando el 503 «El sistema de reservas no está configurado». Después de cada despliegue hay que verificar los bindings de la versión activa y la conexión a D1, además del resultado del build.
+
 Se usa **cf CLI**, fijado en package-lock.json. No se necesita Netlify ni una configuración Wrangler. Antes de operar, confirma la cuenta autenticada; configura un perfil de cf o CLOUDFLARE_ACCOUNT_ID y las credenciales de Cloudflare en el entorno/CI. La CLI permite descubrir comandos sin incluir datos identificativos en la búsqueda:
 
 ```powershell
@@ -153,3 +157,21 @@ No se usa Geoapify ni se copian claves de Geonuvia. CartoCiudad no necesita clav
 Direcciones desplegadas en staging: 028454e4-0005-480e-b4fb-40e6ae1abcb6. Pasan 81 tests, tipos, compilación y smoke del Worker. Chrome sobre preview aislado a 1440px/390px comprobó búsqueda CartoCiudad real, selección con teclado, bloqueo sin selección, invalidación al editar y error controlado del proveedor, sin desbordamiento. Catálogo y horario fueron fixtures; no se crearon reservas ni se enviaron emails. Access sigue protegiendo staging. La comprobación de pertenencia usa el núcleo poblacional oficial devuelto por CartoCiudad, no un polígono manual.
 
 Ajustes de formulario: labels opcionales en línea, seis campos obligatorios con asterisco coral, fecha/hora apiladas y a ancho completo bajo 640px. Sugerencias en dropdown absoluto con scroll y navegación por teclado. Chrome sobre preview a 1440px/390px/320px confirmó etiquetas inline, layout móvil, ausencia de desplazamiento de campos al abrir sugerencias y ausencia de desbordamiento. Pruebas con catálogo, horarios y direcciones simulados; no se enviaron reservas. Tipos y compilación pasan.
+
+## Arrastre de reservas en ordenador
+
+La vista semanal inicializa el módulo drag de Vue Cal incluso mientras carga datos; cada evento individual bloquea arrastre durante carga, si está realizado o si no es futuro. Cambiar Semana/Mes remonta la instancia para inicializar el módulo al volver. El contenido de evento usa un div con rol button y activación por Enter/Espacio, evitando el botón HTML que interfería con el arrastre nativo. El detalle ya no incluye el formulario de reprogramación manual.
+
+Chrome con ratón real sobre preview aislado y API simulada confirmó movimiento de 11:00 a 12:00 Madrid, PATCH con expectedStartAt correcto, actualización tras éxito, restauración tras HTTP 409 y funcionamiento después de Mes→Semana; también se probó navegador con zona America/New_York. No se movieron reservas reales ni se enviaron emails. La corrección se refiere a ordenador; el motor nativo de Vue Cal v4 tiene soporte limitado para táctil.
+
+Durante el arrastre semanal se muestra un indicador flotante con el día y las horas de inicio y fin previstas. Respeta el punto de agarre, la duración y el ajuste de diez minutos de Vue Cal; desaparece al soltar, cancelar o salir de la agenda. No guarda cambios antes de soltar. Verificado con ratón real y API simulada: éxito, conflicto y retorno Mes→Semana, incluyendo navegador en otra zona horaria.
+
+La vista mensual muestra solo la fecha y el número de citas de cada día, incluyendo cero. Cada reserva cuenta una vez aunque agrupe varios masajes; se incluyen confirmadas y realizadas y se excluyen canceladas. No muestra nombres, horarios, jornadas ni bloqueos dentro de las celdas. Verificado en Chrome a 1440px y 390px con datos simulados; tipos y compilación pasan.
+
+## Páginas legales y conservación
+
+Las páginas /aviso-legal, /privacidad, /cookies y /condiciones-reserva usan los datos y decisiones confirmados por la titular. La reserva exige aceptar la versión vigente de condiciones y confirmar que todas las personas son adultas. Si empieza antes de 14 días, se registra la solicitud expresa y el reconocimiento sobre desistimiento. Las confirmaciones incluyen una copia de las condiciones; las notas logísticas no se envían por email.
+
+La migración 0004_privacy.sql se aplicó en staging el 12 de octubre de 2026. Antes de desplegar en otra base, aplica las migraciones pendientes con cf. El mantenimiento elimina reservas tras 12 meses y emails de la cola tras 30 días. El control Conservar por reclamación abierta del admin excluye la reserva y sus avisos asociados del borrado; retíralo al resolver el caso. El buzón de Melba, los backups y la contabilidad externa se gestionan por separado.
+
+La tipografía se sirve localmente con licencia OFL. El build y la prueba Workers verifican las páginas y API, pero queda pendiente el inventario de cookies y la revisión visual en un navegador conectado. No se ha hecho push ni despliegue de estos cambios.

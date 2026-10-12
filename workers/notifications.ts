@@ -14,7 +14,7 @@ export async function sendResend(env:Env,message:EmailMessage,id:string){
 }
 export async function deliver(env:Env,id:string,send:typeof sendResend=sendResend){
  const now=Math.floor(Date.now()/1000)
- const row=await env.DB.prepare('UPDATE outbox SET lease_until=?,attempts=attempts+1 WHERE id=? AND sent_at IS NULL AND (lease_until IS NULL OR lease_until<?) RETURNING *').bind(now+300,id,now).first<Outbox>()
+ const row=await env.DB.prepare('UPDATE outbox SET lease_until=?,attempts=attempts+1 WHERE id=? AND created_at>=? AND sent_at IS NULL AND (lease_until IS NULL OR lease_until<?) RETURNING *').bind(now+300,id,now-30*86400,now).first<Outbox>()
  if(!row)return
  try{
   const html='<div style="font-family:Arial,sans-serif;white-space:pre-wrap">'+row.body.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!))+'</div>'
