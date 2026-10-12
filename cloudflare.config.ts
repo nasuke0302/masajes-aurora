@@ -20,7 +20,6 @@ export default defineConfig(({ mode }) => ({
    NOTIFICATIONS: bindings.queue<{ id: string }>({ name: process.env.NOTIFICATIONS_QUEUE || 'masajes-aurora-notifications-staging' }),
    SITE_URL: bindings.text(process.env.SITE_URL || 'http://localhost:3000'),
    ADMIN_EMAIL: bindings.text(process.env.ADMIN_EMAIL || ''), EMAIL_FROM: bindings.text(process.env.EMAIL_FROM || ''),
-   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? bindings.secret() : bindings.text(''), STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ? bindings.secret() : bindings.text(''), STRIPE_PAYMENT_CONFIGURATION: bindings.text(process.env.STRIPE_PAYMENT_CONFIGURATION || '')
   }
  })
 }))

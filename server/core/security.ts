@@ -19,7 +19,6 @@ export async function limit(env:AppEnv,key:string,max:number,seconds=3600) {
 }
 export function safeError(error:unknown):never {
  if(error instanceof Error && /OVERLAP|BLOCKED|BOOKING_IN_BLOCK|LEAD_TIME/.test(error.message)) throw createError({statusCode:409,statusMessage:'El horario ha cambiado. Elige otra hora.'})
- if(error instanceof Error && 'type' in error && String(error.type).startsWith('Stripe')) throw createError({statusCode:502,statusMessage:'El servicio de pagos no responde. Vuelve a intentarlo con los mismos datos.'})
  throw error
 }
 export function privateHeaders(event:H3Event) { event.node.res.setHeader('Cache-Control','no-store');event.node.res.setHeader('Referrer-Policy','no-referrer');event.node.res.setHeader('X-Robots-Tag','noindex, nofollow') }

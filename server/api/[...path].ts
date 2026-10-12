@@ -1,55 +1,43 @@
-import {defineEventHandler,getRouterParam,getQuery,getHeader,readBody,readRawBody,createError,deleteCookie,getCookie} from 'h3'
-import StripeClient from 'stripe'
+import {defineEventHandler,getRouterParam,getQuery,getHeader,readBody,createError,deleteCookie,getCookie} from 'h3'
 import {z} from 'zod'
 import {environment,sameOrigin,limit,hash,token,nowSeconds,safeError,privateHeaders} from '../core/security'
 import {configuration,available,createBooking,findByToken,publicBooking,quantitiesSchema} from '../core/bookings'
-import {stripeClient,checkout,reconcile,reconcileBooking,handleStripeEvent} from '../core/payments'
 import {dispatch} from '../core/notifications'
 import {createWebBooking} from '../core/turnstile'
-import {requireAdmin,consumeLink,saveSettings,updateBooking} from '../core/admin'
+import {searchAddresses,validatedAddress} from '../core/addresses'
+import {requireAdmin,consumeLink,saveSettings,updateBooking,rescheduleBooking} from '../core/admin'
 export default defineEventHandler(async event=>{
  privateHeaders(event)
  const env=environment(event),path=getRouterParam(event,'path')||'',method=event.method
  if((Number(getHeader(event,'content-length'))||0)>32768)throw createError({statusCode:413,statusMessage:'Solicitud demasiado grande'})
- if(method!=='GET'&&path!=='stripe/webhook')sameOrigin(event,env)
+ if(method!=='GET')sameOrigin(event,env)
  try{
-  if(path==='stripe/webhook'&&method==='POST'){
-   const body=await readRawBody(event)||''
-   if(body.length>32768)throw createError({statusCode:413})
-   let stripeEvent:StripeClient.Event
-   try{stripeEvent=await stripeClient(env).webhooks.constructEventAsync(body,getHeader(event,'stripe-signature')||'',env.STRIPE_WEBHOOK_SECRET,undefined,StripeClient.createSubtleCryptoProvider())}catch{throw createError({statusCode:400,statusMessage:'Firma inválida'})}
-   await handleStripeEvent(env,stripeEvent);event.waitUntil(dispatch(env));return {received:true}
-  }
   if(path==='auth-mode'&&method==='GET')return {access:!!env.ACCESS_AUD}
   if(path==='catalog'&&method==='GET'){
    const c=await configuration(env)
-   return {...c,accepting:c.accepting&&!!env.ADMIN_EMAIL&&!!env.EMAIL_FROM,onlinePayment:!!env.STRIPE_SECRET_KEY&&!!env.STRIPE_PAYMENT_CONFIGURATION}
+   return {...c,accepting:c.accepting&&!!env.ADMIN_EMAIL&&!!env.EMAIL_FROM}
+  }
+  if(path==='addresses/search'&&method==='GET'){
+   await limit(env,'addresses:'+(getHeader(event,'cf-connecting-ip')||'local'),40,60)
+   const q=getQuery(event).q;if(typeof q!=='string')throw createError({statusCode:400})
+   return searchAddresses(q)
   }
   if(path==='availability'&&method==='GET'){
    const q=getQuery(event),parsed=quantitiesSchema.safeParse({massage40:Number(q.massage40),massage60:Number(q.massage60)})
    if(!parsed.success||typeof q.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(q.date))throw createError({statusCode:400,statusMessage:'Fecha o cantidades inválidas'})
    await limit(env,'availability:'+(getHeader(event,'cf-connecting-ip')||'local'),120,60)
-   await reconcile(env);return await available(env,q.date,parsed.data)
+   return await available(env,q.date,parsed.data)
   }
   if(path==='bookings'&&method==='POST'){
    await limit(env,'booking:'+(getHeader(event,'cf-connecting-ip')||'local'),12)
    const b=await createWebBooking(env,await readBody(event),getHeader(event,'cf-connecting-ip'))
-   const session=b.status==='held'?await checkout(env,b):null
    event.waitUntil(dispatch(env))
-   return {url:b.manage_url,checkoutUrl:session?.url||null,reference:b.reference}
+   return {url:b.manage_url,reference:b.reference}
   }
   if(path.startsWith('bookings/')&&method==='GET'){
    const value=path.slice('bookings/'.length)
-   let b=await findByToken(env,value)
-   if(b.status==='held'){await reconcileBooking(env,b);b=await findByToken(env,value)}
+   const b=await findByToken(env,value)
    return publicBooking(b)
-  }
-  if(path.startsWith('checkout/')&&method==='POST'){
-   const b=await findByToken(env,path.slice('checkout/'.length))
-   await reconcileBooking(env,b)
-   const current=await findByToken(env,path.slice('checkout/'.length))
-   const session=await checkout(env,current)
-   return {url:session.url}
   }
   if(env.ACCESS_AUD&&['admin/login','admin/consume'].includes(path))throw createError({statusCode:410,statusMessage:'Utiliza Cloudflare Access'})
   if(path==='admin/login'&&method==='POST'){
@@ -73,17 +61,23 @@ export default defineEventHandler(async event=>{
    if(path==='admin/settings'&&method==='GET')return configuration(env)
    if(path==='admin/settings'&&method==='PUT')return saveSettings(env,await readBody(event))
    if(path==='admin/bookings'&&method==='GET'){
-    await reconcile(env)
     const q=getQuery(event);const from=String(q.from||'2000-01-01'),to=String(q.to||'2100-01-01'),state=String(q.status||'')
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)||from>to||(state&&!['held','confirmed','completed','cancelled','expired'].includes(state)))throw createError({statusCode:400,statusMessage:'Revisa las fechas y el estado del historial'})
-    return (await env.DB.prepare('SELECT id,reference,service_date,start_at,end_at,quantity,amount_cents,lines_json,name,email,phone,address,notes,method,status,payment_status FROM bookings WHERE service_date BETWEEN ? AND ? AND (? = \'\' OR status = ?) ORDER BY start_at LIMIT 300').bind(from,to,state,state).all()).results
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)||from>to||(state&&!['confirmed','completed','cancelled'].includes(state)))throw createError({statusCode:400,statusMessage:'Revisa las fechas y el estado del historial'})
+    const agenda=q.agenda==='true'
+    if(agenda&&(!Number.isFinite(Date.parse(from))||!Number.isFinite(Date.parse(to))||Date.parse(to)-Date.parse(from)>41*86400000))throw createError({statusCode:400,statusMessage:'El calendario admite hasta seis semanas por consulta'})
+    // A complete month grid can exceed the history's 300-record page. Within
+    // six weeks, the minimum visit duration and buffer bound active visits below 1000.
+    return (await env.DB.prepare('SELECT id,reference,service_date,start_at,end_at,quantity,amount_cents,lines_json,name,email,phone,address,notes,method,status,payment_status FROM bookings WHERE service_date BETWEEN ? AND ? AND (? = \'\' OR status = ?)'+(agenda?" AND status IN('confirmed','completed')":'')+' ORDER BY start_at LIMIT '+(agenda?'1000':'300')).bind(from,to,state,state).all()).results
    }
    if(path==='admin/bookings'&&method==='POST'){
-    const body=await readBody(event);const b=await createBooking(env,{...body,method:'cash'});event.waitUntil(dispatch(env));return {reference:b.reference}
+    const body=await readBody(event);const b=await createBooking(env,{...body,address:await validatedAddress(body),method:'cash'});event.waitUntil(dispatch(env));return {reference:b.reference}
    }
    if(path.startsWith('admin/bookings/')&&method==='PATCH'){
-    const body=z.object({action:z.enum(['cancel','complete','cash-paid'])}).safeParse(await readBody(event));if(!body.success)throw createError({statusCode:400})
-    await updateBooking(env,path.slice('admin/bookings/'.length),body.data.action);event.waitUntil(dispatch(env));return {ok:true}
+    const body=z.discriminatedUnion('action',[z.object({action:z.enum(['cancel','complete','cash-paid'])}),z.object({action:z.literal('reschedule'),startAt:z.number().int().positive().max(253402300799),expectedStartAt:z.number().int().positive()})]).safeParse(await readBody(event));if(!body.success)throw createError({statusCode:400})
+    const id=path.slice('admin/bookings/'.length)
+    if(body.data.action==='reschedule')await rescheduleBooking(env,id,body.data.startAt,body.data.expectedStartAt)
+    else await updateBooking(env,id,body.data.action)
+    event.waitUntil(dispatch(env));return {ok:true}
    }
    if(path==='admin/blocks'&&method==='GET')return (await env.DB.prepare('SELECT * FROM blocks ORDER BY start_at').all()).results
    if(path==='admin/blocks'&&method==='POST'){

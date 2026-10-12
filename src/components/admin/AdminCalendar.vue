@@ -1,32 +1,61 @@
 <script setup lang="ts">
-import {localDate,localLabel,dayInstants,type Hours} from '#shared/booking'
-import {agendaRange,clockMinute,dayMassageCount,occupiesAgenda,type AgendaReservation,type AgendaBlock} from '#shared/admin-calendar'
-const props=defineProps<{dates:string[];rows:AgendaReservation[];blocks:AgendaBlock[];hours:Hours[];selectedId:string|null;loading:boolean}>()
-defineEmits<{select:[reservation:AgendaReservation]}>()
+import VueCal from 'vue-cal'
+import 'vue-cal/dist/vuecal.css'
+import {datePlus,localDate,localLabel,type Hours} from '#shared/booking'
+import {agendaRange,calendarWallTime,calendarInstant,calendarDateText,closedHours,dayMassageCount,occupiesAgenda,type AgendaReservation,type AgendaBlock} from '#shared/admin-calendar'
+const props=defineProps<{anchor:string;view:'week'|'month';dates:string[];rows:AgendaReservation[];blocks:AgendaBlock[];hours:Hours[];selectedId:string|null;loading:boolean;revision:number}>()
+const emit=defineEmits<{select:[reservation:AgendaReservation];create:[startAt:number];move:[reservation:AgendaReservation,startAt:number];invalid:[message:string]}>()
 const range=computed(()=>agendaRange(props.hours,props.rows))
-const ticks=computed(()=>Array.from({length:(range.value.end-range.value.start)/60+1},(_,i)=>range.value.start+i*60))
-const height=computed(()=>(range.value.end-range.value.start)*1.35)
-function position(start:number,end:number){const top=Math.max(range.value.start,start),bottom=Math.min(range.value.end,end);return {top:(top-range.value.start)*1.35+'px',height:Math.max(0,(bottom-top)*1.35)+'px'}}
-function eventStyle(r:AgendaReservation){const start=clockMinute(r.start_at);return position(start,start+(r.end_at-r.start_at)/60)}
-function reservations(date:string){return props.rows.filter(r=>r.service_date===date&&occupiesAgenda(r.status))}
-function dayLabel(date:string){return new Intl.DateTimeFormat('es-ES',{weekday:'short',day:'numeric',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'))}
-function closed(date:string){const weekday=new Date(date+'T12:00:00Z').getUTCDay();const windows=props.hours.filter(h=>h.weekday===weekday).sort((a,b)=>a.open_minute-b.open_minute);const gaps:{start:number;end:number}[]=[];let cursor=range.value.start;for(const w of windows){if(w.open_minute>cursor)gaps.push({start:cursor,end:w.open_minute});cursor=Math.max(cursor,w.close_minute)}if(cursor<range.value.end)gaps.push({start:cursor,end:range.value.end});return gaps}
-function blocked(date:string){const instants=dayInstants(date);if(!instants.length)return [];const start=instants[0]!.epoch,end=instants.at(-1)!.epoch+600;return props.blocks.filter(b=>b.start_at<end&&b.end_at>start).map(b=>({...b,start:b.start_at<=start?0:clockMinute(b.start_at),end:b.end_at>=end?1440:clockMinute(b.end_at)}))}
-function lineLabel(r:AgendaReservation){return (JSON.parse(r.lines_json) as {quantity:number;minutes:number}[]).map(l=>l.quantity+' × '+l.minutes+' min').join(' · ')}
+type CalendarEvent={id:string;start:string;end:string;title:string;class:string;background?:boolean;draggable:boolean;resizable:boolean;deletable:boolean}
+const events=computed(()=>{
+ const result:CalendarEvent[]=props.rows.filter(r=>occupiesAgenda(r.status)).map(r=>({id:r.id,start:calendarWallTime(r.start_at),end:calendarWallTime(r.end_at),title:r.name,class:['aurora-session',r.status==='completed'?'is-completed':'',props.selectedId===r.id?'is-selected':''].join(' '),draggable:!props.loading&&r.status==='confirmed'&&r.start_at>Date.now()/1000,resizable:false,deletable:false}))
+ if(props.view==='month')return result
+ const add=(id:string,start:string,end:string,title:string,css:string)=>result.push({id,start,end,title,class:css,background:true,draggable:false,resizable:false,deletable:false})
+ const time=(date:string,m:number)=>m===1440?datePlus(date,1)+' 00:00':date+' '+String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')
+ for(const date of props.dates){
+  for(const gap of closedHours(date,props.hours))add('closed:'+date+':'+gap.start,time(date,gap.start),time(date,gap.end),'Fuera de jornada','aurora-unavailable')
+  for(const b of props.blocks){const start=calendarWallTime(b.start_at),end=calendarWallTime(b.end_at);if(localDate(b.start_at)<=date&&localDate(b.end_at)>=date)add('block:'+b.id+':'+date,start<date+' 00:00'?date+' 00:00':start,end>datePlus(date,1)+' 00:00'?datePlus(date,1)+' 00:00':end,b.reason||'Bloqueado','aurora-block')}
+ }
+ for(const r of props.rows.filter(r=>occupiesAgenda(r.status)))add('buffer:'+r.id,calendarWallTime(r.end_at),calendarWallTime(r.end_at+1800),'30 min entre visitas','aurora-buffer')
+ return result
+})
+function select(event:{id:string}){const row=props.rows.find(r=>r.id===event.id);if(row)emit('select',row)}
+function label(id:string){const row=props.rows.find(r=>r.id===id);return row?localLabel(row.start_at)+'–'+localLabel(row.end_at):''}
+function massages(id:string){const row=props.rows.find(r=>r.id===id);return row?(JSON.parse(row.lines_json) as {quantity:number;minutes:number}[]).map(l=>l.quantity+' × '+l.minutes+' min').join(' · '):''}
+function monthHours(date:string){const weekday=new Date(date+'T12:00:00Z').getUTCDay(),windows=props.hours.filter(h=>h.weekday===weekday);const time=(m:number)=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');return windows.length?'Jornada '+windows.map(h=>time(h.open_minute)+'–'+time(h.close_minute)).join(', '):'Fuera de jornada'}
+function monthBlocks(date:string){return props.blocks.filter(b=>calendarWallTime(b.start_at)<datePlus(date,1)+' 00:00'&&calendarWallTime(b.end_at)>date+' 00:00').length}
+function create(date:Date){if(props.loading)return;try{const chosen=new Date(date);if(props.view==='month'){const first=props.hours.filter(h=>h.weekday===chosen.getDay()).sort((a,b)=>a.open_minute-b.open_minute)[0];if(!first)throw new Error('Melba no tiene jornada disponible ese día.');chosen.setHours(0,first.open_minute,0,0)}emit('create',calendarInstant(chosen))}catch(e){emit('invalid',(e as Error).message)}}
+function move({event}:{event:{id:string;start:Date}}){const row=props.rows.find(r=>r.id===event.id);if(!row)return;try{emit('move',row,calendarInstant(event.start))}catch(e){emit('invalid',(e as Error).message)}}
 </script>
-<template><div class="calendar-scroll" :aria-busy="loading" tabindex="0" aria-label="Agenda. Desplázate para ver todas las horas y días.">
- <div class="calendar-grid" :class="{'calendar-day':dates.length===1}" :style="{'--calendar-days':dates.length}">
-  <div class="calendar-corner" aria-hidden="true"></div>
-  <div v-for="date in dates" :key="date" class="calendar-day-heading" :class="{'is-current-day':date===localDate(Date.now()/1000)}"><h3>{{ dayLabel(date) }}</h3><span>{{ dayMassageCount(rows,date) }} {{ dayMassageCount(rows,date)===1?'masaje':'masajes' }}</span></div>
-  <div class="calendar-times" :style="{height:height+'px'}" aria-hidden="true"><span v-for="tick in ticks" :key="tick" :style="{top:(tick-range.start)*1.35+'px'}">{{ String(Math.floor(tick/60)).padStart(2,'0') }}:00</span></div>
-  <div v-for="date in dates" :key="date+'-column'" class="calendar-column" :style="{height:height+'px'}">
-   <div v-for="gap in closed(date)" :key="'closed'+gap.start" class="calendar-closed" :style="position(gap.start,gap.end)" title="Fuera de jornada"></div>
-   <div v-for="b in blocked(date)" :key="b.id" class="calendar-block" :style="position(b.start,b.end)" :title="b.reason||'Periodo bloqueado'"><span>Bloqueado</span></div>
-   <div v-for="tick in ticks" :key="'tick'+tick" class="calendar-hour-line" :style="{top:(tick-range.start)*1.35+'px'}"></div>
-   <template v-for="r in reservations(date)" :key="r.id">
-    <div class="calendar-buffer" :style="position(clockMinute(r.start_at)+(r.end_at-r.start_at)/60,clockMinute(r.start_at)+(r.end_at-r.start_at)/60+30)" title="30 minutos entre visitas" aria-hidden="true"><span>30 min</span></div>
-    <button class="calendar-reservation" :class="{'is-selected':selectedId===r.id,'is-held':r.status==='held','is-completed':r.status==='completed'}" :style="eventStyle(r)" :aria-pressed="selectedId===r.id" :aria-label="dayLabel(date)+', '+localLabel(r.start_at)+' a '+localLabel(r.end_at)+', '+r.name+', '+lineLabel(r)+', '+(r.status==='held'?'En espera de pago':r.status==='completed'?'Realizada':'Confirmada')" @click="$emit('select',r)"><span class="event-time">{{ localLabel(r.start_at) }}–{{ localLabel(r.end_at) }}</span><strong>{{ r.name }}</strong><span class="event-massages">{{ lineLabel(r) }}</span></button>
-   </template>
-  </div>
+<template>
+ <div class="calendar-scroll aurora-vuecal" :aria-busy="loading" tabindex="0" aria-label="Agenda en hora de Ávila. Doble clic para crear una reserva.">
+  <ClientOnly><VueCal :key="revision" :selected-date="anchor" :active-view="view" :disable-views="['years','year','day']" hide-view-selector hide-title-bar locale="es" :events="events" events-on-month-view="short" :editable-events="{title:false,drag:!loading&&view==='week',resize:false,create:false,delete:false}" :time-from="range.start" :time-to="range.end" :time-step="60" :time-cell-height="81" :snap-to-time="10" :dblclick-to-navigate="false" :click-to-navigate="false" :cell-click-hold="false" :drag-to-create-event="false" :transitions="false" :on-event-click="select" @cell-dblclick="create" @event-drop="move">
+   <template #weekday-heading="{heading}"><span>{{ heading.label }}<template v-if="view==='week'&&heading.date"> {{ heading.date.getDate() }}<small class="aurora-day-count">{{ dayMassageCount(rows,calendarDateText(heading.date)) }} masajes</small></template></span></template>
+   <template #cell-content="{cell,view}"><template v-if="view.id==='month'"><div class="vuecal__cell-date">{{ cell.content }}</div><p class="aurora-month-availability">{{ monthHours(cell.formattedDate) }}<span v-if="monthBlocks(cell.formattedDate)"> · {{ monthBlocks(cell.formattedDate) }} bloqueo(s)</span></p></template></template>
+   <template #event="{event}"><button v-if="!event.background" type="button" class="aurora-event-button" :aria-pressed="selectedId===event.id" @click.stop="select(event)" @dblclick.stop><span>{{ label(event.id) }}</span><strong>{{ event.title }}</strong><span>{{ massages(event.id) }}</span></button><span v-else class="aurora-background-label">{{ event.title }}</span></template>
+  </VueCal><template #fallback><p class="calendar-feedback">Cargando agenda…</p></template></ClientOnly>
  </div>
- </div></template>
+</template>
+<style>
+.aurora-vuecal {height:720px;max-height:75vh;}
+.aurora-vuecal .vuecal {min-width:720px;font-family:inherit;box-shadow:none;color:#064f58;}
+.aurora-vuecal .vuecal__heading {background:#edf8f5;min-height:48px;}
+.aurora-vuecal .vuecal__cell--today {background:#edf8f566;}
+.aurora-vuecal .vuecal__event.aurora-session {background:#edf8f5;color:#064f58;border:1px solid #08767b;border-radius:6px;}
+.aurora-vuecal .vuecal__event.is-selected {outline:2px solid #064f58;outline-offset:-2px;}
+.aurora-vuecal .vuecal__event.is-completed {background:#edf8f5;opacity:.8;}
+.aurora-vuecal .vuecal__event.aurora-unavailable {background:#38636918;}
+.aurora-vuecal .vuecal__event.aurora-block {background:#c9534920;}
+.aurora-vuecal .vuecal__event.aurora-buffer {background:#edf8f5;color:#386369;}
+.aurora-background-label {font-size:12px;line-height:1.3;padding:2px 4px;display:block;}
+.calendar-help {font-size:12px;color:#386369;padding:12px 16px;}
+.aurora-month-availability {font-size:12px;line-height:1.3;color:#386369;padding:3px;overflow-wrap:anywhere;}
+.aurora-day-count {display:block;font-size:12px;color:#386369;}
+.aurora-event-button {width:100%;height:100%;padding:4px 6px;text-align:left;display:flex;flex-direction:column;overflow:hidden;cursor:grab;}
+.aurora-event-button span {font-size:12px;font-variant-numeric:tabular-nums;}
+.aurora-event-button strong {font-size:14px;line-height:1.3;overflow-wrap:anywhere;}
+.aurora-event-button:focus-visible {outline:2px solid #064f58;outline-offset:-2px;}
+.aurora-vuecal .vuecal__cell-events-count {background:#08767b;}
+.aurora-vuecal .vuecal--month-view .vuecal__cell {min-height:100px;}
+@media(max-width:600px){.aurora-vuecal{height:620px;max-height:70vh;}}
+</style>

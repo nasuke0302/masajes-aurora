@@ -1,7 +1,7 @@
 import {createError} from 'h3'
 import type {AppEnv} from './types'
 import {bookingSchema,createBooking} from './bookings'
-import {reconcile} from './payments'
+import {validatedAddress,addressInputSchema} from './addresses'
 export async function verifyTurnstile(env:AppEnv,token:unknown,remoteip?:string){
  if(!env.TURNSTILE_SECRET_KEY)throw createError({statusCode:503,statusMessage:'La verificación no está disponible. Inténtalo de nuevo.'})
  if(typeof token!=='string'||!token.trim()||token.length>2048)throw createError({statusCode:403,statusMessage:'Completa la verificación antes de confirmar.'})
@@ -12,7 +12,7 @@ export async function verifyTurnstile(env:AppEnv,token:unknown,remoteip?:string)
 export async function createWebBooking(env:AppEnv,input:unknown,remoteip?:string){
  const parsed=bookingSchema.safeParse(input)
  if(!parsed.success)throw createError({statusCode:400,statusMessage:'Revisa los datos de la reserva',data:parsed.error.flatten()})
+ if(!addressInputSchema.safeParse(input).success)throw createError({statusCode:400,statusMessage:'Selecciona una dirección con número en Ávila capital.'})
  await verifyTurnstile(env,(input as Record<string,unknown>).turnstileToken,remoteip)
- await reconcile(env)
- return createBooking(env,parsed.data)
+ return createBooking(env,{...parsed.data,address:await validatedAddress(input)})
 }

@@ -5,6 +5,32 @@ import type {AppEnv,Booking} from './types'
 import {hash,token,nowSeconds,safeError} from './security'
 import {configuration} from './bookings'
 import {noticeStatements} from './notifications'
+import {dayInstants,localDate,datePlus,LEAD_SECONDS,HORIZON_DAYS} from '../../shared/booking'
+
+export async function rescheduleBooking(env:AppEnv,id:string,startAt:number,expectedStartAt:number) {
+ const b=await env.DB.prepare('SELECT * FROM bookings WHERE id=?').bind(id).first<Booking>()
+ if(!b)throw createError({statusCode:404,statusMessage:'Reserva no encontrada'})
+ if(b.status!=='confirmed'||b.start_at<=nowSeconds())throw createError({statusCode:409,statusMessage:'Solo se pueden mover reservas confirmadas futuras'})
+ if(b.start_at!==expectedStartAt)throw createError({statusCode:409,statusMessage:'La reserva ha cambiado. Recarga la agenda.'})
+ if(startAt===b.start_at)return
+ const now=nowSeconds(),date=localDate(startAt),endAt=startAt+b.end_at-b.start_at
+ const instants=dayInstants(date),config=await configuration(env)
+ const weekday=new Date(date+'T12:00:00Z').getUTCDay(),minute=instants.find(p=>p.epoch===startAt)?.minute
+ if(minute===undefined||startAt<now+LEAD_SECONDS||date>datePlus(localDate(now),HORIZON_DAYS)||localDate(endAt-1)!==date||!config.hours.some(h=>h.weekday===weekday&&minute>=h.open_minute&&minute<h.close_minute&&!instants.some(p=>p.epoch>=startAt&&p.epoch<endAt&&(p.minute<h.open_minute||p.minute>=h.close_minute))))throw createError({statusCode:409,statusMessage:'La visita debe caber en una jornada disponible, con 3 horas de antelación y dentro de 30 días.'})
+ // D1 batches are atomic. A second concurrent edit aborts the entire batch,
+ // including its notifications, rather than sending an email for a stale move.
+ const revision=crypto.randomUUID(),changed={...b,service_date:date,start_at:startAt,end_at:endAt}
+ try {
+  await env.DB.batch([
+   env.DB.prepare("UPDATE bookings SET service_date=?,start_at=?,end_at=? WHERE id=? AND status='confirmed' AND start_at=?").bind(date,startAt,endAt,id,expectedStartAt),
+   env.DB.prepare("INSERT INTO outbox(id,recipient,subject,body,created_at) SELECT ?,NULL,'','',? WHERE changes()=0").bind(revision,now),
+   ...noticeStatements(env,changed,'rescheduled',revision)
+  ])
+ }catch(error){
+  if(error instanceof Error&&/NOT NULL/.test(error.message))throw createError({statusCode:409,statusMessage:'La reserva ha cambiado. Recarga la agenda.'})
+  safeError(error)
+ }
+}
 export async function requireAdmin(event:H3Event,env:AppEnv){
  if(env.ACCESS_AUD){try{await verifyAccessToken(getHeader(event,'cf-access-jwt-assertion')||'',env);return}catch{throw createError({statusCode:401,statusMessage:'Accede mediante Cloudflare Access'})}}
  const value=getCookie(event,'aurora_admin')||''
@@ -38,8 +64,8 @@ export async function updateBooking(env:AppEnv,id:string,action:'cancel'|'comple
   if(b.status!=='confirmed'||b.end_at>nowSeconds())throw createError({statusCode:409,statusMessage:'La sesión todavía no ha finalizado'})
   await env.DB.prepare("UPDATE bookings SET status='completed' WHERE id=? AND status='confirmed'").bind(id).run()
  }else{
-  if(b.method!=='cash'||!['confirmed','completed'].includes(b.status))throw createError({statusCode:409,statusMessage:'Esta reserva no admite cobro en efectivo'})
-  await env.DB.prepare("UPDATE bookings SET payment_status='paid' WHERE id=? AND method='cash'").bind(id).run()
+  if(!['confirmed','completed'].includes(b.status))throw createError({statusCode:409,statusMessage:'Esta reserva no admite cobro en efectivo'})
+  await env.DB.prepare("UPDATE bookings SET payment_status='paid',paid_at=COALESCE(paid_at,?) WHERE id=?").bind(nowSeconds(),id).run()
  }
 }
 
