@@ -13,7 +13,7 @@ import ContactWidget from './ContactWidget.vue'
           Más de 20 años de experiencia, y una forma de trabajar que empieza por escucharte.
         </p>
         <p class="mt-6 text-lg leading-relaxed text-muted">
-          Quiero que dedicarte tiempo encaje en tu día a día. Por eso llevo el masaje a tu
+          Quiero que dedicarte un tiempo que encaje en tu día a día. Por eso llevo el masaje a tu
           domicilio. Antes de empezar, hablamos de tus preferencias para que la sesión se adapte a
           ti.
         </p>

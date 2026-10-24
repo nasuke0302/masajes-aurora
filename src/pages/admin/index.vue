@@ -1,83 +1,284 @@
 <script setup lang="ts">
-import {money,localDate,localLabel,datePlus,dayInstants,type Product,type Hours} from '#shared/booking'
-import {EARLY_SERVICE_SECONDS} from '#shared/legal'
-import {calendarDates,monday,type AgendaReservation} from '#shared/admin-calendar'
-useSeoMeta({title:'Agenda de Aurora · Aurora Masajista',robots:'noindex, nofollow'})
-type Settings={products:Product[];hours:Hours[];accepting:boolean}
-type Row={id:string;reference:string;service_date:string;start_at:number;end_at:number;quantity:number;amount_cents:number;lines_json:string;name:string;email:string;phone:string;address:string;notes:string;method:string;status:string;payment_status:string;created_at?:number;retention_hold?:number;early_service_requested?:number}
-type Block={id:string;start_at:number;end_at:number;reason:string}
-type Notice={id:string;subject:string;sent_at:number|null;attempts:number;last_error:string|null}
-const headers=useRequestHeaders(['cookie','cf-access-jwt-assertion'])
-const {data:settings,error:authError}=await useFetch<Settings>('/api/admin/settings',{headers})
-if(authError.value?.statusCode===401)await navigateTo('/admin/acceso')
-const tab=ref('agenda'),error=ref(''),message=ref(''),busy=ref(false)
-const today=localDate(Math.floor(Date.now()/1000)),anchor=ref(today),view=ref<'week'|'month'>('week')
-const from=ref(monday(today)),to=ref(datePlus(monday(today),6)),rows=ref<Row[]>([]),blocks=ref<Block[]>([]),notices=ref<Notice[]>([])
-const historyState=ref(''),newStart=ref<number|null>(null),calendarRevision=ref(0)
-function createFromCalendar(startAt:number){newStart.value=startAt;tab.value='new'}
-async function moveReservation(r:AgendaReservation,startAt:number){
- if(busy.value||startAt===r.start_at){calendarRevision.value++;return}
- const earlyNeeded=!r.early_service_requested&&startAt<(r.created_at||Math.floor(Date.now()/1000))+EARLY_SERVICE_SECONDS
- if(earlyNeeded&&!window.confirm('Confirma únicamente si el cliente ha solicitado comenzar antes de los 14 días y reconoce que pierde el desistimiento al completar el servicio. ¿Lo ha comunicado expresamente?')){calendarRevision.value++;return}
- busy.value=true;error.value='';message.value=''
- try{
-  await $fetch('/api/admin/bookings/'+r.id,{method:'PATCH',body:{action:'reschedule',startAt,expectedStartAt:r.start_at,earlyServiceRequested:earlyNeeded,withdrawalAcknowledged:earlyNeeded}})
-  // The PATCH has committed: retain its accepted date even if the refresh fails.
-  rows.value=rows.value.map(row=>row.id===r.id?{...row,service_date:localDate(startAt),start_at:startAt,end_at:startAt+r.end_at-r.start_at}:row)
-  message.value='Reserva reprogramada. Email de aviso preparado.'
-  const refreshed=await Promise.allSettled([$fetch<Row[]>('/api/admin/bookings',{query:{from:from.value,to:to.value,agenda:true}}),$fetch<Notice[]>('/api/admin/notifications')])
-  if(refreshed[0].status==='fulfilled')rows.value=refreshed[0].value
-  if(refreshed[1].status==='fulfilled')notices.value=refreshed[1].value
-  if(refreshed.some(result=>result.status==='rejected'))error.value='El cambio está guardado, pero no se ha podido actualizar todo el panel. Recarga la agenda.'
- }catch(e){error.value=apiError(e);try{rows.value=await $fetch<Row[]>('/api/admin/bookings',{query:{from:from.value,to:to.value,agenda:true}})}catch{/* Keep the last known saved events while offline. */}}
- finally{busy.value=false;calendarRevision.value++}
+import { money, localDate, localLabel, datePlus, dayInstants, type Product, type Hours } from '#shared/booking'
+import { EARLY_SERVICE_SECONDS } from '#shared/legal'
+import { calendarDates, monday, type AgendaReservation } from '#shared/admin-calendar'
+useSeoMeta({ title: 'Agenda de Aurora · Aurora Masajista', robots: 'noindex, nofollow' })
+type Settings = { products: Product[]; hours: Hours[]; accepting: boolean }
+type Row = { id: string; reference: string; service_date: string; start_at: number; end_at: number; quantity: number; amount_cents: number; lines_json: string; name: string; email: string; phone: string; address: string; notes: string; method: string; status: string; payment_status: string; created_at?: number; retention_hold?: number; early_service_requested?: number }
+type Block = { id: string; start_at: number; end_at: number; reason: string }
+type Notice = { id: string; subject: string; sent_at: number | null; attempts: number; last_error: string | null }
+const headers = useRequestHeaders(['cookie', 'cf-access-jwt-assertion'])
+const { data: settings, error: authError } = await useFetch<Settings>('/api/admin/settings', { headers })
+if (authError.value?.statusCode === 401) await navigateTo('/admin/acceso')
+const tab = ref('agenda'), error = ref(''), message = ref(''), busy = ref(false)
+const today = localDate(Math.floor(Date.now() / 1000)), anchor = ref(today), view = ref<'week' | 'month'>('week')
+const from = ref(monday(today)), to = ref(datePlus(monday(today), 6)), rows = ref<Row[]>([]), blocks = ref<Block[]>([]), notices = ref<Notice[]>([])
+const historyState = ref(''), newStart = ref<number | null>(null), calendarRevision = ref(0)
+function createFromCalendar(startAt: number) { newStart.value = startAt; tab.value = 'new' }
+async function moveReservation(r: AgendaReservation, startAt: number) {
+  if (busy.value || startAt === r.start_at) { calendarRevision.value++; return }
+  const earlyNeeded = !r.early_service_requested && startAt < (r.created_at || Math.floor(Date.now() / 1000)) + EARLY_SERVICE_SECONDS
+  if (earlyNeeded && !window.confirm('Confirma únicamente si el cliente ha solicitado comenzar antes de los 14 días y reconoce que pierde el desistimiento al completar el servicio. ¿Lo ha comunicado expresamente?')) { calendarRevision.value++; return }
+  busy.value = true; error.value = ''; message.value = ''
+  try {
+    await $fetch('/api/admin/bookings/' + r.id, { method: 'PATCH', body: { action: 'reschedule', startAt, expectedStartAt: r.start_at, earlyServiceRequested: earlyNeeded, withdrawalAcknowledged: earlyNeeded } })
+    // The PATCH has committed: retain its accepted date even if the refresh fails.
+    rows.value = rows.value.map(row => row.id === r.id ? { ...row, service_date: localDate(startAt), start_at: startAt, end_at: startAt + r.end_at - r.start_at } : row)
+    message.value = 'Reserva reprogramada. Email de aviso preparado.'
+    const refreshed = await Promise.allSettled([$fetch<Row[]>('/api/admin/bookings', { query: { from: from.value, to: to.value, agenda: true } }), $fetch<Notice[]>('/api/admin/notifications')])
+    if (refreshed[0].status === 'fulfilled') rows.value = refreshed[0].value
+    if (refreshed[1].status === 'fulfilled') notices.value = refreshed[1].value
+    if (refreshed.some(result => result.status === 'rejected')) error.value = 'El cambio está guardado, pero no se ha podido actualizar todo el panel. Recarga la agenda.'
+  } catch (e) { error.value = apiError(e); try { rows.value = await $fetch<Row[]>('/api/admin/bookings', { query: { from: from.value, to: to.value, agenda: true } }) } catch {/* Keep the last known saved events while offline. */ } }
+  finally { busy.value = false; calendarRevision.value++ }
 }
-const selectedId=ref<string|null>(null),detailDialog=ref<HTMLDialogElement|null>(null),clock=ref(Math.floor(Date.now()/1000))
-const dates=computed(()=>calendarDates(anchor.value,view.value))
-const selected=computed(()=>rows.value.find(r=>r.id===selectedId.value)||null)
-const rangeLabel=computed(()=>{const fmt=new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});return view.value==='month'?new Intl.DateTimeFormat('es-ES',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(anchor.value+'T12:00:00Z')):fmt.formatRange(new Date(dates.value[0]+'T12:00:00Z'),new Date(dates.value.at(-1)+'T12:00:00Z'))})
-function navigateCalendar(step:number){if(view.value==='week')anchor.value=datePlus(anchor.value,step*7);else{const d=new Date(anchor.value.slice(0,7)+'-01T12:00:00Z');d.setUTCMonth(d.getUTCMonth()+step);anchor.value=d.toISOString().slice(0,10)}}
-async function selectReservation(r:AgendaReservation){selectedId.value=r.id;await nextTick();if(window.matchMedia('(max-width: 1099px)').matches)detailDialog.value?.showModal()}
-function closeDetails(){detailDialog.value?.close()}
-async function holdReservation(r:Row,hold:boolean){await run(async()=>{await $fetch('/api/admin/bookings/'+r.id,{method:'PATCH',body:{action:'retention-hold',hold}});rows.value=rows.value.map(row=>row.id===r.id?{...row,retention_hold:Number(hold)}:row)},hold?'Reserva conservada por reclamación abierta':'Excepción de conservación retirada')}
-watch([anchor,view],async()=>{from.value=dates.value[0]!;to.value=dates.value.at(-1)!;await load();if(!selected.value)closeDetails()})
-watch(tab,async value=>{if(value==='agenda'){from.value=dates.value[0]!;to.value=dates.value.at(-1)!;await load()}})
-let clockTimer:ReturnType<typeof setInterval>|undefined
-onUnmounted(()=>{if(clockTimer)clearInterval(clockTimer)})
-const prices=reactive({massage40:settings.value?.products.find(p=>p.id==='massage40')?.price_cents?settings.value.products.find(p=>p.id==='massage40')!.price_cents!/100:null as number|null,massage60:settings.value?.products.find(p=>p.id==='massage60')?.price_cents?settings.value.products.find(p=>p.id==='massage60')!.price_cents!/100:null as number|null})
-const accepting=ref(settings.value?.accepting||false)
-const weekly=ref((settings.value?.hours||[]).map(h=>({weekday:h.weekday,open:minutesText(h.open_minute),close:minutesText(h.close_minute)})))
-const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']
-const block=reactive({start:'',end:'',reason:''})
-function minutesText(m:number){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
-function minute(s:string){const [h,m]=s.split(':').map(Number);return h!*60+m!}
-function epoch(s:string){const [date,time]=s.split('T');const result=dayInstants(date!).find(p=>localLabel(p.epoch)===time);if(!result)throw new Error('Hora local inválida');return result.epoch}
-const status=(s:string)=>({confirmed:'Confirmada',completed:'Realizada',cancelled:'Cancelada',pending:'Pendiente',paid:'Pagado'}[s]||s)
-async function run(action:()=>Promise<unknown>,text='Cambios guardados'){busy.value=true;error.value='';message.value='';try{await action();message.value=text}catch(e){error.value=apiError(e)}finally{busy.value=false}}
-async function load(){await run(async()=>{[rows.value,blocks.value,notices.value]=await Promise.all([$fetch<Row[]>('/api/admin/bookings',{query:{from:from.value,to:to.value,...(tab.value==='agenda'?{agenda:true}:{}),...(tab.value==='history'&&historyState.value?{status:historyState.value}:{})}}),$fetch<Block[]>('/api/admin/blocks'),$fetch<Notice[]>('/api/admin/notifications')])},'')}
-async function save(){await run(async()=>{settings.value=await $fetch<Settings>('/api/admin/settings',{method:'PUT',body:{accepting:accepting.value,products:Object.entries(prices).map(([id,price])=>({id,price_cents:price===null||!Number(price)?null:Math.round(Number(price)*100)})),hours:weekly.value.map(h=>({weekday:Number(h.weekday),open_minute:minute(h.open),close_minute:minute(h.close)}))}})})}
-async function change(r:Row,action:'cancel'|'complete'|'cash-paid'){
- if(action==='cancel'&&!window.confirm('¿Cancelar esta reserva y liberar el horario?'))return
- await run(async()=>{await $fetch('/api/admin/bookings/'+r.id,{method:'PATCH',body:{action}});rows.value=await $fetch<Row[]>('/api/admin/bookings',{query:{from:from.value,to:to.value,...(tab.value==='agenda'?{agenda:true}:{}),...(tab.value==='history'&&historyState.value?{status:historyState.value}:{})}})})
+const selectedId = ref<string | null>(null), detailDialog = ref<HTMLDialogElement | null>(null), clock = ref(Math.floor(Date.now() / 1000))
+const dates = computed(() => calendarDates(anchor.value, view.value))
+const selected = computed(() => rows.value.find(r => r.id === selectedId.value) || null)
+const rangeLabel = computed(() => { const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }); return view.value === 'month' ? new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(anchor.value + 'T12:00:00Z')) : fmt.formatRange(new Date(dates.value[0] + 'T12:00:00Z'), new Date(dates.value.at(-1) + 'T12:00:00Z')) })
+function navigateCalendar(step: number) { if (view.value === 'week') anchor.value = datePlus(anchor.value, step * 7); else { const d = new Date(anchor.value.slice(0, 7) + '-01T12:00:00Z'); d.setUTCMonth(d.getUTCMonth() + step); anchor.value = d.toISOString().slice(0, 10) } }
+async function selectReservation(r: AgendaReservation) { selectedId.value = r.id; await nextTick(); if (window.matchMedia('(max-width: 1099px)').matches) detailDialog.value?.showModal() }
+function closeDetails() { detailDialog.value?.close() }
+async function holdReservation(r: Row, hold: boolean) { await run(async () => { await $fetch('/api/admin/bookings/' + r.id, { method: 'PATCH', body: { action: 'retention-hold', hold } }); rows.value = rows.value.map(row => row.id === r.id ? { ...row, retention_hold: Number(hold) } : row) }, hold ? 'Reserva conservada por reclamación abierta' : 'Excepción de conservación retirada') }
+watch([anchor, view], async () => { from.value = dates.value[0]!; to.value = dates.value.at(-1)!; await load(); if (!selected.value) closeDetails() })
+watch(tab, async value => { if (value === 'agenda') { from.value = dates.value[0]!; to.value = dates.value.at(-1)!; await load() } })
+let clockTimer: ReturnType<typeof setInterval> | undefined
+onUnmounted(() => { if (clockTimer) clearInterval(clockTimer) })
+const prices = reactive({ massage40: settings.value?.products.find(p => p.id === 'massage40')?.price_cents ? settings.value.products.find(p => p.id === 'massage40')!.price_cents! / 100 : null as number | null, massage60: settings.value?.products.find(p => p.id === 'massage60')?.price_cents ? settings.value.products.find(p => p.id === 'massage60')!.price_cents! / 100 : null as number | null })
+const accepting = ref(settings.value?.accepting || false)
+const weekly = ref((settings.value?.hours || []).map(h => ({ weekday: h.weekday, open: minutesText(h.open_minute), close: minutesText(h.close_minute) })))
+const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const block = reactive({ start: '', end: '', reason: '' })
+function minutesText(m: number) { return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0') }
+function minute(s: string) { const [h, m] = s.split(':').map(Number); return h! * 60 + m! }
+function epoch(s: string) { const [date, time] = s.split('T'); const result = dayInstants(date!).find(p => localLabel(p.epoch) === time); if (!result) throw new Error('Hora local inválida'); return result.epoch }
+const status = (s: string) => ({ confirmed: 'Confirmada', completed: 'Realizada', cancelled: 'Cancelada', pending: 'Pendiente', paid: 'Pagado' }[s] || s)
+async function run(action: () => Promise<unknown>, text = 'Cambios guardados') { busy.value = true; error.value = ''; message.value = ''; try { await action(); message.value = text } catch (e) { error.value = apiError(e) } finally { busy.value = false } }
+async function load() { await run(async () => { [rows.value, blocks.value, notices.value] = await Promise.all([$fetch<Row[]>('/api/admin/bookings', { query: { from: from.value, to: to.value, ...(tab.value === 'agenda' ? { agenda: true } : {}), ...(tab.value === 'history' && historyState.value ? { status: historyState.value } : {}) } }), $fetch<Block[]>('/api/admin/blocks'), $fetch<Notice[]>('/api/admin/notifications')]) }, '') }
+async function save() { await run(async () => { settings.value = await $fetch<Settings>('/api/admin/settings', { method: 'PUT', body: { accepting: accepting.value, products: Object.entries(prices).map(([id, price]) => ({ id, price_cents: price === null || !Number(price) ? null : Math.round(Number(price) * 100) })), hours: weekly.value.map(h => ({ weekday: Number(h.weekday), open_minute: minute(h.open), close_minute: minute(h.close) })) } }) }) }
+async function change(r: Row, action: 'cancel' | 'complete' | 'cash-paid') {
+  if (action === 'cancel' && !window.confirm('¿Cancelar esta reserva y liberar el horario?')) return
+  await run(async () => { await $fetch('/api/admin/bookings/' + r.id, { method: 'PATCH', body: { action } }); rows.value = await $fetch<Row[]>('/api/admin/bookings', { query: { from: from.value, to: to.value, ...(tab.value === 'agenda' ? { agenda: true } : {}), ...(tab.value === 'history' && historyState.value ? { status: historyState.value } : {}) } }) })
 }
-async function addBlock(){await run(async()=>{await $fetch('/api/admin/blocks',{method:'POST',body:{startAt:epoch(block.start),endAt:epoch(block.end),reason:block.reason}});blocks.value=await $fetch<Block[]>('/api/admin/blocks');block.start='';block.end='';block.reason=''})}
-async function removeBlock(id:string){await run(async()=>{await $fetch('/api/admin/blocks/'+id,{method:'DELETE'});blocks.value=await $fetch<Block[]>('/api/admin/blocks')})}
-async function logout(){const result=await $fetch<{url?:string}>('/api/admin/logout',{method:'POST'});if(result.url)window.location.assign(result.url);else await navigateTo('/admin/acceso')}
-onMounted(()=>{void load();clockTimer=setInterval(()=>{clock.value=Math.floor(Date.now()/1000)},60000)})
+async function addBlock() { await run(async () => { await $fetch('/api/admin/blocks', { method: 'POST', body: { startAt: epoch(block.start), endAt: epoch(block.end), reason: block.reason } }); blocks.value = await $fetch<Block[]>('/api/admin/blocks'); block.start = ''; block.end = ''; block.reason = '' }) }
+async function removeBlock(id: string) { await run(async () => { await $fetch('/api/admin/blocks/' + id, { method: 'DELETE' }); blocks.value = await $fetch<Block[]>('/api/admin/blocks') }) }
+async function logout() { const result = await $fetch<{ url?: string }>('/api/admin/logout', { method: 'POST' }); if (result.url) window.location.assign(result.url); else await navigateTo('/admin/acceso') }
+onMounted(() => { void load(); clockTimer = setInterval(() => { clock.value = Math.floor(Date.now() / 1000) }, 60000) })
 </script>
-<template><div class="admin-shell"><header class="admin-header"><BrandLogo /><nav class="admin-navigation" aria-label="Secciones del panel"><button v-for="item in [{id:'agenda',label:'Agenda'},{id:'settings',label:'Tarifas y jornadas'},{id:'blocks',label:'Bloqueos'},{id:'emails',label:'Emails'}]" :key="item.id" :aria-current="tab===item.id?'page':undefined" @click="tab=item.id;message='';error=''">{{ item.label }}</button></nav><button class="admin-button logout" @click="logout"><AdminIcon name="logout" /><span>Salir</span></button></header><main><p v-if="authError" class="notice" role="alert">No se ha podido cargar el panel. Comprueba tu acceso y la conexión.</p><template v-else><p v-if="error" class="notice mb-5" role="alert">{{ error }}</p><p v-if="message" class="notice mb-5" role="status">{{ message }}</p>
- <section v-if="tab==='agenda'" aria-label="Agenda de reservas">
-  <div class="agenda-toolbar"><div class="agenda-dates"><button class="admin-button icon-only" :aria-label="view==='week'?'Semana anterior':'Mes anterior'" :disabled="busy" @click="navigateCalendar(-1)"><AdminIcon name="left" /></button><h1>{{ rangeLabel }}</h1><button class="admin-button icon-only" :aria-label="view==='week'?'Semana siguiente':'Mes siguiente'" :disabled="busy" @click="navigateCalendar(1)"><AdminIcon name="right" /></button></div><div class="agenda-view" role="group" aria-label="Vista de la agenda"><button :aria-pressed="view==='week'" :disabled="busy" @click="view='week'">Semana</button><button :aria-pressed="view==='month'" :disabled="busy" @click="view='month'">Mes</button></div><span class="agenda-state" :class="{'is-closed':!settings?.accepting}">{{ settings?.accepting?'Reservas abiertas':'Reservas cerradas' }}<template v-if="settings?.products.some(p=>p.price_cents===null)"> · Tarifas por definir</template></span><button class="admin-button primary new-reservation" @click="newStart=null;tab='new'"><AdminIcon name="plus" />Nueva reserva</button></div>
-  <div class="agenda-workspace"><section class="agenda-calendar" aria-label="Calendario"><p v-if="busy" class="calendar-feedback" role="status">Cargando agenda…</p><AdminCalendar :anchor="anchor" :view="view" :revision="calendarRevision" :dates="dates" :rows="rows" :blocks="blocks" :hours="settings?.hours||[]" :selected-id="selectedId" :loading="busy" @select="selectReservation" @create="createFromCalendar" @move="moveReservation" @invalid="error=$event;calendarRevision++" /><p v-if="!busy&&!rows.some(r=>['confirmed','completed'].includes(r.status))" class="calendar-empty">No hay sesiones esta {{ view==='week'?'semana':'vista' }}. <button class="text-link" @click="newStart=null;tab='new'">Añadir una reserva</button></p><p class="calendar-help">Doble clic para crear una reserva. En semana, arrastra una cita para moverla; también puedes moverla arrastrándola en la vista semanal.</p><div class="calendar-legend"><span><i class="legend-session"></i>Reserva</span><span><i class="legend-block"></i>Bloqueado / fuera de jornada</span><span>30 min entre visitas · Hora de Ávila</span></div></section>
-   <aside class="agenda-detail" aria-label="Detalle de la reserva"><AdminReservationDetails v-if="selected" :reservation="selected" :busy="busy" :now="clock" @action="change(selected!,$event)" @hold="holdReservation(selected!,$event)" /><div v-else class="detail-empty"><AdminIcon name="calendar" :size="32" /><h2>Reserva seleccionada</h2><p>Selecciona una sesión en la agenda para ver sus datos.</p></div></aside>
+<template>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <BrandLogo />
+      <nav class="admin-navigation" aria-label="Secciones del panel"><button
+          v-for="item in [{ id: 'agenda', label: 'Agenda' }, { id: 'settings', label: 'Tarifas y jornadas' }, { id: 'blocks', label: 'Bloqueos' }, { id: 'emails', label: 'Emails' }]"
+          :key="item.id" :aria-current="tab === item.id ? 'page' : undefined"
+          @click="tab = item.id; message = ''; error = ''">{{
+            item.label }}</button></nav><button class="admin-button logout" @click="logout">
+        <AdminIcon name="logout" /><span>Salir</span>
+      </button>
+    </header>
+    <main>
+      <p v-if="authError" class="notice" role="alert">No se ha podido cargar el panel. Comprueba tu acceso y la
+        conexión.</p><template v-else>
+        <p v-if="error" class="notice mb-5" role="alert">{{ error }}</p>
+        <p v-if="message" class="notice mb-5" role="status">{{ message }}</p>
+        <section v-if="tab === 'agenda'" aria-label="Agenda de reservas">
+          <div class="agenda-toolbar">
+            <div class="agenda-dates"><button class="admin-button icon-only"
+                :aria-label="view === 'week' ? 'Semana anterior' : 'Mes anterior'" :disabled="busy"
+                @click="navigateCalendar(-1)">
+                <AdminIcon name="left" />
+              </button>
+              <h1>{{ rangeLabel }}</h1><button class="admin-button icon-only"
+                :aria-label="view === 'week' ? 'Semana siguiente' : 'Mes siguiente'" :disabled="busy"
+                @click="navigateCalendar(1)">
+                <AdminIcon name="right" />
+              </button>
+            </div>
+            <div class="agenda-view" role="group" aria-label="Vista de la agenda"><button
+                :aria-pressed="view === 'week'" :disabled="busy" @click="view = 'week'">Semana</button><button
+                :aria-pressed="view === 'month'" :disabled="busy" @click="view = 'month'">Mes</button></div><span
+              class="agenda-state" :class="{ 'is-closed': !settings?.accepting }">{{ settings?.accepting ?
+                'Reservas abiertas' : 'Reservas cerradas'
+              }}<template v-if="settings?.products.some(p => p.price_cents === null)"> · Tarifas por
+                definir</template></span><button class="admin-button primary new-reservation"
+              @click="newStart = null; tab = 'new'">
+              <AdminIcon name="plus" />Nueva reserva
+            </button>
+          </div>
+          <div class="agenda-workspace">
+            <section class="agenda-calendar" aria-label="Calendario">
+              <p v-if="busy" class="calendar-feedback" role="status">Cargando agenda…</p>
+              <AdminCalendar :anchor="anchor" :view="view" :revision="calendarRevision" :dates="dates" :rows="rows"
+                :blocks="blocks" :hours="settings?.hours || []" :selected-id="selectedId" :loading="busy"
+                @select="selectReservation" @create="createFromCalendar" @move="moveReservation"
+                @invalid="error = $event; calendarRevision++" />
+              <p v-if="!busy && !rows.some(r => ['confirmed', 'completed'].includes(r.status))" class="calendar-empty">
+                No hay
+                sesiones
+                esta {{ view === 'week' ? 'semana' : 'vista' }}. <button class="text-link"
+                  @click="newStart = null; tab = 'new'">Añadir una
+                  reserva</button></p>
+              <p class="calendar-help">Doble clic para crear una reserva. En semana, arrastra una cita para moverla;
+                también
+                puedes moverla arrastrándola en la vista semanal.</p>
+              <div class="calendar-legend"><span><i class="legend-session"></i>Reserva</span><span><i
+                    class="legend-block"></i>Bloqueado / fuera de jornada</span><span>30 min entre visitas · Hora de
+                  Ávila</span>
+              </div>
+            </section>
+            <aside class="agenda-detail" aria-label="Detalle de la reserva">
+              <AdminReservationDetails v-if="selected" :reservation="selected" :busy="busy" :now="clock"
+                @action="change(selected!, $event)" @hold="holdReservation(selected!, $event)" />
+              <div v-else class="detail-empty">
+                <AdminIcon name="calendar" :size="32" />
+                <h2>Reserva seleccionada</h2>
+                <p>Selecciona una sesión en la agenda para ver sus datos.</p>
+              </div>
+            </aside>
+          </div>
+          <div class="agenda-history-link"><button class="text-link"
+              @click="tab = 'history'; message = ''; error = ''; load()">Historial
+              de reservas</button></div>
+        </section>
+        <dialog ref="detailDialog" class="reservation-dialog" aria-label="Reserva seleccionada"
+          @click="($event.target === detailDialog) && closeDetails()"><button
+            class="admin-button icon-only detail-close" aria-label="Cerrar detalle" @click="closeDetails">
+            <AdminIcon name="close" />
+          </button>
+          <p v-if="error" class="notice" role="alert">{{ error }}</p>
+          <p v-if="message" class="notice" role="status">{{ message }}</p>
+          <AdminReservationDetails v-if="selected" :reservation="selected" :busy="busy" :now="clock"
+            @action="change(selected!, $event)" @hold="holdReservation(selected!, $event)" />
+        </dialog>
+        <section v-if="tab === 'history'">
+          <div class="history-header">
+            <div>
+              <h1 class="text-2xl font-bold">Historial de reservas</h1>
+              <p class="text-muted mt-2">Consulta sesiones realizadas y cancelaciones.</p>
+            </div><button class="admin-button secondary" @click="tab = 'agenda'">
+              <AdminIcon name="left" />Volver a la agenda
+            </button>
+          </div>
+          <form class="flex flex-wrap gap-4 items-end mb-6" @submit.prevent="load"><label class="field">Desde<input
+                v-model="from" type="date" required /></label><label class="field">Hasta<input v-model="to" type="date"
+                :min="from" required /></label><label class="field">Estado<select v-model="historyState"
+                aria-label="Estado">
+                <option value="">Todos los estados</option>
+                <option value="confirmed">Confirmada</option>
+                <option value="completed">Realizada</option>
+                <option value="cancelled">Cancelada</option>
+              </select></label><button class="action" :disabled="busy">Consultar</button></form>
+          <p v-if="!rows.length" class="notice">No hay reservas con estos filtros.</p>
+          <p v-if="rows.length === 300" class="text-muted text-sm mb-4">Se muestran hasta 300 reservas. Reduce el
+            periodo
+            para
+            consultar el resto.</p>
+          <div class="admin-list">
+            <article v-for="r in rows" :key="r.id">
+              <div class="flex flex-wrap justify-between gap-4">
+                <div>
+                  <h3 class="text-xl font-bold">{{ r.service_date }} · {{ localLabel(r.start_at) }}–{{
+                    localLabel(r.end_at) }}
+                  </h3>
+                  <p>{{ r.reference }} · {{ r.quantity }} {{ r.quantity === 1 ? 'masaje' : 'masajes' }} · {{
+                    money(r.amount_cents) }}
+                  </p>
+                  <p class="text-muted">{{ status(r.status) }} · {{ 'Efectivo' }} · {{ status(r.payment_status) }}</p>
+                </div>
+                <div class="flex flex-wrap gap-3 items-start"><button
+                    v-if="r.method === 'cash' && r.payment_status === 'pending' && ['confirmed', 'completed'].includes(r.status)"
+                    class="action" :disabled="busy" @click="change(r, 'cash-paid')">Marcar cobrado</button><button
+                    v-if="r.status === 'confirmed' && r.end_at <= Date.now() / 1000" class="text-link min-h-11"
+                    :disabled="busy" @click="change(r, 'complete')">Marcar realizada</button><button
+                    v-if="r.status === 'confirmed'" class="text-link min-h-11" :disabled="busy"
+                    @click="change(r, 'cancel')">Cancelar</button></div>
+              </div><button class="text-link mt-4" :disabled="busy" :aria-pressed="!!r.retention_hold"
+                @click="holdReservation(r, !r.retention_hold)">{{ r.retention_hold ?
+                  'Reclamación resuelta: retirar conservación' : 'Conservar por reclamación abierta' }}</button>
+              <p class="mt-4 font-semibold">{{ r.name }} · <a :href="'tel:' + r.phone" class="underline">{{ r.phone
+                  }}</a>
+                · {{
+                  r.email }}</p>
+              <p>{{ r.address }}</p>
+              <p v-for="line in JSON.parse(r.lines_json)" :key="line.id" class="text-muted">{{ line.quantity }} · {{
+                line.name
+              }}</p>
+              <p v-if="r.notes" class="mt-2 whitespace-pre-wrap">{{ r.notes }}</p>
+            </article>
+          </div>
+        </section>
+        <section v-if="tab === 'new'">
+          <h2 class="text-2xl font-bold mb-5">Añadir una reserva de WhatsApp</h2><button class="text-link mb-5"
+            @click="tab = 'agenda'">Volver a la agenda</button>
+          <BookingForm admin :initial-start-at="newStart" @saved="tab = 'agenda'; load()" />
+        </section>
+        <section v-if="tab === 'settings'">
+          <h2 class="text-2xl font-bold mb-5">Tarifas y jornadas</h2>
+          <form class="surface space-y-7 max-w-3xl" @submit.prevent="save">
+            <div class="form-columns"><label class="field">Precio del masaje de 40 minutos (€)<input
+                  v-model.number="prices.massage40" type="number" min="0.01" max="1000" step="0.01"
+                  :required="accepting" placeholder="Por definir" /></label><label class="field">Precio del masaje de 60
+                minutos (€)<input v-model.number="prices.massage60" type="number" min="0.01" max="1000" step="0.01"
+                  :required="accepting" placeholder="Por definir" /></label></div>
+            <div>
+              <h3 class="text-xl font-semibold mb-3">Jornadas semanales</h3>
+              <p class="text-muted mb-4">Horas de Ávila. Puedes añadir varios periodos por día. Para terminar a
+                medianoche, usa
+                24:00.</p>
+              <div v-for="(h, i) in weekly" :key="i"
+                class="grid grid-cols-2 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 mb-4">
+                <label class="field">Día<select v-model.number="h.weekday">
+                    <option v-for="(day, index) in days" :key="index" :value="index">{{ day }}</option>
+                  </select></label><label class="field">Desde<input v-model="h.open" type="time" step="600"
+                    required /></label><label class="field">Hasta<input v-model="h.close"
+                    pattern="(?:[01][0-9]|2[0-4]):[0-5][0-9]" placeholder="18:00" required /></label><button
+                  type="button" class="text-link self-end min-h-12" @click="weekly.splice(i, 1)">Quitar</button>
+              </div>
+              <button type="button" class="text-link" @click="weekly.push({ weekday: 1, open: '', close: '' })">Añadir
+                jornada</button>
+            </div><label class="radio-line"><input v-model="accepting" type="checkbox" /> Abrir reservas online</label>
+            <p class="text-sm text-muted">Configura tarifas, jornadas y emails antes de abrir la agenda. Los cambios de
+              tarifa
+              no alteran reservas existentes.</p><button class="action" :disabled="busy">Guardar configuración</button>
+          </form>
+        </section>
+        <section v-if="tab === 'blocks'">
+          <h2 class="text-2xl font-bold mb-5">Bloquear horas o vacaciones</h2>
+          <form class="surface space-y-5 max-w-3xl" @submit.prevent="addBlock">
+            <div class="form-columns"><label class="field">Inicio (hora de Ávila)<input v-model="block.start"
+                  type="datetime-local" step="600" required /></label><label class="field">Fin (hora de Ávila)<input
+                  v-model="block.end" type="datetime-local" step="600" required /></label></div><label
+              class="field">Motivo
+              interno<input v-model="block.reason" maxlength="200" /></label><button class="action"
+              :disabled="busy">Bloquear
+              periodo</button>
+          </form>
+          <div class="admin-list">
+            <article v-for="b in blocks" :key="b.id">
+              <p>{{ localDate(b.start_at) }} {{ localLabel(b.start_at) }} · {{ localDate(b.end_at) }} {{
+                localLabel(b.end_at) }}
+              </p>
+              <p>{{ b.reason }}</p><button class="text-link mt-3" :disabled="busy" @click="removeBlock(b.id)">Eliminar
+                bloqueo</button>
+            </article>
+          </div>
+        </section>
+        <section v-if="tab === 'emails'">
+          <h2 class="text-2xl font-bold mb-5">Emails de la agenda</h2><button class="action" :disabled="busy"
+            @click="run(async () => { await $fetch('/api/admin/notifications/retry', { method: 'POST' }); notices = await $fetch('/api/admin/notifications') }, 'Emails pendientes enviados a la cola')">Reintentar
+            pendientes</button>
+          <div class="admin-list">
+            <article v-for="n in notices" :key="n.id">
+              <h3 class="font-semibold">{{ n.subject }}</h3>
+              <p>{{ n.sent_at ? 'Aceptado por el servicio de email' : 'Pendiente de envío' }} · {{ n.attempts }}
+                intentos
+              </p>
+              <p v-if="n.last_error" class="text-muted">{{ n.last_error }}</p>
+            </article>
+          </div>
+        </section>
+      </template>
+    </main>
   </div>
-  <div class="agenda-history-link"><button class="text-link" @click="tab='history';message='';error='';load()">Historial de reservas</button></div>
- </section>
- <dialog ref="detailDialog" class="reservation-dialog" aria-label="Reserva seleccionada" @click="($event.target===detailDialog)&&closeDetails()"><button class="admin-button icon-only detail-close" aria-label="Cerrar detalle" @click="closeDetails"><AdminIcon name="close" /></button><p v-if="error" class="notice" role="alert">{{ error }}</p><p v-if="message" class="notice" role="status">{{ message }}</p><AdminReservationDetails v-if="selected" :reservation="selected" :busy="busy" :now="clock" @action="change(selected!,$event)" @hold="holdReservation(selected!,$event)" /></dialog>
- <section v-if="tab==='history'"><div class="history-header"><div><h1 class="text-2xl font-bold">Historial de reservas</h1><p class="text-muted mt-2">Consulta sesiones realizadas y cancelaciones.</p></div><button class="admin-button secondary" @click="tab='agenda'"><AdminIcon name="left" />Volver a la agenda</button></div><form class="flex flex-wrap gap-4 items-end mb-6" @submit.prevent="load"><label class="field">Desde<input v-model="from" type="date" required /></label><label class="field">Hasta<input v-model="to" type="date" :min="from" required /></label><label class="field">Estado<select v-model="historyState" aria-label="Estado"><option value="">Todos los estados</option><option value="confirmed">Confirmada</option><option value="completed">Realizada</option><option value="cancelled">Cancelada</option></select></label><button class="action" :disabled="busy">Consultar</button></form><p v-if="!rows.length" class="notice">No hay reservas con estos filtros.</p><p v-if="rows.length===300" class="text-muted text-sm mb-4">Se muestran hasta 300 reservas. Reduce el periodo para consultar el resto.</p><div class="admin-list"><article v-for="r in rows" :key="r.id"><div class="flex flex-wrap justify-between gap-4"><div><h3 class="text-xl font-bold">{{ r.service_date }} · {{ localLabel(r.start_at) }}–{{ localLabel(r.end_at) }}</h3><p>{{ r.reference }} · {{ r.quantity }} {{ r.quantity===1?'masaje':'masajes' }} · {{ money(r.amount_cents) }}</p><p class="text-muted">{{ status(r.status) }} · {{ 'Efectivo' }} · {{ status(r.payment_status) }}</p></div><div class="flex flex-wrap gap-3 items-start"><button v-if="r.method==='cash'&&r.payment_status==='pending'&&['confirmed','completed'].includes(r.status)" class="action" :disabled="busy" @click="change(r,'cash-paid')">Marcar cobrado</button><button v-if="r.status==='confirmed'&&r.end_at<=Date.now()/1000" class="text-link min-h-11" :disabled="busy" @click="change(r,'complete')">Marcar realizada</button><button v-if="r.status==='confirmed'" class="text-link min-h-11" :disabled="busy" @click="change(r,'cancel')">Cancelar</button></div></div><button class="text-link mt-4" :disabled="busy" :aria-pressed="!!r.retention_hold" @click="holdReservation(r,!r.retention_hold)">{{ r.retention_hold?'Reclamación resuelta: retirar conservación':'Conservar por reclamación abierta' }}</button><p class="mt-4 font-semibold">{{ r.name }} · <a :href="'tel:'+r.phone" class="underline">{{ r.phone }}</a> · {{ r.email }}</p><p>{{ r.address }}</p><p v-for="line in JSON.parse(r.lines_json)" :key="line.id" class="text-muted">{{ line.quantity }} · {{ line.name }}</p><p v-if="r.notes" class="mt-2 whitespace-pre-wrap">{{ r.notes }}</p></article></div></section>
- <section v-if="tab==='new'"><h2 class="text-2xl font-bold mb-5">Añadir una reserva de WhatsApp</h2><button class="text-link mb-5" @click="tab='agenda'">Volver a la agenda</button><BookingForm admin :initial-start-at="newStart" @saved="tab='agenda';load()" /></section>
- <section v-if="tab==='settings'"><h2 class="text-2xl font-bold mb-5">Tarifas y jornadas</h2><form class="surface space-y-7 max-w-3xl" @submit.prevent="save"><div class="form-columns"><label class="field">Precio del masaje de 40 minutos (€)<input v-model.number="prices.massage40" type="number" min="0.01" max="1000" step="0.01" :required="accepting" placeholder="Por definir" /></label><label class="field">Precio del masaje de 60 minutos (€)<input v-model.number="prices.massage60" type="number" min="0.01" max="1000" step="0.01" :required="accepting" placeholder="Por definir" /></label></div><div><h3 class="text-xl font-semibold mb-3">Jornadas semanales</h3><p class="text-muted mb-4">Horas de Ávila. Puedes añadir varios periodos por día. Para terminar a medianoche, usa 24:00.</p><div v-for="(h,i) in weekly" :key="i" class="grid grid-cols-2 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 mb-4"><label class="field">Día<select v-model.number="h.weekday"><option v-for="(day,index) in days" :key="index" :value="index">{{ day }}</option></select></label><label class="field">Desde<input v-model="h.open" type="time" step="600" required /></label><label class="field">Hasta<input v-model="h.close" pattern="(?:[01][0-9]|2[0-4]):[0-5][0-9]" placeholder="18:00" required /></label><button type="button" class="text-link self-end min-h-12" @click="weekly.splice(i,1)">Quitar</button></div><button type="button" class="text-link" @click="weekly.push({weekday:1,open:'',close:''})">Añadir jornada</button></div><label class="radio-line"><input v-model="accepting" type="checkbox" /> Abrir reservas online</label><p class="text-sm text-muted">Configura tarifas, jornadas y emails antes de abrir la agenda. Los cambios de tarifa no alteran reservas existentes.</p><button class="action" :disabled="busy">Guardar configuración</button></form></section>
- <section v-if="tab==='blocks'"><h2 class="text-2xl font-bold mb-5">Bloquear horas o vacaciones</h2><form class="surface space-y-5 max-w-3xl" @submit.prevent="addBlock"><div class="form-columns"><label class="field">Inicio (hora de Ávila)<input v-model="block.start" type="datetime-local" step="600" required /></label><label class="field">Fin (hora de Ávila)<input v-model="block.end" type="datetime-local" step="600" required /></label></div><label class="field">Motivo interno<input v-model="block.reason" maxlength="200" /></label><button class="action" :disabled="busy">Bloquear periodo</button></form><div class="admin-list"><article v-for="b in blocks" :key="b.id"><p>{{ localDate(b.start_at) }} {{ localLabel(b.start_at) }} · {{ localDate(b.end_at) }} {{ localLabel(b.end_at) }}</p><p>{{ b.reason }}</p><button class="text-link mt-3" :disabled="busy" @click="removeBlock(b.id)">Eliminar bloqueo</button></article></div></section>
- <section v-if="tab==='emails'"><h2 class="text-2xl font-bold mb-5">Emails de la agenda</h2><button class="action" :disabled="busy" @click="run(async()=>{await $fetch('/api/admin/notifications/retry',{method:'POST'});notices=await $fetch('/api/admin/notifications')},'Emails pendientes enviados a la cola')">Reintentar pendientes</button><div class="admin-list"><article v-for="n in notices" :key="n.id"><h3 class="font-semibold">{{ n.subject }}</h3><p>{{ n.sent_at?'Aceptado por el servicio de email':'Pendiente de envío' }} · {{ n.attempts }} intentos</p><p v-if="n.last_error" class="text-muted">{{ n.last_error }}</p></article></div></section>
- </template></main></div></template>
-
+</template>

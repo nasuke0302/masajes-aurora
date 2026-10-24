@@ -50,7 +50,7 @@ build:cloudflare crea y valida dos Workers bajo .cloudflare/output/v0. preview e
 
 ## Reglas de reserva
 
-Una reserva agrupa masajes de 40/60 minutos, realizados consecutivamente en una sola dirección y con un único pago. **No hay cupo diario**: se pueden reservar las sesiones que quepan en las jornadas, respetando la separación entre visitas. Se suman cantidades, precios y duraciones sin descuentos; se conservan instantáneas de lo contratado.
+Una reserva agrupa masajes de 60 minutos, realizados consecutivamente en una sola dirección y con un único pago. **No hay cupo diario**: se pueden reservar las sesiones que quepan en las jornadas, respetando la separación entre visitas. Se suman cantidades, precios y duraciones sin descuentos; se conservan instantáneas de lo contratado.
 
 La jornada ofrece inicios cada diez minutos. Toda la visita debe caber y dejar 30 minutos entre reservas. No se añade pausa dentro del grupo. El servidor exige tres horas de antelación y permite reservar hasta 30 días vista; usa Europe/Madrid y distingue los instantes de los cambios de hora. El desplegable muestra únicamente las horas disponibles y la hora de fin de la sesión, sin datos personales.
 

@@ -110,7 +110,7 @@ export default defineNuxtConfig({
         {
           name: "description",
           content:
-            "Masajes de 40 y 60 minutos a domicilio en Ávila capital. Reserva una sesión para ti o para varias personas, sin crear una cuenta.",
+            "Masajes a domicilio en Ávila capital. Reserva una sesión para ti o para varias personas, sin crear una cuenta.",
         },
       ],
       link: [{ rel: "icon", href: "/favicon.svg" }],
