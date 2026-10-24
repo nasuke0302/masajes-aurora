@@ -21,7 +21,7 @@ export async function ensureAccess(create=false){
   let policy=policies.find(p=>p.name==='Aurora staging owner only')
   if(!policy)policy=await cf(['zero-trust','access','policies','create','--body',JSON.stringify({name:'Aurora staging owner only',decision:'allow',include:[{email:{email}}],exclude:[],require:[]})])
   if(policy.decision!=='allow'||JSON.stringify(policy.include)!==JSON.stringify([{email:{email}}])||!policy.reusable)throw new Error('AURORA_POLICY_MISMATCH')
-  app=await cf(['zero-trust','access','applications','create','--body',JSON.stringify({name:'Masajes Aurora staging',type:'self_hosted',domain:host,self_hosted_domains:[host],allowed_idps:[otp.id],app_launcher_visible:false,session_duration:source.session_duration,http_only_cookie_attribute:true,options_preflight_bypass:false,policies:[{id:policy.id,precedence:1}]})])
+  app=await cf(['zero-trust','access','applications','create','--body',JSON.stringify({name:'Aurora Masajista staging',type:'self_hosted',domain:host,self_hosted_domains:[host],allowed_idps:[otp.id],app_launcher_visible:false,session_duration:source.session_duration,http_only_cookie_attribute:true,options_preflight_bypass:false,policies:[{id:policy.id,precedence:1}]})])
  }
  app=await cf(['zero-trust','access','applications','get',app.id])
  if(app.policies.length!==1||app.policies[0].decision!=='allow'||JSON.stringify(app.policies[0].include)!==JSON.stringify([{email:{email}}])||(app.policies[0].exclude||[]).length||(app.policies[0].require||[]).length||!app.policies[0].reusable||app.allowed_idps.length!==1||app.allowed_idps[0]!==otp.id)throw new Error('AURORA_ACCESS_MISMATCH')

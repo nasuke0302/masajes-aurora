@@ -1,0 +1,5 @@
+{
+  "origin": "Generated panoramic Aurora comp .impeccable/mocks/hero/panoramico.png; generation prompt preserved in panoramico.png.json.",
+  "transform": "User requested crop excluding the therapist face: x=720,y=310,width=952,height=528. User requested integration and gray uniform. Selective desaturation of garment cyan pixels at x=350..690, hue=165..210, saturation>0.12, retaining luminance and geometry.",
+  "illustrative": true
+}

@@ -46,7 +46,7 @@ export default defineEventHandler(async event=>{
    const body=await readBody(event)
    if(env.ADMIN_EMAIL&&String(body.email||'').toLowerCase()===env.ADMIN_EMAIL.toLowerCase()){
     const value=token(),id=crypto.randomUUID(),url=new URL('/admin/acceso#'+value,env.SITE_URL).href
-    await env.DB.batch([env.DB.prepare('INSERT INTO admin_links VALUES(?,?,NULL)').bind(await hash(value),nowSeconds()+900),env.DB.prepare('INSERT INTO outbox(id,recipient,subject,body,created_at) VALUES(?,?,?,?,?)').bind(id,env.ADMIN_EMAIL,'Acceso a Masajes Aurora','Accede al panel con este enlace de un solo uso (15 minutos): '+url,nowSeconds())])
+    await env.DB.batch([env.DB.prepare('INSERT INTO admin_links VALUES(?,?,NULL)').bind(await hash(value),nowSeconds()+900),env.DB.prepare('INSERT INTO outbox(id,recipient,subject,body,created_at) VALUES(?,?,?,?,?)').bind(id,env.ADMIN_EMAIL,'Acceso a Aurora Masajista','Accede al panel con este enlace de un solo uso (15 minutos): '+url,nowSeconds())])
     event.waitUntil(dispatch(env))
    }
    return {message:'Si el email está autorizado, recibirás un enlace de acceso.'}

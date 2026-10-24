@@ -7,16 +7,16 @@ const sessions = [
     icon: 'waves',
   },
   {
-    duration: '40 min',
-    title: 'Una pausa breve',
-    description: 'Una opción más corta para dedicarte un momento en tu día.',
-    icon: 'wave',
+    duration: '10 min extras',
+    title: 'Masaje facial',
+    description: 'Completa tu masaje de cuerpo completo con un momento de cuidado para tu rostro.',
+    icon: 'face',
   },
 ]
 </script>
 <template>
   <section id="massage" aria-labelledby="massage-title" class="scroll-mt-6 bg-sage-light px-[5%] py-12 lg:py-14">
-    <div class="grid gap-10 lg:grid-cols-[1.15fr_1.85fr] lg:gap-12">
+    <div class="landing-columns">
       <div>
         <h2 id="massage-title"
           class="font-display text-[clamp(2rem,3.5vw,3.8rem)] font-bold leading-[1.08] tracking-[-0.04em]">
@@ -53,7 +53,7 @@ const sessions = [
         </article>
       </div>
     </div>
-    <div class="grid gap-10 lg:grid-cols-[1.15fr_1.85fr] lg:gap-12 mt-6">
+    <div class="landing-columns mt-6">
       <p class="rounded-2xl bg-[#d7eee8] px-6 py-4 text-sm leading-relaxed md:col-start-2">
         <strong>Cremas neutras.</strong> Si tienes alergias o sensibilidad a algún producto,
         coméntamelo antes de reservar para revisar los ingredientes contigo.

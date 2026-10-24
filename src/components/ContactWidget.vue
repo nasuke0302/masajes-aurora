@@ -7,7 +7,7 @@ const bookingEnabled=!!import.meta.env.AURORA_BOOKING_ENABLED
 
 <template>
   <section id="contact" aria-labelledby="contact-title" class="scroll-mt-6 px-[5%] py-16 lg:py-24">
-    <div class="grid items-center gap-10 md:grid-cols-[1.4fr_1fr] md:gap-[10%]">
+    <div class="landing-columns items-center">
       <div>
         <h2 id="contact-title"
           class="font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-[1.1] tracking-[-0.04em]">
@@ -19,9 +19,9 @@ const bookingEnabled=!!import.meta.env.AURORA_BOOKING_ENABLED
         </p>
       </div>
       <div class="flex flex-col items-start gap-3">
-        <a class="flex gap-2 min-h-11 items-center text-base font-semibold underline-offset-4 hover:underline"
-          href="tel:+34644798063">
-          <Phone :size="18" /> +34 644 798 063
+        <a class="contact-phone"
+          href="tel:+34644517187">
+          <Phone :size="20" class="block shrink-0" aria-hidden="true" /><span>+34 644 51 71 87</span>
         </a>
         <div class="landing-actions contact-actions">
           <NuxtLink v-if="bookingEnabled" to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>

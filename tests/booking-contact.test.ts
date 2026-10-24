@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { bookingContactSchema } from '../shared/booking-contact'
 
-const valid = { name: 'Ana García', email: 'ana@example.com', phone: '+34 644 798 063', address: 'Calle Mayor 12' }
+const valid = { name: 'Ana García', email: 'ana@example.com', phone: '+34 644 51 71 87', address: 'Calle Mayor 12' }
 describe('required booking contact', () => {
  it('accepts a complete contact', () => expect(bookingContactSchema.safeParse(valid).success).toBe(true))
  it.each(['name', 'email', 'phone', 'address'] as const)('rejects missing or blank %s', field => {

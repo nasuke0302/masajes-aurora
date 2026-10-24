@@ -1,5 +1,5 @@
 ---
-name: Masajes Aurora — A tu ritmo
+name: Aurora Masajista — A tu ritmo
 description: Approved fluid identity for wellbeing massage in Ávila.
 colors:
   cream: '#fafdfc'
@@ -33,7 +33,7 @@ Urbanist, geometric and approachable. Bold compact headings, readable regular bo
 
 ## Layout
 
-Desktop: broad hero with semantic text above a generated text-free image and marbled pigment ribbon; open two-column session details below. Narrow screens: normal-flow text then image, service columns stack, compact header navigation. Content capped at 1800px.
+Desktop hero: panoramic scenic photography with semantic heading and contact controls at the left, over a near-white horizontal fade. From 1024px, the photograph fills the right-hand scene and is cropped with cover; its therapist face stays outside the frame. Below 1024px, header and copy precede the full-width image in normal flow. The separate trust strip sits below the scene, with divided statements on desktop and a left-aligned stack below 600px. Open two-column session details below; service columns stack on narrow screens. Content capped at 1800px.
 
 Hero and contact actions share a 12px gap and align in a row when space permits. Below 576px, each pair stacks with equal-width buttons in a group capped at 320px; the telephone link remains left-aligned.
 
@@ -41,7 +41,7 @@ The private agenda uses Vue Cal 4.10.2 and opens to a Monday–Sunday week time 
 
 ## Elevation & Depth
 
-Photography and the pigment ribbon provide depth. Supporting sections remain flat.
+The hero uses photographic depth and a near-white fade for text legibility, without a liquid or pigment ribbon. Supporting sections remain flat.
 
 ## Shapes
 
@@ -49,7 +49,9 @@ Pill contact controls; circular service pictograms; softly rounded cream-informa
 
 ## Components
 
-All page headers share the Aurora wordmark, coral underline, vertical divider and “Masajes a domicilio en Ávila capital” descriptor through BrandLogo. The descriptor remains visible on mobile with a smaller scale; the logo links home. Header anchors to sessions, Melba and contact. WhatsApp opens a prefilled enquiry in a new tab. Telephone links dial +34 644 798 063. Session details show 60 and 40 minutes. The booking flow combines quantities in one visit with one joint payment; its summary sits beside the form on desktop and below it on mobile. Date and start time stack at full width below 640px and sit side by side on larger screens. The native start-time dropdown stays visible and is disabled while loading or when no starts are available; it contains available starts and session end times; fully unavailable days show a recovery message. Changing the date or massage quantities clears the selected start and refreshes available options. The private agenda uses native form controls, 16px fields, visible focus and the incumbent palette.
+The home hero uses the existing generated massage photograph, cropped to keep the therapist face out of view and with only the uniform locally desaturated to charcoal gray. Its shipped asset is `public/images/masaje-cuerpo-completo-hero.png`; the home page social image uses the same asset. The current Aurora Masajista wordmark, Urbanist typography, teal/coral palette and semantic copy remain the visual authority. This is a hero-only refinement, not a replacement identity.
+
+All page headers share the Aurora Masajista wordmark, coral underline, vertical divider and “Masajes a domicilio en Ávila capital” descriptor through BrandLogo. The descriptor remains visible on mobile with a smaller scale; the logo links home. Header anchors to sessions, Aurora and contact. WhatsApp opens a prefilled enquiry in a new tab. Telephone links dial +34 644 51 71 87. Session details show 60 and 40 minutes. The booking flow combines quantities in one visit with one joint payment; its summary sits beside the form on desktop and below it on mobile. Date and start time stack at full width below 640px and sit side by side on larger screens. The native start-time dropdown stays visible and is disabled while loading or when no starts are available; it contains available starts and session end times; fully unavailable days show a recovery message. Changing the date or massage quantities clears the selected start and refreshes available options. The private agenda uses native form controls, 16px fields, visible focus and the incumbent palette.
 
 Public landing buttons use a reusable pill treatment with 14px text and a minimum 44px height. Reservation is filled teal; WhatsApp is outlined on the near-white ground with a 20px icon. Telephone links use 16px text and an 18px icon, hero trust statements use 14px text, and the contact email-confirmation line uses 12px text with the spelling Recibirás.
 
@@ -63,7 +65,7 @@ Booking review places labeled, initially unchecked acknowledgment boxes beside t
 
 ## Do's and Don'ts
 
-Use actual semantic text and controls, never a flattened mockup. Generated photography is illustrative, not a portrait of Melba. Preserve the non-therapeutic description and agreed neutral-cream wording. Honor reduced motion. The previous custom private admin agenda was checked in local Chrome at 1440×1000 and 390×844; its finish reviewer returned ship. That review does not cover the Vue Cal replacement: current screenshots and browser interaction verification remain pending because the available browser inventory was empty. Source review returned ship scoped to its three resolved source fixes. Empty-history captures were also checked at those sizes for filters, return navigation and mobile fit, with reviewer disposition ship; populated records and transient states were outside that review. The public hero/contact CTA refinement was checked in local Chrome captures at 1440px and 390px widths; measurements at 1440px, 768px and 390px confirmed 14px button text, 44px height and no horizontal overflow. The finish reviewer returned ship for these four hero/contact captures, scoped to the CTA refinement; hover/focus captures and a full public landing visual audit remain pending.
+Use actual semantic text and controls, never a flattened mockup. Generated photography is illustrative, not a portrait of Aurora. Preserve the non-therapeutic description and agreed neutral-cream wording. Honor reduced motion. The previous custom private admin agenda was checked in local Chrome at 1440×1000 and 390×844; its finish reviewer returned ship. That review does not cover the Vue Cal replacement: current screenshots and browser interaction verification remain pending because the available browser inventory was empty. Source review returned ship scoped to its three resolved source fixes. Empty-history captures were also checked at those sizes for filters, return navigation and mobile fit, with reviewer disposition ship; populated records and transient states were outside that review. The public hero/contact CTA refinement was checked in local Chrome captures at 1440px and 390px widths; measurements at 1440px, 768px and 390px confirmed 14px button text, 44px height and no horizontal overflow. The finish reviewer returned ship for these four hero/contact captures, scoped to the CTA refinement; hover/focus captures and a full public landing visual audit remain pending.
 
 The native start-time dropdown was checked in local 1440px and 390px booking captures using four 60-minute massages, the real staging catalog and an empty-agenda fixture calculated by the shared availability logic. No reservations were submitted; the finish reviewer returned ship with no material fixes, scoped to these dropdown captures. The deployed refinement was then checked in live staging Chrome captures at 1440px and 390px without fixtures: four 60-minute massages, available-start dropdown and matching summary, no remaining-capacity field, horizontal overflow or page errors. No bookings or emails were submitted; this verification remains scoped to the booking refinement.
 
@@ -82,3 +84,5 @@ Selected reservation details lead with large date/time and smaller client name u
 Selected reservation details omit the manual date/time reschedule form. Weekly event drag on desktop uses the calendar event wrapper with keyboard-accessible inner content; event permissions gate moves while loading and for past/completed reservations.
 
 The legal pages, acknowledgment controls and retention actions have source review only; browser inventory was empty, so responsive visual approval, live interaction checks and a deployed cookie inventory remain pending.
+
+Hero visual evidence: the user selected `.impeccable/mocks/hero/panoramico.png` and then requested the closer crop recorded in `.impeccable/mocks/hero/panoramico-zoom.png`, including the charcoal uniform and hidden therapist face. These photography changes were specifically approved by the user. Implementation captures are `.impeccable/review/hero/desktop.jpg` and `.impeccable/review/hero/mobile.jpg`; they show the panoramic desktop composition and the mobile text/image/trust sequence. These captures document the hero only, even where other sections are visible; they do not establish whole-site approval, interaction approval or approval of product claims. Existing service copy, including the 20-year experience statement, is unchanged.

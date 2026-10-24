@@ -2,7 +2,7 @@
 import {money,localDate,localLabel,datePlus,dayInstants,type Product,type Hours} from '#shared/booking'
 import {EARLY_SERVICE_SECONDS} from '#shared/legal'
 import {calendarDates,monday,type AgendaReservation} from '#shared/admin-calendar'
-useSeoMeta({title:'Agenda de Melba · Masajes Aurora',robots:'noindex, nofollow'})
+useSeoMeta({title:'Agenda de Aurora · Aurora Masajista',robots:'noindex, nofollow'})
 type Settings={products:Product[];hours:Hours[];accepting:boolean}
 type Row={id:string;reference:string;service_date:string;start_at:number;end_at:number;quantity:number;amount_cents:number;lines_json:string;name:string;email:string;phone:string;address:string;notes:string;method:string;status:string;payment_status:string;created_at?:number;retention_hold?:number;early_service_requested?:number}
 type Block={id:string;start_at:number;end_at:number;reason:string}

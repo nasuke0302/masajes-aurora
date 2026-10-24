@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {legalOwner} from '#shared/legal'
-useSeoMeta({title:'Aviso legal · Masajes Aurora',description:'Identificación de la titular y datos de contacto de Masajes Aurora.'})
+useSeoMeta({title:'Aviso legal · Aurora Masajista',description:'Identificación de la titular y datos de contacto de Aurora Masajista.'})
 </script>
 <template>
- <LegalPage title="Aviso legal" description="Titularidad de la web y datos de contacto de Masajes Aurora.">
+ <LegalPage title="Aviso legal" description="Titularidad de la web y datos de contacto de Aurora Masajista.">
   <h2>Titular de la actividad</h2>
-  <p>Masajes Aurora es el nombre comercial con el que {{ legalOwner.name }} presta servicios de masaje de bienestar a domicilio en Ávila capital, como trabajadora autónoma y en su propio nombre.</p>
+  <p>Aurora Masajista es el nombre comercial con el que {{ legalOwner.name }} presta servicios de masaje de bienestar a domicilio en Ávila capital, como trabajadora autónoma y en su propio nombre.</p>
   <dl><dt>Nombre</dt><dd>{{ legalOwner.name }}</dd><dt>NIF</dt><dd>{{ legalOwner.nif }}</dd><dt>Domicilio</dt><dd>{{ legalOwner.address }}</dd><dt>Email</dt><dd><a :href="'mailto:'+legalOwner.email">{{ legalOwner.email }}</a></dd><dt>Teléfono</dt><dd><a :href="legalOwner.phoneHref">{{ legalOwner.phone }}</a></dd></dl>
   <h2>Servicios y contacto</h2>
   <p>Los servicios ofrecidos son masajes de bienestar para personas mayores de 18 años. No constituyen asistencia sanitaria, diagnóstico ni tratamiento médico.</p>

@@ -16,10 +16,10 @@ let migrationPreserved=false
 const emailSend=vi.fn(),queueSend=vi.fn()
 function rescheduleWithConsent(env:AppEnv,id:string,startAt:number,expected:number){return rescheduleBooking(env,id,startAt,expected,{earlyServiceRequested:true,withdrawalAcknowledged:true})}
 async function row(id:string){return (await env.DB.prepare('SELECT * FROM bookings WHERE id=?').bind(id).first<Booking>())!}
-function input(q={massage40:0,massage60:1},s=start,method='cash'){return {quantities:q,startAt:s,name:'Cliente prueba',email:'cliente@example.com',phone:'+34644798063',address:'Calle Mayor 10, 1A',city:'Ávila',notes:'Avisar al llegar',addressSelection:{id:'07.05.G05_050190111614',portal:'2'},addressExtra:'1A',method,requestKey:crypto.randomUUID(),termsVersion:TERMS_VERSION,acceptTerms:true,adultsOnly:true,earlyServiceRequested:true,withdrawalAcknowledged:true}}
+function input(q={massage40:0,massage60:1},s=start,method='cash'){return {quantities:q,startAt:s,name:'Cliente prueba',email:'cliente@example.com',phone:'+34644517187',address:'Calle Mayor 10, 1A',city:'Ávila',notes:'Avisar al llegar',addressSelection:{id:'07.05.G05_050190111614',portal:'2'},addressExtra:'1A',method,requestKey:crypto.randomUUID(),termsVersion:TERMS_VERSION,acceptTerms:true,adultsOnly:true,earlyServiceRequested:true,withdrawalAcknowledged:true}}
 beforeAll(async()=>{
  mf=new Miniflare({workers:[{config:{name:'test',compatibilityDate:'2026-10-11',env:{DB:{type:'d1',id:'00000000-0000-0000-0000-000000000001'}},manifest:{mainModule:'index.mjs',modules:{'index.mjs':{type:'esm',contents:'export default {fetch(){return new Response("test")}}'}}}}}]})
- env={DB:await mf.getD1Database('DB'),SITE_URL:'https://aurora.example',ADMIN_EMAIL:'melba@example.com',EMAIL_FROM:'reservas@aurora.example',NOTIFICATIONS:{send:queueSend}} as unknown as AppEnv
+ env={DB:await mf.getD1Database('DB'),SITE_URL:'https://aurora.example',ADMIN_EMAIL:'aurora@example.com',EMAIL_FROM:'reservas@aurora.example',NOTIFICATIONS:{send:queueSend}} as unknown as AppEnv
  await env.DB.exec((await readFile('migrations/0001_booking.sql','utf8')).replace(/\n/g,' '))
  await env.DB.prepare('UPDATE settings SET accepting=1').run();await env.DB.prepare('UPDATE products SET price_cents=5000').run()
  const seedDate=datePlus(localDate(Math.floor(Date.now()/1000)),1),seedStart=dayInstants(seedDate).find(x=>localLabel(x.epoch)==='09:00')!.epoch

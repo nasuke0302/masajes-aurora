@@ -53,10 +53,10 @@ async function submit() {
 }
 </script>
 <template>
-  <div v-if="catalogError" class="notice" role="alert">La agenda todavía no está disponible. Puedes consultar con Melba
-    por <a href="https://wa.me/34644798063" class="underline">WhatsApp</a>.</div>
+  <div v-if="catalogError" class="notice" role="alert">La agenda todavía no está disponible. Puedes consultar con Aurora
+    por <a href="https://wa.me/34644517187" class="underline">WhatsApp</a>.</div>
   <div v-else-if="!ready" class="notice">Estamos preparando la agenda de reservas. Mientras tanto, <a
-      href="https://wa.me/34644798063" class="underline">contacta con Melba por WhatsApp</a>.</div>
+      href="https://wa.me/34644517187" class="underline">contacta con Aurora por WhatsApp</a>.</div>
   <div v-else-if="saved" class="notice" role="status">Reserva {{ saved }} guardada. Hemos preparado los emails de
     confirmación.</div>
   <form v-else class="booking-grid" @submit.prevent="review ? submit() : showReview()">
@@ -138,7 +138,7 @@ async function submit() {
       </dl>
       <p class="mt-6 font-semibold">Pago en efectivo</p>
       <template v-if="review">
-        <fieldset class="mt-6 space-y-3"><legend class="font-semibold mb-3">{{ admin?'Confirmaciones comunicadas por el cliente':'Antes de confirmar' }}</legend><p v-if="admin" class="text-sm text-muted">Marca estas casillas únicamente si el cliente ha recibido las condiciones y ha comunicado estas confirmaciones. Se registrará como reserva introducida por Melba.</p>
+        <fieldset class="mt-6 space-y-3"><legend class="font-semibold mb-3">{{ admin?'Confirmaciones comunicadas por el cliente':'Antes de confirmar' }}</legend><p v-if="admin" class="text-sm text-muted">Marca estas casillas únicamente si el cliente ha recibido las condiciones y ha comunicado estas confirmaciones. Se registrará como reserva introducida por Aurora.</p>
           <label class="flex items-start gap-3 text-sm"><input v-model="acceptTerms" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente acepta las':'Acepto las' }} <NuxtLink to="/condiciones-reserva" target="_blank" class="text-link">condiciones de reserva</NuxtLink>, incluido el pago en efectivo del servicio.</span></label>
           <label class="flex items-start gap-3 text-sm"><input v-model="adultsOnly" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente confirma':'Confirmo' }} que todas las personas que recibirán un masaje son mayores de 18 años.</span></label>
           <template v-if="needsEarlyService"><label class="flex items-start gap-3 text-sm"><input v-model="earlyService" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente solicita expresamente':'Solicito expresamente' }} que el servicio comience antes de finalizar los 14 días de desistimiento.</span></label><label class="flex items-start gap-3 text-sm"><input v-model="withdrawalAcknowledged" type="checkbox" required :disabled="busy" class="mt-1" /><span>{{ admin?'El cliente reconoce':'Reconozco' }} que perderá el derecho de desistimiento cuando el servicio se haya prestado íntegramente. Puede cancelar gratuitamente antes de que empiece.</span></label></template>

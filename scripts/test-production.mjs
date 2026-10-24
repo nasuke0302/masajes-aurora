@@ -21,7 +21,7 @@ const mf=new Miniflare({workers:[{config}],port:0,logRequests:false,telemetry:{e
 try{
  for(const path of ['/','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-fluido-hero.png']){
   const r=await mf.dispatchFetch('https://auroramasajista.com'+path);assert.equal(r.status,200,path)
-  if(path==='/'){const html=await r.text();assert.match(html,/Reservar por WhatsApp/);assert.doesNotMatch(html,/href="\/reservar"|Reservar una sesión|Recibirás la confirmación de tu reserva por email/);assert.match(html,/https:\/\/wa.me\/34644798063/)}
+  if(path==='/'){const html=await r.text();assert.match(html,/Reservar por WhatsApp/);assert.doesNotMatch(html,/href="\/reservar"|Reservar una sesión|Recibirás la confirmación de tu reserva por email/);assert.match(html,/https:\/\/wa.me\/34644517187/)}
   if(path==='/sitemap.xml')assert.doesNotMatch(await r.text(),/\/reservar|\/admin|\/reserva\//)
  }
  for(const path of ['/reservar','/reserva/token','/admin','/admin/acceso','/api/catalog','/api/auth-mode','/api/admin/settings','/unknown'])for(const headers of [{},{'Sec-Fetch-Mode':'navigate'}])assert.equal((await mf.dispatchFetch('https://auroramasajista.com'+path,{headers})).status,404,path)

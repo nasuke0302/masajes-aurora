@@ -28,6 +28,19 @@
 }
 
 @layer components {
+  .landing-columns {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .landing-columns > * {
+    min-width: 0;
+  }
+  @media (min-width: 48rem) {
+    .landing-columns {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.85fr);
+      column-gap: 8rem;
+    }
+  }
   .action {
     @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-7 py-3 font-semibold text-cream transition-colors hover:bg-sage disabled:cursor-not-allowed disabled:opacity-50;
   }
@@ -36,6 +49,9 @@
   }
   .landing-button.secondary {
     @apply border-ink/30 bg-cream text-ink hover:bg-sage-light;
+  }
+  .contact-phone {
+    @apply inline-flex min-h-11 w-fit items-center gap-2 border border-transparent px-5 text-base font-semibold leading-5 underline-offset-4 hover:underline;
   }
   .landing-actions {
     @apply mt-6 flex flex-wrap items-center gap-3;
@@ -615,6 +631,11 @@
 }
 .detail-contact dd {
   overflow-wrap: anywhere;
+}
+.detail-contact dt {
+  display: flex;
+  align-items: center;
+  height: 1.5em;
 }
 .detail-contact a {
   text-decoration: underline;

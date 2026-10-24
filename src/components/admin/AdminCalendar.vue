@@ -56,7 +56,7 @@ const events=computed(()=>{
 function select(event:{id:string}){const row=props.rows.find(r=>r.id===event.id);if(row)emit('select',row)}
 function label(id:string){const row=props.rows.find(r=>r.id===id);return row?localLabel(row.start_at)+'–'+localLabel(row.end_at):''}
 function massages(id:string){const row=props.rows.find(r=>r.id===id);return row?(JSON.parse(row.lines_json) as {quantity:number;minutes:number}[]).map(l=>l.quantity+' × '+l.minutes+' min').join(' · '):''}
-function create(date:Date){if(props.loading)return;try{const chosen=new Date(date);if(props.view==='month'){const first=props.hours.filter(h=>h.weekday===chosen.getDay()).sort((a,b)=>a.open_minute-b.open_minute)[0];if(!first)throw new Error('Melba no tiene jornada disponible ese día.');chosen.setHours(0,first.open_minute,0,0)}emit('create',calendarInstant(chosen))}catch(e){emit('invalid',(e as Error).message)}}
+function create(date:Date){if(props.loading)return;try{const chosen=new Date(date);if(props.view==='month'){const first=props.hours.filter(h=>h.weekday===chosen.getDay()).sort((a,b)=>a.open_minute-b.open_minute)[0];if(!first)throw new Error('Aurora no tiene jornada disponible ese día.');chosen.setHours(0,first.open_minute,0,0)}emit('create',calendarInstant(chosen))}catch(e){emit('invalid',(e as Error).message)}}
 function move({event}:{event:{id:string;start:Date}}){const row=props.rows.find(r=>r.id===event.id);if(!row)return;try{emit('move',row,calendarInstant(event.start))}catch(e){emit('invalid',(e as Error).message)}}
 </script>
 <template>

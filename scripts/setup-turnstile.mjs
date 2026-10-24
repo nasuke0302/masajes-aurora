@@ -6,7 +6,7 @@ import {readFile,writeFile} from 'node:fs/promises'
 const run=promisify(execFile),cli=join(dirname(createRequire(import.meta.url).resolve('cf/package.json')),'bin/cf')
 async function cf(args){try{const {stdout}=await run(process.execPath,[cli,...args],{env:{...process.env,DEBUG:'',CF_SEND_TELEMETRY:'false'},maxBuffer:4*1024*1024});return JSON.parse(stdout)}catch{throw new Error('TURNSTILE_CF_FAILED')}}
 await run('git',['check-ignore','-q','.env.local'])
-const domains=['aurora-staging.geonuvia.com','localhost','127.0.0.1'],name='Masajes Aurora staging bookings'
+const domains=['aurora-staging.geonuvia.com','localhost','127.0.0.1'],name='Aurora Masajista staging bookings'
 const widgets=await cf(['turnstile','widgets','list'])
 let widget=widgets.find(w=>w.name===name)
 if(widget)widget=await cf(['turnstile','widgets','get',widget.sitekey])

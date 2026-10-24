@@ -1,4 +1,4 @@
-# Masajes Aurora
+# Aurora Masajista
 
 ## Producción: auroramasajista.com
 
@@ -17,7 +17,7 @@ Los artefactos de producción están en `.nuxt-production/`, `.output-production
 
 ## Estado inicial
 
-Staging usa pago **solo en efectivo**, con tarifas de **40 € por 40 minutos** y **50 € por 60 minutos**. Las jornadas iniciales son de lunes a domingo, 09:00–21:00 (Europe/Madrid). El acceso privado solo autoriza a **masajesaurora@gmail.com**. El teléfono sigue siendo +34 644 798 063.
+Staging usa pago **solo en efectivo**, con tarifas de **40 € por 40 minutos** y **50 € por 60 minutos**. Las jornadas iniciales son de lunes a domingo, 09:00–21:00 (Europe/Madrid). El acceso privado solo autoriza a **masajesaurora@gmail.com**. El teléfono sigue siendo +34 644 51 71 87.
 
 Se conserva .env.local y sus valores anteriores; únicamente se ha añadido ADMIN_EMAIL. .env.example enumera las nuevas variables. No publiques .env.local ni .data: contienen secretos, enlaces privados o mensajes locales.
 
@@ -32,7 +32,7 @@ npm run dev
 
 Abre http://localhost:3000. El adaptador de desarrollo usa D1 local persistente en .data/d1. Los emails se escriben en **.data/mail.jsonl** y nunca se envían realmente. Para entrar, visita /admin/acceso, solicita el enlace al email autorizado, abre el enlace guardado en ese archivo y pulsa Entrar. Los enlaces duran 15 minutos y se usan una sola vez; la sesión dura ocho horas.
 
-Para pruebas locales, SITE_URL debe ser http://localhost:3000. Puedes configurar EMAIL_FROM=reservas@localhost exclusivamente en el entorno local; para Workers necesitas un remitente verificado. La variable anterior VITE_ANIMATED_MARBLE sigue funcionando; ANIMATED_MARBLE tiene prioridad.
+Para pruebas locales, SITE_URL debe ser http://localhost:3000. Puedes configurar EMAIL_FROM=reservas@localhost exclusivamente en el entorno local; para Workers necesitas un remitente verificado.
 
 
 El enlace discreto Historial de reservas, al pie de la agenda, sustituye la pestaña Reservas. Permite filtrar por fechas y estado, incluidas canceladas y caducadas, sin ocupar espacio en el calendario. Volver a la agenda recupera el periodo semanal o diario seleccionado.
@@ -83,7 +83,7 @@ Completa .env.local o las variables de CI:
 - SITE_URL: origen HTTPS real de staging, sin barra final; debe coincidir con el dominio servido para validar Origin.
 - D1_DATABASE_ID y NOTIFICATIONS_QUEUE: recursos de staging recién creados.
 - ADMIN_EMAIL: masajesaurora@gmail.com.
-- EMAIL_FROM: remitente verificado en Resend. Staging reutiliza `Masajes Aurora <reports.staging@orders.geonuvia.com>` de la configuración de Geonuvia.
+- EMAIL_FROM: remitente verificado en Resend. Staging reutiliza `Aurora Masajista <reports.staging@orders.geonuvia.com>` de la configuración de Geonuvia.
 - RESEND_API_KEY: clave de envío de Resend, solo del servidor; se carga como secreto exclusivamente en el Worker de emails. Las respuestas se dirigen a ADMIN_EMAIL.
 - WORKER_DOMAIN: hostname propio opcional, en una zona de la cuenta; cf configura el dominio del Worker. Si usas workers.dev, deja esta variable vacía y ajusta SITE_URL al hostname real.
 
@@ -106,7 +106,7 @@ npm exec -- cf deploy --prebuilt --dry-run --mode staging --worker masajes-auror
 - Desplegado y reservas abiertas el 11/10/2026. URL: https://aurora-staging.geonuvia.com
 - D1: masajes-aurora-staging; cola: masajes-aurora-notifications-staging.
 - Tarifas: 40 minutos, 40 €; 60 minutos, 50 €. Lunes a domingo, 09:00–21:00.
-- Emails mediante Resend con el remitente de staging de Geonuvia y nombre Masajes Aurora. Acceso privado para masajesaurora@gmail.com.
+- Emails mediante Resend con el remitente de staging de Geonuvia y nombre Aurora Masajista. Acceso privado para masajesaurora@gmail.com.
 
 Se verificaron HTTP 200 en web, reserva, acceso e imágenes, catálogo con tarifas y efectivo, disponibilidad de grupos mixtos y HTTP 401 en la API privada. La URL inicial workers.dev agotaba el tiempo de conexión con la resolución DNS local. Staging se publica temporalmente en aurora-staging.geonuvia.com, actualizando SITE_URL y WORKER_DOMAIN. Se verificó en Chrome con conexión normal: página renderizada, imágenes y JavaScript sin errores, navegación a reservas y canonical con el nuevo origen. Pasan 42 tests, type-check y test:worker.
 
@@ -134,12 +134,12 @@ El intervalo, antelación y horizonte están en shared/booking.ts. migrations/00
 
 ## Acceso privado de staging
 
-Toda la web y el panel en https://aurora-staging.geonuvia.com usan Cloudflare Access con el proveedor OTP de Geonuvia y el único correo albertoesquivelanias@gmail.com. La sesión dura 24 horas. El código lo envía Cloudflare; Resend sigue enviando las notificaciones de reservas a Melba y a los clientes. ADMIN_EMAIL conserva masajesaurora@gmail.com para los avisos.
+Toda la web y el panel en https://aurora-staging.geonuvia.com usan Cloudflare Access con el proveedor OTP de Geonuvia y el único correo albertoesquivelanias@gmail.com. La sesión dura 24 horas. El código lo envía Cloudflare; Resend sigue enviando las notificaciones de reservas a Aurora y a los clientes. ADMIN_EMAIL conserva masajesaurora@gmail.com para los avisos.
 
 El panel acepta la identidad firmada de Access sin pedir otro enlace. Los endpoints de enlace antiguo se deshabilitan cuando Access está configurado. Salir cierra la sesión de Access. workers.dev y las URL de preview están deshabilitados; el Worker verifica firma RS256, emisor, audiencia, caducidad y email antes de servir web, API o imágenes. Configuración pública en config/access.json; npm run setup:access crea/verifica solo la aplicación y política de Aurora, sin modificar Geonuvia. Cada despliegue staging comprueba esa configuración.
 
 
-Verificación del despliegue Access (versión 17c36748-5fb1-472a-b6ef-57fd694377fc): 62 tests, type-check y test:worker pasan. Sin sesión, /, /reservar, /admin, /admin/acceso y /api/admin/settings responden 302 hacia geonuvia.cloudflareaccess.com. Chrome muestra el formulario Email / Send login code para Masajes Aurora staging. No se solicitó un OTP ni se completó una sesión real de propietario; esa última comprobación requiere el código del correo autorizado. El despliegue incluye los cambios locales de logo y formulario.
+Verificación del despliegue Access (versión 17c36748-5fb1-472a-b6ef-57fd694377fc): 62 tests, type-check y test:worker pasan. Sin sesión, /, /reservar, /admin, /admin/acceso y /api/admin/settings responden 302 hacia geonuvia.cloudflareaccess.com. Chrome muestra el formulario Email / Send login code para Aurora Masajista staging. No se solicitó un OTP ni se completó una sesión real de propietario; esa última comprobación requiere el código del correo autorizado. El despliegue incluye los cambios locales de logo y formulario.
 
 ## Turnstile en reservas web
 
@@ -186,6 +186,6 @@ La vista mensual muestra solo la fecha y el número de citas de cada día, inclu
 
 Las páginas /aviso-legal, /privacidad, /cookies y /condiciones-reserva usan los datos y decisiones confirmados por la titular. La reserva exige aceptar la versión vigente de condiciones y confirmar que todas las personas son adultas. Si empieza antes de 14 días, se registra la solicitud expresa y el reconocimiento sobre desistimiento. Las confirmaciones incluyen una copia de las condiciones; las notas logísticas no se envían por email.
 
-La migración 0004_privacy.sql se aplicó en staging el 12 de octubre de 2026. Antes de desplegar en otra base, aplica las migraciones pendientes con cf. El mantenimiento elimina reservas tras 12 meses y emails de la cola tras 30 días. El control Conservar por reclamación abierta del admin excluye la reserva y sus avisos asociados del borrado; retíralo al resolver el caso. El buzón de Melba, los backups y la contabilidad externa se gestionan por separado.
+La migración 0004_privacy.sql se aplicó en staging el 12 de octubre de 2026. Antes de desplegar en otra base, aplica las migraciones pendientes con cf. El mantenimiento elimina reservas tras 12 meses y emails de la cola tras 30 días. El control Conservar por reclamación abierta del admin excluye la reserva y sus avisos asociados del borrado; retíralo al resolver el caso. El buzón de Aurora, los backups y la contabilidad externa se gestionan por separado.
 
 La tipografía se sirve localmente con licencia OFL. El build y la prueba Workers verifican las páginas y API, pero queda pendiente el inventario de cookies y la revisión visual en un navegador conectado. No se ha hecho push ni despliegue de estos cambios.
