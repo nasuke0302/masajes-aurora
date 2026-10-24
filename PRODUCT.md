@@ -4,6 +4,8 @@ Spanish website for at-home wellbeing massages exclusively in Ávila capital. Me
 
 ## Booking rules
 
+These booking and admin features apply to staging only. Production at auroramasajista.com is an informational static website: WhatsApp booking CTA, no booking/admin routes or APIs, no database, emails, queue, cron, Access or Turnstile. Its public legal pages describe direct contact. Build scripts explicitly select the profile independently of NODE_ENV; preserve the full staging behavior when changing shared components.
+
 Guests book without accounts. A booking is one visit to one address, with one contact and one joint payment. Combine quantities of 40- and 60-minute massages, without a daily massage quota; confirmed/completed sessions still occupy their reserved times. Durations and prices sum without group discounts. Masajes Aurora has no additional facial product in v1.
 
 Starts are offered every ten minutes within configured weekly hours; the whole visit must fit. Leave thirty minutes between visits, with no break between massages in a visit. Confirm at least three hours ahead, use Europe/Madrid, and offer thirty days ahead. Public availability never reveals customer information.

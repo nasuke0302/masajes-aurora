@@ -7,6 +7,7 @@ import Phone from '@primeicons/vue/phone'
 const artwork = `/images/masaje-fluido-hero.png`
 
 const animatedMarble = useRuntimeConfig().public.animatedMarble
+const bookingEnabled=!!import.meta.env.AURORA_BOOKING_ENABLED
 </script>
 
 <template>
@@ -31,7 +32,7 @@ const animatedMarble = useRuntimeConfig().public.animatedMarble
         <li>Solo en Ávila capital</li>
       </ul>
       <div class="landing-actions">
-        <NuxtLink to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>
+        <NuxtLink v-if="bookingEnabled" to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>
         <ContactButton />
       </div>
       <a href="tel:+34644798063"

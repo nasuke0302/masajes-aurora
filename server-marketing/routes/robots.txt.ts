@@ -1,0 +1,1 @@
+export default defineEventHandler(event=>{setHeader(event,'Content-Type','text/plain');return 'User-agent: *\nAllow: /\nSitemap: '+new URL('/sitemap.xml',useRuntimeConfig().public.siteUrl).href+'\n'})

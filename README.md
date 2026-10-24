@@ -1,5 +1,19 @@
 # Masajes Aurora
 
+## Producción: auroramasajista.com
+
+Publicada el 24 de octubre de 2026 en https://auroramasajista.com. El Worker web es `masajes-aurora`; `www.auroramasajista.com` redirige con HTTP 308 al dominio principal conservando ruta y parámetros. Los dos hostnames son Custom Domains del Worker. Los registros de aparcamiento de Hostinger se sustituyeron por los gestionados por Workers.
+
+Producción es una web estática prerenderizada con Nuxt. Solo contiene portada, páginas legales, imágenes, fuentes, CSS, JavaScript de presentación, sitemap y robots. Muestra «Reservar por WhatsApp» como acción principal. Las rutas `/reservar`, `/reserva/**`, `/admin/**` y `/api/**` devuelven 404 real y se excluyen antes de compilar; no se genera su código de aplicación. La navegación del cliente tampoco incluye esas páginas. Las páginas legales de producción describen el contacto directo, sin formularios ni confirmaciones automáticas.
+
+El Worker `masajes-aurora` solo sirve assets y redirige `www`; no ejecuta el servidor de Nuxt ni tiene D1, colas, tareas programadas, secretos, Access o Turnstile. Los recursos de backend creados inicialmente para producción se retiraron tras comprobar que no había reservas ni emails pendientes. Staging conserva sus recursos, páginas, autenticación, tarifas y formularios existentes.
+
+Los scripts fijan `AURORA_PROFILE=production` o `staging` explícitamente, independiente de `NODE_ENV`. Producción carga exclusivamente `.env.production.local` (ignorado por Git), con cuenta, dominio y opciones de presentación; `.env.production.example` documenta los valores públicos. Staging carga `.env.local`. La configuración Cloudflare de producción está en `production.cloudflare.config.ts`; `cloudflare.config.ts` rechaza el modo producción para evitar publicar el backend por error.
+
+Comandos: `npm run build:production` genera la web; `npm run test:production` inspecciona el artefacto y lo prueba en workerd; `npm run deploy:production` compila, verifica y publica solo ese Worker; `npm run verify:production` comprueba el dominio real y que staging conserva Access. `npm run build:cloudflare`, `npm run test:worker` y `npm run deploy` mantienen el flujo completo de staging.
+
+Los artefactos de producción están en `.nuxt-production/`, `.output-production/` y `.cloudflare/production/`; los de staging siguen en `.nuxt/`, `.output/` y `.cloudflare/output/`. No intercambiar paquetes precompilados entre perfiles. El despliegue de producción verifica el perfil, nombre del Worker, ausencia de backend y 404 antes de publicar. No hay fallback SPA (`200.html`) en el paquete estático.
+
 
 ## Estado inicial
 

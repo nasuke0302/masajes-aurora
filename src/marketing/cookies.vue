@@ -1,0 +1,7 @@
+<script setup lang="ts">useSeoMeta({title:'Cookies · Masajes Aurora',description:'Información sobre las tecnologías utilizadas por esta web informativa.'})</script>
+<template><LegalPage title="Cookies y tecnologías similares" description="Una web informativa para conocer los servicios y contactar con Melba.">
+ <h2>Tecnologías de esta web</h2><p>No incorporamos analítica de visitas, publicidad ni personalización comercial. La web no utiliza autenticación, formularios de reserva ni verificaciones Turnstile. Las fuentes se sirven localmente. Cloudflare presta el alojamiento y la seguridad; sus comprobaciones técnicas pueden depender de la configuración y del tráfico.</p>
+ <h2>Enlaces externos</h2><p>WhatsApp solo se abre cuando decides pulsar su enlace. No insertamos un widget ni cargamos ese servicio al visitar la página. Los sitios externos aplican sus propias condiciones y políticas de privacidad.</p>
+ <h2>Control y cambios</h2><p>Puedes consultar y eliminar las cookies o datos almacenados desde los ajustes de tu navegador. No solicitamos aceptar cookies de publicidad o analítica porque no incorporamos esas herramientas. Si añadimos tecnologías no necesarias, informaremos y solicitaremos el consentimiento antes de activarlas.</p>
+ <h2>Contacto</h2><p>Consulta el <NuxtLink to="/aviso-legal">aviso legal</NuxtLink> y la <NuxtLink to="/privacidad">política de privacidad</NuxtLink>. Última actualización: 24 de octubre de 2026.</p>
+</LegalPage></template>

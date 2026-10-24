@@ -39,6 +39,8 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 .nuxt/
+.nuxt-production/
+.output-production/
 .output/
 .cloudflare/
 .wrangler/

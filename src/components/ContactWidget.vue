@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ContactButton from './ContactButton.vue'
 import Phone from '@primeicons/vue/phone'
+const bookingEnabled=!!import.meta.env.AURORA_BOOKING_ENABLED
 
 </script>
 
@@ -23,10 +24,10 @@ import Phone from '@primeicons/vue/phone'
           <Phone :size="18" /> +34 644 798 063
         </a>
         <div class="landing-actions contact-actions">
-          <NuxtLink to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>
+          <NuxtLink v-if="bookingEnabled" to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>
           <ContactButton />
         </div>
-        <p class="max-w-[38ch] text-xs leading-relaxed text-muted">Recibirás la confirmación de tu reserva por email.</p>
+        <p v-if="bookingEnabled" class="max-w-[38ch] text-xs leading-relaxed text-muted">Recibirás la confirmación de tu reserva por email.</p>
       </div>
     </div>
   </section>

@@ -13,8 +13,12 @@
     "db:local": "node scripts/db-local.mjs",
     "worker:types": "cf types",
     "deploy": "node scripts/deploy.mjs",
+    "deploy:production": "node scripts/deploy.mjs --production",
     "postinstall": "nuxt prepare",
     "build:cloudflare": "node --import tsx scripts/build-cloudflare.mjs",
+    "build:production": "node --import tsx scripts/build-cloudflare.mjs --production",
+    "test:production": "node scripts/test-production.mjs",
+    "verify:production": "node scripts/verify-production.mjs",
     "test:worker": "node scripts/preview.mjs --smoke",
     "setup:access": "node scripts/setup-access.mjs",
     "setup:turnstile": "node scripts/setup-turnstile.mjs"
