@@ -1,0 +1,2588 @@
+{
+  "capturedAt": "2026-10-25T10:54:49.020Z",
+  "timezone": "Europe/Madrid",
+  "sources": "Read-only cf CLI; no database rows, object contents or secret values",
+  "resources": {
+    "accounts": [
+      {
+        "id": "ef56a3d28dc0132beea7873e6688dee7",
+        "name": "Albertoesquivelanias@gmail.com's Account",
+        "type": "standard",
+        "settings": {
+          "enforce_twofactor": false,
+          "api_access_enabled": null,
+          "access_approval_expiry": null,
+          "abuse_contact_email": null,
+          "oauth_app_access_enabled": true
+        }
+      }
+    ],
+    "zones": [
+      {
+        "id": "014dbec7389685f34cadc60b44b45fc2",
+        "name": "auroramasajista.com",
+        "status": "active",
+        "name_servers": [
+          "grace.ns.cloudflare.com",
+          "nash.ns.cloudflare.com"
+        ],
+        "plan": {
+          "name": "Free Website",
+          "price": 0,
+          "currency": "USD",
+          "legacy_id": "free"
+        },
+        "dns": [
+          {
+            "id": "a2df0dc8303e4c21754a69b9631cd22d",
+            "name": "auroramasajista.com",
+            "type": "TXT",
+            "content": "\"google-site-verification=P5ONdOmB8S9pmMwZpkzqRWbkOpfF8_X0xugWQ4P6KuU\"",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 3600,
+            "settings": {},
+            "meta": {},
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-24T14:07:50.855458Z",
+            "modified_on": "2026-10-24T14:07:50.855458Z"
+          },
+          {
+            "id": "8723662845e6053604b8604454320c56",
+            "name": "auroramasajista.com",
+            "type": "AAAA",
+            "content": "100::",
+            "proxiable": true,
+            "proxied": true,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "origin_worker_id": "78da188ddfeb00d1b67291221858f7184a0d70e3",
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-24T14:02:35.616879Z",
+            "modified_on": "2026-10-24T14:02:35.616879Z"
+          },
+          {
+            "id": "7d23445455c41353adce0b60a346bc61",
+            "name": "www.auroramasajista.com",
+            "type": "AAAA",
+            "content": "100::",
+            "proxiable": true,
+            "proxied": true,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "origin_worker_id": "3dc5be0badd2ef8420c0e3873591ef43d86e8e4d",
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-24T14:02:35.718371Z",
+            "modified_on": "2026-10-24T14:02:35.718371Z"
+          }
+        ],
+        "rulesets": [
+          {
+            "description": "Created by the Cloudflare security team, this ruleset provides normalization on the URL path",
+            "id": "70339d97bdb34195bbf054b1ebe81f76",
+            "kind": "managed",
+            "last_updated": "2024-08-01T17:37:11.538019Z",
+            "name": "Cloudflare Normalization Ruleset",
+            "phase": "http_request_sanitize",
+            "version": "6"
+          },
+          {
+            "description": "Created by the Cloudflare security team, this ruleset applies default mitigations during HTTP response processing to protect your applications from security threats. It is regularly updated to address new threats and reduce false positives.",
+            "id": "b42644f558d04e41ba6afa4c79b51009",
+            "kind": "managed",
+            "last_updated": "2026-10-21T07:52:48.743926Z",
+            "name": "Cloudflare Managed Response Firewall Default",
+            "phase": "http_response_firewall_custom",
+            "version": "2"
+          },
+          {
+            "description": "Created by the Cloudflare security team, this ruleset is designed to provide protection for free zones",
+            "id": "77454fe2d30c4220b5701f6fdfb893ba",
+            "kind": "managed",
+            "last_updated": "2026-10-23T15:07:01.484907Z",
+            "name": "Cloudflare Managed Free Ruleset",
+            "phase": "http_request_firewall_managed",
+            "source": "firewall_managed",
+            "version": "82"
+          },
+          {
+            "description": "Automatic mitigation of HTTP-based DDoS attacks. Cloudflare routinely adds signatures to address new attack vectors. Additional configuration allows you to customize the sensitivity of each rule and the performed mitigation action.",
+            "id": "4d21379b4f9f4bb088e0729962c8b3cf",
+            "kind": "managed",
+            "last_updated": "2026-10-23T21:35:14.276342Z",
+            "name": "DDoS L7 ruleset",
+            "phase": "ddos_l7",
+            "version": "3472"
+          },
+          {
+            "description": "",
+            "id": "00cef4f22e184481a7844b050f3c7d11",
+            "kind": "zone",
+            "last_updated": "2026-10-25T10:39:47.920797Z",
+            "name": "Aurora canonical host",
+            "phase": "http_request_dynamic_redirect",
+            "version": "1"
+          },
+          {
+            "description": "",
+            "id": "90e22dbaf35140b4ae883a9bc31c5f1c",
+            "kind": "zone",
+            "last_updated": "2026-10-25T10:39:51.81205Z",
+            "name": "Aurora static site protection",
+            "phase": "http_request_firewall_custom",
+            "source": "firewall_custom",
+            "version": "1"
+          },
+          {
+            "description": "",
+            "id": "7cedf5d444a342e1894b2d77d222e255",
+            "kind": "zone",
+            "last_updated": "2026-10-25T10:39:55.721191Z",
+            "name": "Aurora request burst protection",
+            "phase": "http_ratelimit",
+            "source": "rate_limit",
+            "version": "1"
+          }
+        ],
+        "entrypoints": [
+          {
+            "description": "",
+            "id": "00cef4f22e184481a7844b050f3c7d11",
+            "kind": "zone",
+            "last_updated": "2026-10-25T10:39:47.920797Z",
+            "name": "Aurora canonical host",
+            "phase": "http_request_dynamic_redirect",
+            "rules": [
+              {
+                "action": "redirect",
+                "action_parameters": {
+                  "from_value": {
+                    "preserve_query_string": true,
+                    "status_code": 308,
+                    "target_url": {
+                      "expression": "concat(\"https://auroramasajista.com\", http.request.uri.path)"
+                    }
+                  }
+                },
+                "description": "Aurora: redirect www without invoking a Worker",
+                "enabled": true,
+                "expression": "http.host eq \"www.auroramasajista.com\"",
+                "id": "8fa3560775a64b939900eb822f35f3ef",
+                "last_updated": "2026-10-25T10:39:47.920797Z",
+                "ref": "aurora_www_canonical",
+                "version": "1"
+              }
+            ],
+            "version": "1"
+          },
+          {
+            "description": "",
+            "id": "90e22dbaf35140b4ae883a9bc31c5f1c",
+            "kind": "zone",
+            "last_updated": "2026-10-25T10:39:51.81205Z",
+            "name": "Aurora static site protection",
+            "phase": "http_request_firewall_custom",
+            "rules": [
+              {
+                "action": "block",
+                "description": "Aurora: static website accepts GET and HEAD only",
+                "enabled": true,
+                "expression": "(http.host in {\"auroramasajista.com\" \"www.auroramasajista.com\"} and not http.request.method in {\"GET\" \"HEAD\"})",
+                "id": "11e949427a584c1c9edffb2fdf868da7",
+                "last_updated": "2026-10-25T10:39:51.81205Z",
+                "ref": "aurora_static_methods",
+                "version": "1"
+              },
+              {
+                "action": "block",
+                "description": "Aurora: block probes for secrets and nonexistent WordPress",
+                "enabled": true,
+                "expression": "(http.host in {\"auroramasajista.com\" \"www.auroramasajista.com\"} and (starts_with(lower(http.request.uri.path), \"/.env\") or starts_with(lower(http.request.uri.path), \"/.git\") or starts_with(lower(http.request.uri.path), \"/wp-admin\") or lower(http.request.uri.path) in {\"/wp-login.php\" \"/xmlrpc.php\"}))",
+                "id": "bcde0762138746c29fea9356ec9dc86a",
+                "last_updated": "2026-10-25T10:39:51.81205Z",
+                "ref": "aurora_scanner_paths",
+                "version": "1"
+              }
+            ],
+            "source": "firewall_custom",
+            "version": "1"
+          },
+          {
+            "description": "",
+            "id": "7cedf5d444a342e1894b2d77d222e255",
+            "kind": "zone",
+            "last_updated": "2026-10-25T10:39:55.721191Z",
+            "name": "Aurora request burst protection",
+            "phase": "http_ratelimit",
+            "rules": [
+              {
+                "action": "block",
+                "description": "Aurora: 200 requests per IP per 10 seconds; verified bots excluded",
+                "enabled": true,
+                "expression": "(http.host in {\"auroramasajista.com\" \"www.auroramasajista.com\"} and not cf.client.bot)",
+                "id": "712b446d3a754e01a6ce66b30d4a66c8",
+                "last_updated": "2026-10-25T10:39:55.721191Z",
+                "ratelimit": {
+                  "characteristics": [
+                    "cf.colo.id",
+                    "ip.src"
+                  ],
+                  "mitigation_timeout": 10,
+                  "period": 10,
+                  "requests_per_period": 200
+                },
+                "ref": "aurora_public_burst_limit",
+                "version": "1"
+              }
+            ],
+            "source": "rate_limit",
+            "version": "1"
+          }
+        ],
+        "bots": {
+          "enable_js": false,
+          "fight_mode": false,
+          "ai_bots_protection": "disabled",
+          "content_bots_protection": "disabled",
+          "crawler_protection": "disabled",
+          "ai_training": "disabled",
+          "ai_search": "disabled",
+          "ai_user": "disabled",
+          "is_robots_txt_managed": false,
+          "bot_preference_sync_enabled": true,
+          "cf_robots_variant": "policy_only",
+          "ai_bots_migration_opt_out": false,
+          "using_latest_model": true
+        },
+        "settings": {
+          "ssl": {
+            "id": "ssl",
+            "value": "full",
+            "modified_on": null,
+            "certificate_status": "active",
+            "validation_errors": [],
+            "editable": true
+          },
+          "always_use_https": {
+            "id": "always_use_https",
+            "value": "off",
+            "editable": true
+          },
+          "min_tls_version": {
+            "id": "min_tls_version",
+            "value": "1.0",
+            "modified_on": null,
+            "editable": true
+          },
+          "security_level": {
+            "id": "security_level",
+            "value": "medium",
+            "modified_on": null,
+            "editable": true
+          }
+        },
+        "emailRouting": {
+          "id": "014dbec7389685f34cadc60b44b45fc2",
+          "tag": "014dbec7389685f34cadc60b44b45fc2",
+          "name": "auroramasajista.com",
+          "enabled": false,
+          "created": "2026-10-25T10:57:31.500618Z",
+          "modified": "2026-10-25T10:57:31.500618Z",
+          "skip_wizard": false,
+          "support_subaddress": false,
+          "synced": false,
+          "admin_locked": false,
+          "status": "unconfigured"
+        },
+        "emailRules": [
+          {
+            "id": "a5d7ee0831a5423dba4c487894c8b73f",
+            "tag": "a5d7ee0831a5423dba4c487894c8b73f",
+            "name": "",
+            "matchers": [
+              {
+                "type": "all"
+              }
+            ],
+            "actions": [
+              {
+                "type": "drop"
+              }
+            ],
+            "enabled": false,
+            "priority": 2147483647,
+            "source": "api"
+          }
+        ],
+        "certificates": [
+          {
+            "id": "50f18c1c-8d74-417c-bf67-eee2cbb86ba8",
+            "type": "advanced",
+            "hosts": [
+              "auroramasajista.com",
+              "www.auroramasajista.com",
+              "*.www.auroramasajista.com"
+            ],
+            "primary_certificate": "a21a5d12-cb32-4a50-ba5d-6e8d6a23e47d",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "a21a5d12-cb32-4a50-ba5d-6e8d6a23e47d",
+                "hosts": [
+                  "auroramasajista.com",
+                  "www.auroramasajista.com",
+                  "*.www.auroramasajista.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "SHA256WithRSA",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "014dbec7389685f34cadc60b44b45fc2",
+                "uploaded_on": "2026-10-25T10:57:34.626831Z",
+                "modified_on": "2026-10-24T14:05:04.885208Z",
+                "expires_on": "2027-01-22T14:02:35.000000Z",
+                "priority": null
+              },
+              {
+                "id": "62c5f7b9-b510-4732-9f7e-ebcb46541127",
+                "hosts": [
+                  "auroramasajista.com",
+                  "www.auroramasajista.com",
+                  "*.www.auroramasajista.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "ECDSAWithSHA256",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "014dbec7389685f34cadc60b44b45fc2",
+                "uploaded_on": "2026-10-25T10:57:34.626858Z",
+                "modified_on": "2026-10-24T14:05:04.885208Z",
+                "expires_on": "2027-01-22T14:04:53.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-24T14:02:35.732572Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "google"
+          },
+          {
+            "id": "af6f5729-1f8e-4a50-9f0d-717f4bc72e7c",
+            "type": "advanced",
+            "hosts": [
+              "auroramasajista.com",
+              "*.auroramasajista.com"
+            ],
+            "primary_certificate": "618985c5-4bde-4787-9846-24aa8b039611",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "618985c5-4bde-4787-9846-24aa8b039611",
+                "hosts": [
+                  "auroramasajista.com",
+                  "*.auroramasajista.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "SHA256WithRSA",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "014dbec7389685f34cadc60b44b45fc2",
+                "uploaded_on": "2026-10-25T10:57:34.634279Z",
+                "modified_on": "2026-10-24T14:07:16.799459Z",
+                "expires_on": "2027-01-22T14:02:35.000000Z",
+                "priority": null
+              },
+              {
+                "id": "abac214e-2667-44c0-91a2-95fc4b3730e6",
+                "hosts": [
+                  "auroramasajista.com",
+                  "*.auroramasajista.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "ECDSAWithSHA256",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "014dbec7389685f34cadc60b44b45fc2",
+                "uploaded_on": "2026-10-25T10:57:34.634314Z",
+                "modified_on": "2026-10-24T14:07:16.799459Z",
+                "expires_on": "2027-01-22T14:07:06.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-24T14:02:35.631615Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "google"
+          },
+          {
+            "id": "3f560a80-cfdc-4953-9b91-1a32a955f9a4",
+            "type": "universal",
+            "hosts": [
+              "auroramasajista.com",
+              "*.auroramasajista.com"
+            ],
+            "primary_certificate": "a7354ad3-12f3-416d-b629-f95f2df6e7be",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "a7354ad3-12f3-416d-b629-f95f2df6e7be",
+                "hosts": [
+                  "auroramasajista.com",
+                  "*.auroramasajista.com"
+                ],
+                "issuer": "LetsEncrypt",
+                "signature": "ECDSAWithSHA384",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "014dbec7389685f34cadc60b44b45fc2",
+                "uploaded_on": "2026-10-25T10:57:34.671590Z",
+                "modified_on": "2026-10-24T13:54:34.856135Z",
+                "expires_on": "2027-01-22T12:56:00.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-24T13:52:23.500790Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "lets_encrypt"
+          }
+        ],
+        "loadBalancers": [],
+        "emailSending": []
+      },
+      {
+        "id": "c03736aba92b82d052c648ad807ad3d8",
+        "name": "geonuvia.com",
+        "status": "active",
+        "name_servers": [
+          "grace.ns.cloudflare.com",
+          "nash.ns.cloudflare.com"
+        ],
+        "plan": {
+          "name": "Free Website",
+          "price": 0,
+          "currency": "USD",
+          "legacy_id": "free"
+        },
+        "dns": [
+          {
+            "id": "1e7e079abd54677b7d2ab0bf3f844375",
+            "name": "rsend.orders.geonuvia.com",
+            "type": "CNAME",
+            "content": "rsend-euw1.forge.rmta.net",
+            "proxiable": true,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {
+              "flatten_cname": false
+            },
+            "meta": {},
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-04T08:52:56.205864Z",
+            "modified_on": "2026-10-04T09:02:00.766701Z"
+          },
+          {
+            "id": "dc57ca7ae53bc6bfa3f54e867355e6c5",
+            "name": "send.orders.geonuvia.com",
+            "type": "CNAME",
+            "content": "send.forge.rmta.net",
+            "proxiable": true,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {
+              "flatten_cname": false
+            },
+            "meta": {},
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-04T08:52:56.20494Z",
+            "modified_on": "2026-10-04T09:02:07.574634Z"
+          },
+          {
+            "id": "a22dc3cb4a2817ce6663a6fdcb06cb21",
+            "name": "cf-bounce.support.geonuvia.com",
+            "type": "MX",
+            "content": "route3.mx.cloudflare.net",
+            "priority": 49,
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "email_routing": true,
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-05T08:35:22.687659Z",
+            "modified_on": "2026-10-05T08:35:22.687659Z"
+          },
+          {
+            "id": "7914977875ed0f176370d8a6b6261607",
+            "name": "cf-bounce.support.geonuvia.com",
+            "type": "MX",
+            "content": "route2.mx.cloudflare.net",
+            "priority": 93,
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "email_routing": true,
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-05T08:35:22.680565Z",
+            "modified_on": "2026-10-05T08:35:22.680565Z"
+          },
+          {
+            "id": "cf15bbd5fdfbe7ebe5af5f177b7086dd",
+            "name": "cf-bounce.support.geonuvia.com",
+            "type": "MX",
+            "content": "route1.mx.cloudflare.net",
+            "priority": 53,
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "email_routing": true,
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-05T08:35:22.670405Z",
+            "modified_on": "2026-10-05T08:35:22.670405Z"
+          },
+          {
+            "id": "3ef307ceeb8451f1a8081442e7f6d934",
+            "name": "cf-bounce._domainkey.support.geonuvia.com",
+            "type": "TXT",
+            "content": "\"v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiweykoi+o48IOGuP7GR3X0MOExCUDY/BCRHoWBnh3rChl7WhdyCxW3jgq1daEjPPqoi7sJvdg5hEQVsgVRQP4DcnQDVjGMbASQtrY4WmB1VebF+RPJB2ECPsEDTpeiI5ZyUAwJaVX7r6bznU67g7LvFq35yIo4sdlmtZGV+i0H4cpYH9+3JJ78k\" \"m4KXwaf9xUJCWF6nxeD+qG6Fyruw1Qlbds2r85U9dkNDVAS3gioCvELryh1TxKGiVTkg4wqHTyHfWsp7KD3WQHYJn0RyfJJu6YEmL77zonn7p2SRMvTMP3ZEXibnC9gz3nnhR6wcYL8Q7zXypKTMD58bTixDSJwIDAQAB\"",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "email_routing": true,
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-05T08:35:22.700743Z",
+            "modified_on": "2026-10-05T08:35:22.700743Z"
+          },
+          {
+            "id": "4d391243d0bf83fa52b223f20c3de504",
+            "name": "cf-bounce.support.geonuvia.com",
+            "type": "TXT",
+            "content": "\"v=spf1 include:_spf.mx.cloudflare.net ~all\"",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "email_routing": true,
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-05T08:35:22.694588Z",
+            "modified_on": "2026-10-05T08:35:22.694588Z"
+          },
+          {
+            "id": "729e5ffae2c89f0d1a7ffeb4f2023c7e",
+            "name": "_dmarc.geonuvia.com",
+            "type": "TXT",
+            "content": "\"v=DMARC1; p=none;\"",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {},
+            "meta": {},
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-04T09:05:51.389443Z",
+            "modified_on": "2026-10-04T09:05:51.389443Z"
+          },
+          {
+            "id": "f7672f321ca72d95642d488f5c10644c",
+            "name": "_dmarc.support.geonuvia.com",
+            "type": "TXT",
+            "content": "\"v=DMARC1; p=reject;\"",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "settings": {},
+            "meta": {},
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-05T08:35:22.707455Z",
+            "modified_on": "2026-10-05T08:35:22.707455Z"
+          },
+          {
+            "id": "0108fb883e9ffa63558831d15560226d",
+            "name": "resend._domainkey.orders.geonuvia.com",
+            "type": "TXT",
+            "content": "\"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCnRs2wbT5t06WLe2UlUgsT7iyQ6i0Y0tob/icK7RBl47HEZaMfy3bx8pRVyL9EQ9WHa7zk9MUDHVfG5UvtSaqT+abnVrtmtzfg+YW58NmJl2wPGscikz6I24/Qjc9UyBC+8hcktVY/q/nC+LLijmwn3p7PGUpXN3Of1HVJok8jiQIDAQAB\"",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 14400,
+            "settings": {},
+            "meta": {},
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-04T08:52:56.198087Z",
+            "modified_on": "2026-10-04T09:03:14.351714Z"
+          },
+          {
+            "id": "d3084b588b4f8901f93cb0f052297fdb",
+            "name": "admin-staging.geonuvia.com",
+            "type": "AAAA",
+            "content": "100::",
+            "proxiable": true,
+            "proxied": true,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "origin_worker_id": "d68d744f38d0071254dd88b6367125e749b98386",
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-11T07:57:06.394933Z",
+            "modified_on": "2026-10-11T07:57:06.394933Z"
+          },
+          {
+            "id": "cf5dfa3558f643b3acd62215b18bfaa9",
+            "name": "aurora-staging.geonuvia.com",
+            "type": "AAAA",
+            "content": "100::",
+            "proxiable": true,
+            "proxied": true,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "origin_worker_id": "992b57884ce4fe7b4230072777992b9fe1f88750",
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-11T14:38:23.55057Z",
+            "modified_on": "2026-10-11T14:38:23.55057Z"
+          },
+          {
+            "id": "14d22b7d64f9baba253fb95998e9687f",
+            "name": "geonuvia.com",
+            "type": "AAAA",
+            "content": "100::",
+            "proxiable": true,
+            "proxied": true,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "origin_worker_id": "85ffb5cdb5bfcd518b0bfca35363ae89aadc9e4f",
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-04T11:59:28.400688Z",
+            "modified_on": "2026-10-04T11:59:28.400688Z"
+          },
+          {
+            "id": "579b6ca30aa5dd6014bc559efa264673",
+            "name": "staging.geonuvia.com",
+            "type": "AAAA",
+            "content": "100::",
+            "proxiable": true,
+            "proxied": true,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "origin_worker_id": "da1d34a12a641b95fd42ff2cdf10943b517ba398",
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-04T13:19:31.709516Z",
+            "modified_on": "2026-10-04T13:19:31.709516Z"
+          },
+          {
+            "id": "fd97a133a8a872b71a458850138049bc",
+            "name": "www.geonuvia.com",
+            "type": "AAAA",
+            "content": "100::",
+            "proxiable": true,
+            "proxied": true,
+            "ttl": 1,
+            "settings": {},
+            "meta": {
+              "origin_worker_id": "72975673837c8120ada08997dccf01b6b9c9f2aa",
+              "read_only": true
+            },
+            "comment": null,
+            "tags": [],
+            "created_on": "2026-10-04T11:59:28.438333Z",
+            "modified_on": "2026-10-04T11:59:28.438333Z"
+          }
+        ],
+        "rulesets": [
+          {
+            "description": "Created by the Cloudflare security team, this ruleset provides normalization on the URL path",
+            "id": "70339d97bdb34195bbf054b1ebe81f76",
+            "kind": "managed",
+            "last_updated": "2024-08-01T17:37:11.538019Z",
+            "name": "Cloudflare Normalization Ruleset",
+            "phase": "http_request_sanitize",
+            "version": "6"
+          },
+          {
+            "description": "Created by the Cloudflare security team, this ruleset applies default mitigations during HTTP response processing to protect your applications from security threats. It is regularly updated to address new threats and reduce false positives.",
+            "id": "b42644f558d04e41ba6afa4c79b51009",
+            "kind": "managed",
+            "last_updated": "2026-10-21T07:52:48.743926Z",
+            "name": "Cloudflare Managed Response Firewall Default",
+            "phase": "http_response_firewall_custom",
+            "version": "2"
+          },
+          {
+            "description": "Created by the Cloudflare security team, this ruleset is designed to provide protection for free zones",
+            "id": "77454fe2d30c4220b5701f6fdfb893ba",
+            "kind": "managed",
+            "last_updated": "2026-10-23T15:07:01.484907Z",
+            "name": "Cloudflare Managed Free Ruleset",
+            "phase": "http_request_firewall_managed",
+            "source": "firewall_managed",
+            "version": "82"
+          },
+          {
+            "description": "Automatic mitigation of HTTP-based DDoS attacks. Cloudflare routinely adds signatures to address new attack vectors. Additional configuration allows you to customize the sensitivity of each rule and the performed mitigation action.",
+            "id": "4d21379b4f9f4bb088e0729962c8b3cf",
+            "kind": "managed",
+            "last_updated": "2026-10-23T21:35:14.276342Z",
+            "name": "DDoS L7 ruleset",
+            "phase": "ddos_l7",
+            "version": "3472"
+          },
+          {
+            "description": "",
+            "id": "9fb5a9798e2846ecb5d5330ced1c36e6",
+            "kind": "zone",
+            "last_updated": "2026-10-04T16:03:26.055764Z",
+            "name": "Geonuvia API rate limits",
+            "phase": "http_ratelimit",
+            "source": "rate_limit",
+            "version": "2"
+          }
+        ],
+        "entrypoints": [
+          {
+            "description": "",
+            "id": "9fb5a9798e2846ecb5d5330ced1c36e6",
+            "kind": "zone",
+            "last_updated": "2026-10-04T16:03:26.055764Z",
+            "name": "Geonuvia API rate limits",
+            "phase": "http_ratelimit",
+            "rules": [
+              {
+                "action": "block",
+                "description": "Geonuvia address search, summary and checkout: 20 requests per IP per 10 seconds",
+                "enabled": true,
+                "expression": "http.request.uri.path in {\"/api/cartociudad/candidates\" \"/api/report/summary\" \"/api/stripe/checkout\"}",
+                "id": "5058aac9818d4cb3a7a2cbea4e597ec4",
+                "last_updated": "2026-10-04T16:03:26.055764Z",
+                "ratelimit": {
+                  "characteristics": [
+                    "cf.colo.id",
+                    "ip.src"
+                  ],
+                  "mitigation_timeout": 10,
+                  "period": 10,
+                  "requests_per_period": 20
+                },
+                "ref": "5058aac9818d4cb3a7a2cbea4e597ec4",
+                "version": "2"
+              }
+            ],
+            "source": "rate_limit",
+            "version": "2"
+          }
+        ],
+        "bots": {
+          "enable_js": false,
+          "fight_mode": false,
+          "ai_bots_protection": "disabled",
+          "content_bots_protection": "disabled",
+          "crawler_protection": "disabled",
+          "ai_training": "block",
+          "ai_search": "disabled",
+          "ai_user": "disabled",
+          "is_robots_txt_managed": false,
+          "bot_preference_sync_enabled": true,
+          "cf_robots_variant": "policy_only",
+          "ai_bots_migration_opt_out": false,
+          "using_latest_model": true
+        },
+        "settings": {
+          "ssl": {
+            "id": "ssl",
+            "value": "full",
+            "modified_on": null,
+            "certificate_status": "active",
+            "validation_errors": [],
+            "editable": true
+          },
+          "always_use_https": {
+            "id": "always_use_https",
+            "value": "off",
+            "editable": true
+          },
+          "min_tls_version": {
+            "id": "min_tls_version",
+            "value": "1.0",
+            "modified_on": null,
+            "editable": true
+          },
+          "security_level": {
+            "id": "security_level",
+            "value": "medium",
+            "modified_on": null,
+            "editable": true
+          }
+        },
+        "emailRouting": {
+          "id": "c03736aba92b82d052c648ad807ad3d8",
+          "tag": "c03736aba92b82d052c648ad807ad3d8",
+          "name": "geonuvia.com",
+          "enabled": false,
+          "created": "2026-10-05T08:35:00.463005Z",
+          "modified": "2026-10-05T08:35:22.715588Z",
+          "skip_wizard": false,
+          "support_subaddress": false,
+          "synced": true,
+          "admin_locked": false,
+          "status": "unconfigured"
+        },
+        "emailRules": [
+          {
+            "id": "fc41d0515eb64e009ddbcf10181d394b",
+            "tag": "fc41d0515eb64e009ddbcf10181d394b",
+            "name": "",
+            "matchers": [
+              {
+                "type": "all"
+              }
+            ],
+            "actions": [
+              {
+                "type": "drop"
+              }
+            ],
+            "enabled": false,
+            "priority": 2147483647,
+            "source": "api"
+          }
+        ],
+        "certificates": [
+          {
+            "id": "97675b67-f0ed-4b06-aafd-3c1ec33258f6",
+            "type": "advanced",
+            "hosts": [
+              "geonuvia.com",
+              "aurora-staging.geonuvia.com",
+              "*.aurora-staging.geonuvia.com"
+            ],
+            "primary_certificate": "1107a6b0-d3ee-4a5a-b378-54dd1ca7804a",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "1107a6b0-d3ee-4a5a-b378-54dd1ca7804a",
+                "hosts": [
+                  "geonuvia.com",
+                  "aurora-staging.geonuvia.com",
+                  "*.aurora-staging.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "SHA256WithRSA",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.261097Z",
+                "modified_on": "2026-10-11T14:40:53.491353Z",
+                "expires_on": "2027-01-09T14:38:24.000000Z",
+                "priority": null
+              },
+              {
+                "id": "c406bf48-dbaa-4ae8-ba4a-d32d7f5bf00e",
+                "hosts": [
+                  "geonuvia.com",
+                  "aurora-staging.geonuvia.com",
+                  "*.aurora-staging.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "ECDSAWithSHA256",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.261121Z",
+                "modified_on": "2026-10-11T14:40:53.491353Z",
+                "expires_on": "2027-01-09T14:40:40.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-11T14:38:23.573286Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "google"
+          },
+          {
+            "id": "97595aad-1509-4e03-9113-8a32c4e9f0f7",
+            "type": "advanced",
+            "hosts": [
+              "geonuvia.com",
+              "admin-staging.geonuvia.com",
+              "*.admin-staging.geonuvia.com"
+            ],
+            "primary_certificate": "73ecd49f-130a-4b90-9819-809cb317ed5c",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "73ecd49f-130a-4b90-9819-809cb317ed5c",
+                "hosts": [
+                  "geonuvia.com",
+                  "admin-staging.geonuvia.com",
+                  "*.admin-staging.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "SHA256WithRSA",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.328219Z",
+                "modified_on": "2026-10-11T07:59:33.346396Z",
+                "expires_on": "2027-01-09T07:57:06.000000Z",
+                "priority": null
+              },
+              {
+                "id": "b9cce883-9181-4f68-9798-e94a805944fa",
+                "hosts": [
+                  "geonuvia.com",
+                  "admin-staging.geonuvia.com",
+                  "*.admin-staging.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "ECDSAWithSHA256",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.328243Z",
+                "modified_on": "2026-10-11T07:59:33.346396Z",
+                "expires_on": "2027-01-09T07:59:22.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-11T07:57:06.410978Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "google"
+          },
+          {
+            "id": "9d7ebb88-2890-49ad-ac19-e8ec96ef2063",
+            "type": "advanced",
+            "hosts": [
+              "geonuvia.com",
+              "staging.geonuvia.com",
+              "*.staging.geonuvia.com"
+            ],
+            "primary_certificate": "51f53443-b5f0-4f84-a646-ce1ae0cf8861",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "51f53443-b5f0-4f84-a646-ce1ae0cf8861",
+                "hosts": [
+                  "geonuvia.com",
+                  "staging.geonuvia.com",
+                  "*.staging.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "SHA256WithRSA",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.398291Z",
+                "modified_on": "2026-10-04T13:21:17.306909Z",
+                "expires_on": "2027-01-02T13:19:35.000000Z",
+                "priority": null
+              },
+              {
+                "id": "462290f8-2ef4-4d26-ae10-e60c94722246",
+                "hosts": [
+                  "geonuvia.com",
+                  "staging.geonuvia.com",
+                  "*.staging.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "ECDSAWithSHA256",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.398314Z",
+                "modified_on": "2026-10-04T13:21:17.306909Z",
+                "expires_on": "2027-01-02T13:21:05.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-04T13:19:31.733268Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "google"
+          },
+          {
+            "id": "a5e6d4d1-8359-4b25-84be-9bfeb4ef4d02",
+            "type": "advanced",
+            "hosts": [
+              "geonuvia.com",
+              "www.geonuvia.com",
+              "*.www.geonuvia.com"
+            ],
+            "primary_certificate": "b5b8d257-0126-4eb9-a5e6-8df2fa17c460",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "b5b8d257-0126-4eb9-a5e6-8df2fa17c460",
+                "hosts": [
+                  "geonuvia.com",
+                  "www.geonuvia.com",
+                  "*.www.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "SHA256WithRSA",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.505342Z",
+                "modified_on": "2026-10-04T12:01:31.941893Z",
+                "expires_on": "2027-01-02T11:59:28.000000Z",
+                "priority": null
+              },
+              {
+                "id": "d4321b6c-b713-44fe-9f04-36e92e6afb50",
+                "hosts": [
+                  "geonuvia.com",
+                  "www.geonuvia.com",
+                  "*.www.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "ECDSAWithSHA256",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.505381Z",
+                "modified_on": "2026-10-04T12:01:31.941893Z",
+                "expires_on": "2027-01-02T12:01:15.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-04T11:59:28.452390Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "google"
+          },
+          {
+            "id": "6c65f293-4ef3-4750-9ef0-bf592fe98055",
+            "type": "advanced",
+            "hosts": [
+              "geonuvia.com",
+              "*.geonuvia.com"
+            ],
+            "primary_certificate": "e3678294-3b64-4703-a776-2489666a258c",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "e3678294-3b64-4703-a776-2489666a258c",
+                "hosts": [
+                  "geonuvia.com",
+                  "*.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "ECDSAWithSHA256",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.582927Z",
+                "modified_on": "2026-10-04T12:01:18.857966Z",
+                "expires_on": "2027-01-02T12:01:01.000000Z",
+                "priority": null
+              },
+              {
+                "id": "f3926904-301c-4647-8089-5ef78c8fd6ba",
+                "hosts": [
+                  "geonuvia.com",
+                  "*.geonuvia.com"
+                ],
+                "issuer": "GoogleTrustServices",
+                "signature": "SHA256WithRSA",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.582963Z",
+                "modified_on": "2026-10-04T12:01:18.857966Z",
+                "expires_on": "2027-01-02T11:59:28.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-04T11:59:28.414719Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "google"
+          },
+          {
+            "id": "2c7e8157-cc7f-475e-a09c-8d907449d003",
+            "type": "universal",
+            "hosts": [
+              "geonuvia.com",
+              "*.geonuvia.com"
+            ],
+            "primary_certificate": "ce126c9c-8aaf-4250-92d4-1ebc9411e84f",
+            "status": "active",
+            "certificates": [
+              {
+                "id": "ce126c9c-8aaf-4250-92d4-1ebc9411e84f",
+                "hosts": [
+                  "geonuvia.com",
+                  "*.geonuvia.com"
+                ],
+                "issuer": "LetsEncrypt",
+                "signature": "ECDSAWithSHA384",
+                "status": "active",
+                "bundle_method": "ubiquitous",
+                "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+                "uploaded_on": "2026-10-25T10:57:41.751368Z",
+                "modified_on": "2026-10-04T09:00:47.544856Z",
+                "expires_on": "2027-01-02T08:02:12.000000Z",
+                "priority": null
+              }
+            ],
+            "created_on": "2026-10-04T08:59:16.588362Z",
+            "validity_days": 90,
+            "validation_method": "txt",
+            "certificate_authority": "lets_encrypt"
+          }
+        ],
+        "loadBalancers": [],
+        "emailSending": [
+          {
+            "id": "28e1478c67ec49c88744a20e2a548ac2",
+            "tag": "28e1478c67ec49c88744a20e2a548ac2",
+            "name": "support.geonuvia.com",
+            "enabled": true,
+            "preview_enabled": true,
+            "return_path_domain": "cf-bounce.support.geonuvia.com",
+            "dkim_selector": "cf-bounce",
+            "drop_suppressed_recipients": false,
+            "created": "2026-10-05T08:35:22.577712Z",
+            "modified": "2026-10-05T08:35:22.577712Z"
+          }
+        ]
+      }
+    ],
+    "d1": [
+      {
+        "uuid": "1c265507-1692-42e5-8b11-a6bc9d2b9802",
+        "name": "masajes-aurora-staging",
+        "created_at": "2026-10-11T14:18:05.269Z",
+        "version": "production",
+        "num_tables": 0,
+        "file_size": 147456,
+        "jurisdiction": null,
+        "details": {
+          "uuid": "1c265507-1692-42e5-8b11-a6bc9d2b9802",
+          "name": "masajes-aurora-staging",
+          "created_at": "2026-10-11T14:18:05.269Z",
+          "version": "production",
+          "num_tables": 11,
+          "file_size": 147456,
+          "running_in_region": "WEUR",
+          "read_replication": {
+            "mode": "disabled"
+          },
+          "jurisdiction": null
+        }
+      },
+      {
+        "uuid": "60427671-7c00-424c-8fd4-f78b2b995a52",
+        "name": "geonuvia-staging",
+        "created_at": "2026-10-04T12:54:11.107Z",
+        "version": "production",
+        "num_tables": 0,
+        "file_size": 44019712,
+        "jurisdiction": null,
+        "details": {
+          "uuid": "60427671-7c00-424c-8fd4-f78b2b995a52",
+          "name": "geonuvia-staging",
+          "created_at": "2026-10-04T12:54:11.107Z",
+          "version": "production",
+          "num_tables": 18,
+          "file_size": 44019712,
+          "running_in_region": "WEUR",
+          "read_replication": {
+            "mode": "disabled"
+          },
+          "jurisdiction": null
+        }
+      },
+      {
+        "uuid": "c2c69f84-2063-4591-9163-c65c71959ed8",
+        "name": "geonuvia-climate",
+        "created_at": "2026-10-04T11:49:21.812Z",
+        "version": "production",
+        "num_tables": 0,
+        "file_size": 40988672,
+        "jurisdiction": null,
+        "details": {
+          "uuid": "c2c69f84-2063-4591-9163-c65c71959ed8",
+          "name": "geonuvia-climate",
+          "created_at": "2026-10-04T11:49:21.812Z",
+          "version": "production",
+          "num_tables": 15,
+          "file_size": 40988672,
+          "running_in_region": "WEUR",
+          "read_replication": {
+            "mode": "disabled"
+          },
+          "jurisdiction": null
+        }
+      }
+    ],
+    "r2": {
+      "buckets": [
+        {
+          "name": "geonuvia-basemaps",
+          "creation_date": "2026-10-05T17:32:38.988Z",
+          "managedDomain": {
+            "enabled": false,
+            "bucketId": "fc2d38ca4a2945379a539b57785b0445",
+            "domain": "pub-fc2d38ca4a2945379a539b57785b0445.r2.dev"
+          },
+          "customDomains": {
+            "domains": []
+          }
+        }
+      ]
+    },
+    "workers": [
+      {
+        "id": "df62a96eab1843bab452d7727bd6866c",
+        "name": "masajes-aurora-staging",
+        "created_on": "2026-10-11T14:23:45.296916Z",
+        "updated_on": "2026-10-25T10:43:39.527397Z",
+        "deployed_on": "2026-10-25T10:43:36.316898Z",
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 0.01,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 0.01,
+            "invocation_logs": true,
+            "persist": true
+          },
+          "traces": {
+            "enabled": true,
+            "head_sampling_rate": 0.01,
+            "persist": true
+          }
+        },
+        "subdomain": {
+          "enabled": false,
+          "previews_enabled": false,
+          "url": "https://masajes-aurora-staging.albertoesquivelanias.workers.dev",
+          "preview_url_suffix": "-masajes-aurora-staging.albertoesquivelanias.workers.dev"
+        },
+        "references": {
+          "workers": [],
+          "domains": [
+            {
+              "id": "992b57884ce4fe7b4230072777992b9fe1f88750",
+              "hostname": "aurora-staging.geonuvia.com",
+              "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+              "zone_name": "geonuvia.com"
+            }
+          ],
+          "dispatch_namespace_outbounds": [],
+          "durable_objects": [],
+          "queues": []
+        },
+        "tail_consumers": [],
+        "logpush": false,
+        "deployment": {
+          "id": "faa0793c-acaa-4a2d-835e-241742546311",
+          "created_on": "2026-10-25T10:43:36.316898Z",
+          "versions": [
+            {
+              "version_id": "e90c4b9b-a973-48b3-8b0d-62ce42cbecf7",
+              "percentage": 100
+            }
+          ],
+          "source": "cf_cli"
+        },
+        "versions": [
+          {
+            "id": "e90c4b9b-a973-48b3-8b0d-62ce42cbecf7",
+            "number": 30,
+            "created_on": "2026-10-25T10:43:34.807705Z",
+            "compatibility_date": "2026-10-11",
+            "compatibility_flags": [
+              "nodejs_compat"
+            ],
+            "main_module": "index.mjs",
+            "startup_time_ms": 13,
+            "limits": {
+              "cpu_ms": 100
+            },
+            "usage_model": "standard",
+            "assets": {
+              "config": {
+                "html_handling": "auto-trailing-slash",
+                "not_found_handling": "none",
+                "run_worker_first": true,
+                "base_path": "/"
+              }
+            },
+            "percentage": 100,
+            "bindings": [
+              {
+                "name": "ACCESS_AUD",
+                "type": "plain_text"
+              },
+              {
+                "name": "ACCESS_EMAIL",
+                "type": "plain_text"
+              },
+              {
+                "name": "ACCESS_MODE",
+                "type": "plain_text"
+              },
+              {
+                "name": "ACCESS_TEAM_DOMAIN",
+                "type": "plain_text"
+              },
+              {
+                "name": "ADMIN_EMAIL",
+                "type": "plain_text"
+              },
+              {
+                "name": "ASSETS",
+                "type": "assets"
+              },
+              {
+                "name": "DB",
+                "type": "d1",
+                "id": "1c265507-1692-42e5-8b11-a6bc9d2b9802",
+                "database_id": "1c265507-1692-42e5-8b11-a6bc9d2b9802"
+              },
+              {
+                "name": "EMAIL_FROM",
+                "type": "plain_text"
+              },
+              {
+                "name": "LOCAL_DEV",
+                "type": "plain_text"
+              },
+              {
+                "name": "NOTIFICATIONS",
+                "type": "queue",
+                "queue_name": "masajes-aurora-notifications-staging"
+              },
+              {
+                "name": "SITE_URL",
+                "type": "plain_text"
+              },
+              {
+                "name": "TURNSTILE_SECRET_KEY",
+                "type": "secret_text"
+              }
+            ]
+          }
+        ],
+        "build": {
+          "script_tag": "df62a96eab1843bab452d7727bd6866c",
+          "git_repository": {
+            "repo_id": "1414268597",
+            "repo_name": "masajes-aurora",
+            "provider_type": "github",
+            "provider_account_id": "38634485",
+            "provider_account_name": "nasuke0302",
+            "grant_id": null,
+            "branch": "staging"
+          },
+          "production_settings": {
+            "build_command": "npm run build:cloudflare",
+            "deploy_command": "npm exec -- cf deploy --mode staging --prebuilt",
+            "root_directory": "/",
+            "build_caching_enabled": false,
+            "path_includes": [
+              "*"
+            ],
+            "path_excludes": [],
+            "build_token_uuid": "[omitted]",
+            "environment_variables": {
+              "names": [
+                "ADMIN_EMAIL",
+                "CF_SEND_TELEMETRY",
+                "D1_DATABASE_ID",
+                "DEBUG",
+                "EMAIL_FROM",
+                "NOTIFICATIONS_QUEUE",
+                "SITE_URL",
+                "TURNSTILE_SECRET_KEY",
+                "TURNSTILE_SITE_KEY",
+                "WORKER_DOMAIN"
+              ]
+            }
+          },
+          "auto_build_enabled": true,
+          "previews_enabled": false
+        }
+      },
+      {
+        "id": "8881e72c9d5e460999cc69a44392fc0a",
+        "name": "masajes-aurora-email-staging",
+        "created_on": "2026-10-11T14:23:33.023033Z",
+        "updated_on": "2026-10-25T10:43:19.341507Z",
+        "deployed_on": "2026-10-25T10:43:15.792676Z",
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 0.01,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 0.01,
+            "invocation_logs": true,
+            "persist": true
+          },
+          "traces": {
+            "enabled": true,
+            "head_sampling_rate": 0.01,
+            "persist": true
+          }
+        },
+        "subdomain": {
+          "enabled": false,
+          "previews_enabled": false,
+          "url": "https://masajes-aurora-email-staging.albertoesquivelanias.workers.dev",
+          "preview_url_suffix": "-masajes-aurora-email-staging.albertoesquivelanias.workers.dev"
+        },
+        "references": {
+          "workers": [],
+          "domains": [],
+          "dispatch_namespace_outbounds": [],
+          "durable_objects": [],
+          "queues": [
+            {
+              "queue_id": "66331bcd7038419aac1a43c68d390a7f",
+              "queue_name": "masajes-aurora-notifications-staging",
+              "queue_consumer_id": "8de6379833f94b7aa6b58bd9218fd306"
+            }
+          ]
+        },
+        "tail_consumers": [],
+        "logpush": false,
+        "deployment": {
+          "id": "5195d8e0-ef09-4f8b-9c58-2096ab09f929",
+          "created_on": "2026-10-25T10:43:15.792676Z",
+          "versions": [
+            {
+              "version_id": "2f350665-8bc6-4ca5-85af-9447b4858687",
+              "percentage": 100
+            }
+          ],
+          "source": "cf_cli"
+        },
+        "versions": [
+          {
+            "id": "2f350665-8bc6-4ca5-85af-9447b4858687",
+            "number": 20,
+            "created_on": "2026-10-25T10:43:14.586117Z",
+            "compatibility_date": "2026-10-11",
+            "compatibility_flags": [
+              "nodejs_compat"
+            ],
+            "main_module": "index.mjs",
+            "startup_time_ms": 1,
+            "limits": {
+              "cpu_ms": 1000
+            },
+            "usage_model": "standard",
+            "percentage": 100,
+            "bindings": [
+              {
+                "name": "ADMIN_EMAIL",
+                "type": "plain_text"
+              },
+              {
+                "name": "DB",
+                "type": "d1",
+                "id": "1c265507-1692-42e5-8b11-a6bc9d2b9802",
+                "database_id": "1c265507-1692-42e5-8b11-a6bc9d2b9802"
+              },
+              {
+                "name": "EMAIL_FROM",
+                "type": "plain_text"
+              },
+              {
+                "name": "RESEND_API_KEY",
+                "type": "secret_text"
+              }
+            ]
+          }
+        ],
+        "build": null
+      },
+      {
+        "id": "89c513c85b0846818df4fdf4af476697",
+        "name": "masajes-aurora",
+        "created_on": "2026-10-24T14:01:23.818918Z",
+        "updated_on": "2026-10-25T10:41:34.760211Z",
+        "deployed_on": "2026-10-25T10:41:31.291864Z",
+        "observability": {
+          "enabled": false,
+          "head_sampling_rate": 1,
+          "redact_query_string": false,
+          "logs": {
+            "enabled": false,
+            "head_sampling_rate": 1,
+            "invocation_logs": true,
+            "persist": true,
+            "destinations": []
+          },
+          "traces": {
+            "enabled": false,
+            "head_sampling_rate": 1,
+            "persist": true,
+            "destinations": []
+          }
+        },
+        "subdomain": {
+          "enabled": false,
+          "previews_enabled": false,
+          "url": "https://masajes-aurora.albertoesquivelanias.workers.dev",
+          "preview_url_suffix": "-masajes-aurora.albertoesquivelanias.workers.dev"
+        },
+        "references": {
+          "workers": [],
+          "domains": [
+            {
+              "id": "78da188ddfeb00d1b67291221858f7184a0d70e3",
+              "hostname": "auroramasajista.com",
+              "zone_id": "014dbec7389685f34cadc60b44b45fc2",
+              "zone_name": "auroramasajista.com"
+            },
+            {
+              "id": "3dc5be0badd2ef8420c0e3873591ef43d86e8e4d",
+              "hostname": "www.auroramasajista.com",
+              "zone_id": "014dbec7389685f34cadc60b44b45fc2",
+              "zone_name": "auroramasajista.com"
+            }
+          ],
+          "dispatch_namespace_outbounds": [],
+          "durable_objects": [],
+          "queues": []
+        },
+        "tail_consumers": [],
+        "logpush": false,
+        "deployment": {
+          "id": "f22934bc-53cf-4b69-b454-1d041612ae35",
+          "created_on": "2026-10-25T10:41:31.291864Z",
+          "versions": [
+            {
+              "version_id": "493b8648-1d35-4a0c-af1f-7d5f244c2039",
+              "percentage": 100
+            }
+          ],
+          "source": "cf_cli"
+        },
+        "versions": [
+          {
+            "id": "493b8648-1d35-4a0c-af1f-7d5f244c2039",
+            "number": 9,
+            "created_on": "2026-10-25T10:41:30.096018Z",
+            "compatibility_date": "2026-10-11",
+            "usage_model": "standard",
+            "assets": {
+              "config": {
+                "html_handling": "drop-trailing-slash",
+                "not_found_handling": "404-page",
+                "run_worker_first": false,
+                "base_path": "/"
+              }
+            },
+            "percentage": 100,
+            "bindings": []
+          }
+        ],
+        "build": {
+          "script_tag": "89c513c85b0846818df4fdf4af476697",
+          "git_repository": {
+            "repo_id": "1414268597",
+            "repo_name": "masajes-aurora",
+            "provider_type": "github",
+            "provider_account_id": "38634485",
+            "provider_account_name": "nasuke0302",
+            "grant_id": null,
+            "branch": "main"
+          },
+          "production_settings": {
+            "build_command": "npm run build:production && npm run test:production",
+            "deploy_command": "cd .cloudflare/production && node ../../node_modules/cf/bin/cf deploy --mode production --prebuilt",
+            "root_directory": "/",
+            "build_caching_enabled": false,
+            "path_includes": [
+              "*"
+            ],
+            "path_excludes": [],
+            "build_token_uuid": "[omitted]",
+            "environment_variables": {
+              "names": [
+                "ANIMATED_MARBLE",
+                "CF_SEND_TELEMETRY",
+                "CLOUDFLARE_ACCOUNT_ID",
+                "DEBUG",
+                "SITE_URL",
+                "WORKER_DOMAIN"
+              ]
+            }
+          },
+          "auto_build_enabled": true,
+          "previews_enabled": false
+        }
+      },
+      {
+        "id": "7c6dff4d05f544dfbcf80ed1757a0826",
+        "name": "geonuvia-staging",
+        "created_on": "2026-10-04T13:19:18.176412Z",
+        "updated_on": "2026-10-11T09:07:38.135027Z",
+        "deployed_on": "2026-10-11T09:07:36.85196Z",
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "invocation_logs": true,
+            "persist": true
+          },
+          "traces": {
+            "enabled": true,
+            "head_sampling_rate": 0.1,
+            "persist": true
+          }
+        },
+        "subdomain": {
+          "enabled": false,
+          "previews_enabled": false,
+          "url": "https://geonuvia-staging.albertoesquivelanias.workers.dev",
+          "preview_url_suffix": "-geonuvia-staging.albertoesquivelanias.workers.dev"
+        },
+        "references": {
+          "workers": [
+            {
+              "id": "8f1d6f6f44f14ab5897be963b3975a4e",
+              "name": "geonuvia-admin-staging"
+            }
+          ],
+          "domains": [
+            {
+              "id": "da1d34a12a641b95fd42ff2cdf10943b517ba398",
+              "hostname": "staging.geonuvia.com",
+              "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+              "zone_name": "geonuvia.com"
+            }
+          ],
+          "dispatch_namespace_outbounds": [],
+          "durable_objects": [],
+          "queues": []
+        },
+        "tail_consumers": [],
+        "logpush": false,
+        "deployment": {
+          "id": "4c0ac086-6c21-484c-89e8-9ca32ca53722",
+          "created_on": "2026-10-11T09:07:36.85196Z",
+          "versions": [
+            {
+              "version_id": "4af609bc-afe5-473e-97e2-7600f52976d6",
+              "percentage": 100
+            }
+          ],
+          "source": "cf_cli"
+        },
+        "versions": [
+          {
+            "id": "4af609bc-afe5-473e-97e2-7600f52976d6",
+            "number": 39,
+            "created_on": "2026-10-11T09:07:36.046868Z",
+            "compatibility_date": "2026-10-04",
+            "compatibility_flags": [
+              "nodejs_compat"
+            ],
+            "main_module": "index.js",
+            "startup_time_ms": 58,
+            "usage_model": "standard",
+            "assets": {
+              "config": {
+                "html_handling": "auto-trailing-slash",
+                "not_found_handling": "none",
+                "run_worker_first": false,
+                "base_path": "/"
+              }
+            },
+            "percentage": 100,
+            "bindings": [
+              {
+                "name": "APP_ENV",
+                "type": "plain_text"
+              },
+              {
+                "name": "APP_ORIGIN",
+                "type": "secret_text"
+              },
+              {
+                "name": "ASSETS",
+                "type": "assets"
+              },
+              {
+                "name": "BASEMAPS",
+                "type": "r2_bucket",
+                "bucket_name": "geonuvia-basemaps"
+              },
+              {
+                "name": "CLIMATE_DB",
+                "type": "d1",
+                "id": "60427671-7c00-424c-8fd4-f78b2b995a52",
+                "database_id": "60427671-7c00-424c-8fd4-f78b2b995a52"
+              },
+              {
+                "name": "EMAIL_ALLOWLIST",
+                "type": "secret_text"
+              },
+              {
+                "name": "EMAIL_DELIVERY_MODE",
+                "type": "plain_text"
+              },
+              {
+                "name": "GEOAPIFY_API_KEY",
+                "type": "secret_text"
+              },
+              {
+                "name": "RADON_VERSION",
+                "type": "plain_text"
+              },
+              {
+                "name": "RAPIDAPI_KEY",
+                "type": "secret_text"
+              },
+              {
+                "name": "RESEND_API_KEY",
+                "type": "secret_text"
+              },
+              {
+                "name": "RESEND_FROM",
+                "type": "secret_text"
+              },
+              {
+                "name": "RESEND_TEMPLATE_ID",
+                "type": "secret_text"
+              },
+              {
+                "name": "STRIPE_API_KEY",
+                "type": "secret_text"
+              },
+              {
+                "name": "STRIPE_PRODUCT_ID",
+                "type": "plain_text"
+              },
+              {
+                "name": "STRIPE_WEBHOOK_SECRET",
+                "type": "secret_text"
+              }
+            ]
+          }
+        ],
+        "build": {
+          "script_tag": "7c6dff4d05f544dfbcf80ed1757a0826",
+          "git_repository": {
+            "repo_id": "1402081621",
+            "repo_name": "geonuvia",
+            "provider_type": "github",
+            "provider_account_id": "38634485",
+            "provider_account_name": "nasuke0302",
+            "grant_id": null,
+            "branch": "staging"
+          },
+          "production_settings": {
+            "build_command": "npm run ci:staging",
+            "deploy_command": "npm run release:staging",
+            "root_directory": "/",
+            "build_caching_enabled": true,
+            "path_includes": [
+              "*"
+            ],
+            "path_excludes": [],
+            "build_token_uuid": "[omitted]",
+            "environment_variables": {
+              "names": []
+            }
+          },
+          "auto_build_enabled": true,
+          "previews_enabled": false
+        }
+      },
+      {
+        "id": "8f1d6f6f44f14ab5897be963b3975a4e",
+        "name": "geonuvia-admin-staging",
+        "created_on": "2026-10-11T07:56:53.783769Z",
+        "updated_on": "2026-10-11T09:07:10.234966Z",
+        "deployed_on": "2026-10-11T09:07:09.061271Z",
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "invocation_logs": true,
+            "persist": true
+          },
+          "traces": {
+            "enabled": true,
+            "head_sampling_rate": 0.1,
+            "persist": true
+          }
+        },
+        "subdomain": {
+          "enabled": false,
+          "previews_enabled": false,
+          "url": "https://geonuvia-admin-staging.albertoesquivelanias.workers.dev",
+          "preview_url_suffix": "-geonuvia-admin-staging.albertoesquivelanias.workers.dev"
+        },
+        "references": {
+          "workers": [],
+          "domains": [
+            {
+              "id": "d68d744f38d0071254dd88b6367125e749b98386",
+              "hostname": "admin-staging.geonuvia.com",
+              "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+              "zone_name": "geonuvia.com"
+            }
+          ],
+          "dispatch_namespace_outbounds": [],
+          "durable_objects": [],
+          "queues": []
+        },
+        "tail_consumers": [],
+        "logpush": false,
+        "deployment": {
+          "id": "a32cf42d-9ce9-4e6d-b78c-767a0f3a6cc5",
+          "created_on": "2026-10-11T09:07:09.061271Z",
+          "versions": [
+            {
+              "version_id": "dfee8e11-1569-4652-b958-bc10d5cb6533",
+              "percentage": 100
+            }
+          ],
+          "source": "cf_cli"
+        },
+        "versions": [
+          {
+            "id": "dfee8e11-1569-4652-b958-bc10d5cb6533",
+            "number": 7,
+            "created_on": "2026-10-11T09:07:08.445316Z",
+            "compatibility_date": "2026-10-11",
+            "compatibility_flags": [
+              "nodejs_compat"
+            ],
+            "main_module": "index.js",
+            "startup_time_ms": 20,
+            "usage_model": "standard",
+            "assets": {
+              "config": {
+                "html_handling": "auto-trailing-slash",
+                "not_found_handling": "none",
+                "run_worker_first": true,
+                "base_path": "/"
+              }
+            },
+            "percentage": 100,
+            "bindings": [
+              {
+                "name": "ACCESS_AUD",
+                "type": "plain_text"
+              },
+              {
+                "name": "ACCESS_TEAM_DOMAIN",
+                "type": "plain_text"
+              },
+              {
+                "name": "ADMIN_ORIGIN",
+                "type": "plain_text"
+              },
+              {
+                "name": "APP_ENV",
+                "type": "plain_text"
+              },
+              {
+                "name": "ASSETS",
+                "type": "assets"
+              },
+              {
+                "name": "BASEMAPS",
+                "type": "r2_bucket",
+                "bucket_name": "geonuvia-basemaps"
+              },
+              {
+                "name": "CLIMATE_DB",
+                "type": "d1",
+                "id": "60427671-7c00-424c-8fd4-f78b2b995a52",
+                "database_id": "60427671-7c00-424c-8fd4-f78b2b995a52"
+              },
+              {
+                "name": "LOCAL_DEV",
+                "type": "plain_text"
+              },
+              {
+                "name": "REPORT_GENERATOR",
+                "type": "service",
+                "service": "geonuvia-staging",
+                "environment": "production"
+              }
+            ]
+          }
+        ],
+        "build": {
+          "script_tag": "8f1d6f6f44f14ab5897be963b3975a4e",
+          "git_repository": {
+            "repo_id": "1414073805",
+            "repo_name": "geonuvia-admin",
+            "provider_type": "github",
+            "provider_account_id": "38634485",
+            "provider_account_name": "nasuke0302",
+            "grant_id": null,
+            "branch": "staging"
+          },
+          "production_settings": {
+            "build_command": "npm run build:staging",
+            "deploy_command": "npm run deploy:ci",
+            "root_directory": "/",
+            "build_caching_enabled": true,
+            "path_includes": [
+              "*"
+            ],
+            "path_excludes": [],
+            "build_token_uuid": "[omitted]",
+            "environment_variables": {
+              "names": []
+            }
+          },
+          "auto_build_enabled": true,
+          "previews_enabled": false
+        }
+      },
+      {
+        "id": "7505175e051c4220982cb14e35176ff8",
+        "name": "geonuvia",
+        "created_on": "2026-10-04T11:56:10.727488Z",
+        "updated_on": "2026-10-08T14:03:37.679352Z",
+        "deployed_on": "2026-10-11T07:57:29.406985Z",
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "invocation_logs": true,
+            "persist": true
+          },
+          "traces": {
+            "enabled": true,
+            "head_sampling_rate": 0.1,
+            "persist": true
+          }
+        },
+        "subdomain": {
+          "enabled": false,
+          "previews_enabled": false,
+          "url": "https://geonuvia.albertoesquivelanias.workers.dev",
+          "preview_url_suffix": "-geonuvia.albertoesquivelanias.workers.dev"
+        },
+        "references": {
+          "workers": [],
+          "domains": [
+            {
+              "id": "85ffb5cdb5bfcd518b0bfca35363ae89aadc9e4f",
+              "hostname": "geonuvia.com",
+              "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+              "zone_name": "geonuvia.com"
+            },
+            {
+              "id": "72975673837c8120ada08997dccf01b6b9c9f2aa",
+              "hostname": "www.geonuvia.com",
+              "zone_id": "c03736aba92b82d052c648ad807ad3d8",
+              "zone_name": "geonuvia.com"
+            }
+          ],
+          "dispatch_namespace_outbounds": [],
+          "durable_objects": [],
+          "queues": []
+        },
+        "tail_consumers": [],
+        "logpush": false,
+        "deployment": {
+          "id": "de246f4c-e273-4096-b10c-d7234a43f903",
+          "created_on": "2026-10-11T07:57:29.406985Z",
+          "versions": [
+            {
+              "version_id": "2bb0594d-ef92-4879-bcc3-976edb8ee345",
+              "percentage": 100
+            }
+          ],
+          "source": "cf_cli"
+        },
+        "versions": [
+          {
+            "id": "2bb0594d-ef92-4879-bcc3-976edb8ee345",
+            "number": 8,
+            "created_on": "2026-10-11T07:57:29.406985Z",
+            "compatibility_date": "2026-10-04",
+            "compatibility_flags": [
+              "nodejs_compat"
+            ],
+            "main_module": "index.js",
+            "startup_time_ms": 89,
+            "usage_model": "standard",
+            "assets": {
+              "config": {
+                "html_handling": "auto-trailing-slash",
+                "not_found_handling": "none",
+                "run_worker_first": false,
+                "base_path": "/"
+              }
+            },
+            "percentage": 100,
+            "bindings": [
+              {
+                "name": "APP_ENV",
+                "type": "plain_text"
+              },
+              {
+                "name": "APP_ORIGIN",
+                "type": "secret_text"
+              },
+              {
+                "name": "ASSETS",
+                "type": "assets"
+              },
+              {
+                "name": "BASEMAPS",
+                "type": "r2_bucket",
+                "bucket_name": "geonuvia-basemaps"
+              },
+              {
+                "name": "CLIMATE_DB",
+                "type": "d1",
+                "id": "c2c69f84-2063-4591-9163-c65c71959ed8",
+                "database_id": "c2c69f84-2063-4591-9163-c65c71959ed8"
+              },
+              {
+                "name": "EMAIL_ALLOWLIST",
+                "type": "plain_text"
+              },
+              {
+                "name": "EMAIL_DELIVERY_MODE",
+                "type": "plain_text"
+              },
+              {
+                "name": "GEOAPIFY_API_KEY",
+                "type": "secret_text"
+              },
+              {
+                "name": "RADON_ENABLED",
+                "type": "plain_text"
+              },
+              {
+                "name": "RADON_VERSION",
+                "type": "plain_text"
+              },
+              {
+                "name": "RESEND_API_KEY",
+                "type": "secret_text"
+              },
+              {
+                "name": "RESEND_FROM",
+                "type": "secret_text"
+              },
+              {
+                "name": "RESEND_TEMPLATE_ID",
+                "type": "secret_text"
+              },
+              {
+                "name": "STRIPE_API_KEY",
+                "type": "secret_text"
+              },
+              {
+                "name": "STRIPE_PRODUCT_ID",
+                "type": "plain_text"
+              },
+              {
+                "name": "STRIPE_WEBHOOK_SECRET",
+                "type": "secret_text"
+              }
+            ]
+          }
+        ],
+        "build": {
+          "script_tag": "7505175e051c4220982cb14e35176ff8",
+          "git_repository": {
+            "repo_id": "1402081621",
+            "repo_name": "geonuvia",
+            "provider_type": "github",
+            "provider_account_id": "38634485",
+            "provider_account_name": "nasuke0302",
+            "grant_id": null,
+            "branch": "main"
+          },
+          "production_settings": {
+            "build_command": "npm run build",
+            "deploy_command": "npm exec -- cf deploy --prebuilt",
+            "root_directory": "/",
+            "build_caching_enabled": true,
+            "path_includes": [
+              "*"
+            ],
+            "path_excludes": [],
+            "build_token_uuid": "[omitted]",
+            "environment_variables": {
+              "names": []
+            }
+          },
+          "auto_build_enabled": true,
+          "previews_enabled": false
+        }
+      }
+    ],
+    "kv": [],
+    "queues": [
+      {
+        "queue_id": "66331bcd7038419aac1a43c68d390a7f",
+        "queue_name": "masajes-aurora-notifications-staging",
+        "settings": {
+          "delivery_delay": 0,
+          "message_retention_period": 345600
+        },
+        "created_on": "2026-10-11T14:18:07.525589Z",
+        "modified_on": "2026-10-11T14:18:07.525589Z",
+        "producers_total_count": 1,
+        "producers": [
+          {
+            "script": "masajes-aurora-staging",
+            "type": "worker"
+          }
+        ],
+        "consumers_total_count": 1,
+        "consumers": [
+          {
+            "script": "masajes-aurora-email-staging",
+            "settings": {
+              "batch_size": 5,
+              "max_retries": 5,
+              "max_wait_time_ms": 5000,
+              "max_concurrency": 1,
+              "retry_delay": 60
+            },
+            "consumer_id": "8de6379833f94b7aa6b58bd9218fd306",
+            "type": "worker"
+          }
+        ]
+      }
+    ],
+    "turnstile": [
+      {
+        "sitekey": "0x4AAAAAAFT-f2HdGu1BnZxw",
+        "modified_on": "2026-10-11T17:44:24.896245Z",
+        "created_on": "2026-10-11T17:44:24.896245Z",
+        "mode": "managed",
+        "domains": [
+          "127.0.0.1",
+          "aurora-staging.geonuvia.com",
+          "localhost"
+        ],
+        "name": "Masajes Aurora staging bookings",
+        "bot_fight_mode": false,
+        "region": "world",
+        "offlabel": false,
+        "ephemeral_id": false,
+        "clearance_level": "no_clearance",
+        "deployed_via": "api",
+        "last_modified_via": "api"
+      }
+    ],
+    "accessApps": [
+      {
+        "id": "e7d7d7e0-c327-4f1d-a4af-a4c59f87733f",
+        "name": "Masajes Aurora staging",
+        "domain": "aurora-staging.geonuvia.com",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [
+          "5fc9bf25-64a3-4dc7-b576-ee8944248ffd"
+        ],
+        "self_hosted_domains": [
+          "aurora-staging.geonuvia.com"
+        ],
+        "policies": [
+          {
+            "id": "9eb60042-5a48-4d4b-b44e-8e1714f81b39",
+            "name": "Aurora staging owner only",
+            "decision": "allow",
+            "precedence": 1,
+            "includeTypes": [
+              "email"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "545b9871-cefe-4967-a846-cd957b9f221a",
+        "name": "Geonuvia staging admin",
+        "domain": "admin-staging.geonuvia.com",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [
+          "5fc9bf25-64a3-4dc7-b576-ee8944248ffd"
+        ],
+        "self_hosted_domains": [
+          "admin-staging.geonuvia.com"
+        ],
+        "policies": [
+          {
+            "id": "65b1aa39-8029-48c6-8eae-f8fe9947b9c6",
+            "name": "Owner only",
+            "decision": "allow",
+            "precedence": 1,
+            "includeTypes": [
+              "email"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "283a92b4-6e54-4f65-ae83-dd0a3b25a9a8",
+        "name": "Geonuvia staging private",
+        "domain": "staging.geonuvia.com",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [
+          "5fc9bf25-64a3-4dc7-b576-ee8944248ffd"
+        ],
+        "self_hosted_domains": [
+          "staging.geonuvia.com"
+        ],
+        "policies": [
+          {
+            "id": "26807f04-3a30-421d-b0e9-0d50e1bad374",
+            "name": "Owner only",
+            "decision": "allow",
+            "precedence": 1,
+            "includeTypes": [
+              "email"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "73219991-9471-4c3e-8204-a02502cb28cb",
+        "name": "Geonuvia staging webhook subpaths private",
+        "domain": "staging.geonuvia.com/api/stripe/webhook/*",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [
+          "5fc9bf25-64a3-4dc7-b576-ee8944248ffd"
+        ],
+        "self_hosted_domains": [
+          "staging.geonuvia.com/api/stripe/webhook/*"
+        ],
+        "policies": [
+          {
+            "id": "8fb4eae5-a2ad-44ea-b55c-a3372c63d705",
+            "name": "Owner only",
+            "decision": "allow",
+            "precedence": 1,
+            "includeTypes": [
+              "email"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "1573bfe4-8807-4926-b790-86f9c88616a6",
+        "name": "Geonuvia staging Stripe webhook only",
+        "domain": "staging.geonuvia.com/api/stripe/webhook",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [],
+        "self_hosted_domains": [
+          "staging.geonuvia.com/api/stripe/webhook"
+        ],
+        "policies": [
+          {
+            "id": "a15877f0-06a1-4cc1-bd59-84915933ae50",
+            "name": "Geonuvia staging signed Stripe webhook",
+            "decision": "bypass",
+            "precedence": 1,
+            "includeTypes": [
+              "everyone"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "e58a885c-f081-4422-810b-e18064d99791",
+        "name": "Geonuvia Stripe webhook only",
+        "domain": "geonuvia.com/api/stripe/webhook",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [],
+        "self_hosted_domains": [
+          "geonuvia.com/api/stripe/webhook"
+        ],
+        "policies": [
+          {
+            "id": "e7328a01-4338-47db-8348-eb759bbd3058",
+            "name": "Geonuvia signed Stripe webhook",
+            "decision": "bypass",
+            "precedence": 1,
+            "includeTypes": [
+              "everyone"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19c74fbf-434e-4720-b6f4-a4c65d5b158e",
+        "name": "Geonuvia private development",
+        "domain": "geonuvia.com",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [
+          "5fc9bf25-64a3-4dc7-b576-ee8944248ffd"
+        ],
+        "self_hosted_domains": [
+          "geonuvia.com",
+          "www.geonuvia.com"
+        ],
+        "policies": [
+          {
+            "id": "b3ae9bb4-d4be-4c91-b076-bcc5159b4940",
+            "name": "Owner only",
+            "decision": "allow",
+            "precedence": 1,
+            "includeTypes": [
+              "email"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "5f9e7300-9a09-4211-81ab-94b2e3b26dfa",
+        "name": "Geonuvia webhook subpaths private",
+        "domain": "geonuvia.com/api/stripe/webhook/*",
+        "type": "self_hosted",
+        "session_duration": "24h",
+        "allowed_idps": [
+          "5fc9bf25-64a3-4dc7-b576-ee8944248ffd"
+        ],
+        "self_hosted_domains": [
+          "geonuvia.com/api/stripe/webhook/*"
+        ],
+        "policies": [
+          {
+            "id": "e451994d-5571-4ad7-bb42-2950ecf65ad3",
+            "name": "Owner only",
+            "decision": "allow",
+            "precedence": 1,
+            "includeTypes": [
+              "email"
+            ]
+          }
+        ]
+      }
+    ],
+    "accessPolicies": [
+      {
+        "id": "9eb60042-5a48-4d4b-b44e-8e1714f81b39",
+        "name": "Aurora staging owner only",
+        "decision": "allow",
+        "reusable": true,
+        "includeTypes": [
+          "email"
+        ]
+      },
+      {
+        "id": "e7328a01-4338-47db-8348-eb759bbd3058",
+        "name": "Geonuvia signed Stripe webhook",
+        "decision": "bypass",
+        "reusable": true,
+        "includeTypes": [
+          "everyone"
+        ]
+      }
+    ],
+    "identityProviders": [
+      {
+        "id": "5fc9bf25-64a3-4dc7-b576-ee8944248ffd",
+        "name": "Geonuvia email PIN",
+        "type": "onetimepin"
+      }
+    ],
+    "alerts": [
+      {
+        "id": "592e1032ba2f49e3b1be5cd7353fe0dd",
+        "name": "Default budget alert (auto-created)",
+        "enabled": true,
+        "alert_type": "billing_budget_alert",
+        "filters": {
+          "total_spend_dollars": [
+            "2"
+          ]
+        }
+      }
+    ],
+    "accessOrganization": {
+      "name": "Geonuvia",
+      "auth_domain": "geonuvia.cloudflareaccess.com"
+    },
+    "subscriptions": [
+      {
+        "id": "c2f41b2e9ccf4e79b0b6f2683469d776",
+        "price": 0,
+        "currency": "USD",
+        "frequency": "not-applicable",
+        "state": "Paid",
+        "cancel_at_period_end": false,
+        "intent": "FREE",
+        "plan": {
+          "id": "free",
+          "public_name": "Cloudflare Free Plan",
+          "scope": "zone"
+        },
+        "zone": {
+          "name": "geonuvia.com",
+          "id": "c03736aba92b82d052c648ad807ad3d8"
+        }
+      },
+      {
+        "id": "b39f672399554f42bf6b58849742bbf9",
+        "price": 0,
+        "currency": "USD",
+        "frequency": "not-applicable",
+        "state": "Paid",
+        "cancel_at_period_end": false,
+        "intent": "FREE",
+        "plan": {
+          "id": "free",
+          "public_name": "Cloudflare Free Plan",
+          "scope": "zone"
+        },
+        "zone": {
+          "name": "auroramasajista.com",
+          "id": "014dbec7389685f34cadc60b44b45fc2"
+        }
+      },
+      {
+        "id": "a88a91c441914cda87a69dc1ff0e87e3",
+        "price": 0,
+        "currency": "USD",
+        "frequency": "monthly",
+        "state": "Paid",
+        "current_period_start": "2026-10-03T07:41:20Z",
+        "current_period_end": "2026-11-03T00:00:00Z",
+        "cancel_at_period_end": true,
+        "intent": "PAYGO",
+        "plan": {
+          "id": "r2_paid",
+          "public_name": "R2 Paid",
+          "scope": "account"
+        },
+        "zone": {}
+      },
+      {
+        "id": "40295d8cdd27495eb1a97494023f45a9",
+        "price": 5,
+        "currency": "USD",
+        "frequency": "monthly",
+        "state": "Paid",
+        "current_period_start": "2026-10-03T07:41:20Z",
+        "current_period_end": "2026-11-03T00:00:00Z",
+        "cancel_at_period_end": true,
+        "intent": "PAYGO",
+        "plan": {
+          "id": "workers_paid",
+          "public_name": "Workers Paid",
+          "scope": "account"
+        },
+        "zone": {}
+      }
+    ],
+    "pages": [],
+    "workflows": [],
+    "durableObjects": [],
+    "hyperdrive": [],
+    "vectorize": [],
+    "containers": [],
+    "registrar": [],
+    "tunnels": []
+  },
+  "errors": [
+    {
+      "command": "builds workers get 8881e72c9d5e460999cc69a44392fc0a",
+      "error": "\n┌ APIError\n│ [12040] No build configuration associated with that script tag was found for this account\n│ 404 Not Found · HTTP /accounts/ef56a3d28dc0132beea7873e6688dee7/builds/workers/8881e72c9d5e460999cc69a44392fc0a\n└\n"
+    }
+  ],
+  "completedAt": "2026-10-25T10:57:45.162Z",
+  "preparedAt": "2026-10-25T11:03:22.774Z",
+  "notes": [
+    "All Cloudflare operations were read-only cf CLI calls.",
+    "D1 details.num_tables is authoritative; the list endpoint returned placeholder zero counts.",
+    "The email consumer has no Workers Builds configuration (expected 404).",
+    "Only secret names and binding targets were collected; no secret values, database rows, R2 objects or email contents.",
+    "Cron schedules are corroborated by local configuration and the preceding deployment output, not a separate scheduler-list API in this snapshot.",
+    "Billable usage was not retrieved: the earlier read returned 403; subscription prices are not the current invoice."
+  ],
+  "totals": {
+    "zones": 2,
+    "workers": 6,
+    "d1": 3,
+    "r2": 1,
+    "queues": 1,
+    "turnstile": 1,
+    "accessApplications": 8,
+    "accessReusablePolicies": 2,
+    "identityProviders": 1,
+    "workerBuilds": 5,
+    "dnsRecords": 18,
+    "certificatePacks": 9,
+    "emailSendingSubdomains": 1
+  }
+}

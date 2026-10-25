@@ -6,13 +6,28 @@ Publicada el 24 de octubre de 2026 en https://auroramasajista.com. El Worker web
 
 Producción es una web estática prerenderizada con Nuxt. Solo contiene portada, guía de masaje relajante, páginas legales, imágenes, fuentes, CSS, JavaScript de presentación, sitemap y robots. Muestra «Reservar por WhatsApp» como acción principal. Las rutas `/reservar`, `/reserva/**`, `/admin/**` y `/api/**` devuelven 404 real y se excluyen antes de compilar; no se genera su código de aplicación. La navegación del cliente tampoco incluye esas páginas. Las páginas legales de producción describen el contacto directo, sin formularios ni confirmaciones automáticas.
 
-El Worker `masajes-aurora` solo sirve assets y redirige `www`; no ejecuta el servidor de Nuxt ni tiene D1, colas, tareas programadas, secretos, Access o Turnstile. Los recursos de backend creados inicialmente para producción se retiraron tras comprobar que no había reservas ni emails pendientes. Staging conserva sus recursos, páginas, autenticación, tarifas y formularios existentes.
+`masajes-aurora` es un despliegue **assets-only**, sin módulo ejecutable, manifest ni bindings de aplicación. No se invoca código propio ni para URLs inexistentes; `runWorkerFirst` está desactivado. La redirección de `www` se ejecuta en Cloudflare Rules y las cabeceras salen de `config/production-headers`, copiado como `_headers` durante el build. Producción no usa Nuxt SSR, D1, colas, cron, secretos, Access ni Turnstile. Staging conserva sus recursos, autenticación y formularios.
 
 Los scripts fijan `AURORA_PROFILE=production` o `staging` explícitamente, independiente de `NODE_ENV`. Producción carga exclusivamente `.env.production.local` (ignorado por Git), con cuenta, dominio y opciones de presentación; `.env.production.example` documenta los valores públicos. Staging carga `.env.local`. La configuración Cloudflare de producción está en `production.cloudflare.config.ts`; `cloudflare.config.ts` rechaza el modo producción para evitar publicar el backend por error.
 
 Comandos: `npm run build:production` genera la web; `npm run test:production` inspecciona el artefacto y lo prueba en workerd; `npm run deploy:production` compila, verifica y publica solo ese Worker; `npm run verify:production` comprueba el dominio real y que staging conserva Access. `npm run build:cloudflare`, `npm run test:worker` y `npm run deploy` mantienen el flujo completo de staging.
 
 Los artefactos de producción están en `.nuxt-production/`, `.output-production/` y `.cloudflare/production/`; los de staging siguen en `.nuxt/`, `.output/` y `.cloudflare/output/`. No intercambiar paquetes precompilados entre perfiles. El despliegue de producción verifica el perfil, nombre del Worker, ausencia de backend y 404 antes de publicar. No hay fallback SPA (`200.html`) en el paquete estático.
+
+## Protección frente a abuso y gasto variable
+
+La política reproducible está en `config/production-security.json`, limitada a los dos hosts de Aurora. `npm run setup:security -- --validate` valida las reglas sin activarlas; `npm run setup:security -- --apply` las aplica conservando reglas ajenas y guardando el estado anterior en `.data/security-backups/`. Sin opciones, el comando solo verifica la política y la alerta existente. El despliegue de producción exige que esa verificación pase antes de publicar.
+
+- Redirección 308 de `www` al dominio principal, conservando ruta y query, en la fase `http_request_dynamic_redirect`.
+- WAF: GET y HEAD únicamente; bloqueo de sondeos a `/.env*`, `/.git*`, `/wp-admin*`, `/wp-login.php` y `/xmlrpc.php`. Las rutas de reservas, admin y API siguen siendo 404.
+- Rate limiting: 200 peticiones por IP y centro de datos cada 10 segundos, con bloqueo de 10 segundos. Los bots verificados por Cloudflare quedan excluidos. Es una defensa de ráfagas, no un límite económico global.
+- Producción no genera logs ni trazas de ejecución de aplicación. En staging, logs y trazas se muestrean al 1 %. CPU máxima configurada: 100 ms para el web de staging y 1.000 ms para el consumidor de emails; estos límites no equivalen a un presupuesto mensual.
+- Los tres despliegues de Aurora deshabilitan `workers.dev` y previews. El consumidor de emails solo conserva su cola, con concurrencia 1, lotes de 5 y hasta 5 reintentos.
+- Se conserva la alerta de consumo variable de 2 USD de la cuenta: **solo avisa y no corta el gasto**. El plan y las franquicias se comparten con otros proyectos; servir esta web como assets no elimina la cuota base ni los consumos de esos otros proyectos.
+
+Ante una alerta: revisar Billing y las métricas por Worker antes de atribuirla a esta web; comprobar que producción sigue sin `main_module`, bindings ni observabilidad y que `npm run setup:security` pasa. Revisar Security Events para identificar tráfico bloqueado y rutas atacadas. Si el incidente requiere un desafío adicional, activar temporalmente el modo Under Attack solo en la zona de Aurora, y retirarlo al resolverlo para evitar fricción a visitantes y rastreadores. Mantener Access en staging. No suspender automáticamente toda la cuenta ni modificar los otros proyectos. Si hay que revertir una regla, usar el snapshot anterior y conservar las reglas ajenas.
+
+`npm run verify:production` comprueba en vivo páginas públicas y guía, cabeceras, 404, redirección, bloqueos de sondeos y POST y la protección Access de staging. El test local usa un módulo centinela solo para adaptar Miniflare: no se empaqueta ni despliega, y cualquier invocación hace fallar la prueba.
 
 
 ## Guía de masaje relajante

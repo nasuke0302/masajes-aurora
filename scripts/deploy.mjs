@@ -21,6 +21,8 @@ if(mode==='production'){
  const packageRoot=resolve('.cloudflare/production'),built=await readBuildOutput(packageRoot)
  if(JSON.parse(await readFile(join(packageRoot,'profile.json'),'utf8')).profile!=='production'||Object.keys(built.workers).length!==1||built.workers.default.config.name!=='masajes-aurora')throw new Error('WRONG_PRODUCTION_ARTIFACT')
  await run([resolve('scripts/test-production.mjs')])
+ // The assets-only artifact relies on the edge redirect and abuse rules; do not deploy without them.
+ await run([resolve('scripts/setup-production-security.mjs')])
  await run([cli,'deploy','--mode','production','--prebuilt'],packageRoot)
  process.exit(0)
 }

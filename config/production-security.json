@@ -1,0 +1,55 @@
+{
+  "zone": "auroramasajista.com",
+  "phases": {
+    "http_request_dynamic_redirect": {
+      "name": "Aurora canonical host",
+      "rules": [{
+        "ref": "aurora_www_canonical",
+        "description": "Aurora: redirect www without invoking a Worker",
+        "enabled": true,
+        "expression": "http.host eq \"www.auroramasajista.com\"",
+        "action": "redirect",
+        "action_parameters": { "from_value": {
+          "status_code": 308,
+          "target_url": { "expression": "concat(\"https://auroramasajista.com\", http.request.uri.path)" },
+          "preserve_query_string": true
+        }}
+      }]
+    },
+    "http_request_firewall_custom": {
+      "name": "Aurora static site protection",
+      "rules": [
+        {
+          "ref": "aurora_static_methods",
+          "description": "Aurora: static website accepts GET and HEAD only",
+          "enabled": true,
+          "expression": "(http.host in {\"auroramasajista.com\" \"www.auroramasajista.com\"} and not http.request.method in {\"GET\" \"HEAD\"})",
+          "action": "block"
+        },
+        {
+          "ref": "aurora_scanner_paths",
+          "description": "Aurora: block probes for secrets and nonexistent WordPress",
+          "enabled": true,
+          "expression": "(http.host in {\"auroramasajista.com\" \"www.auroramasajista.com\"} and (starts_with(lower(http.request.uri.path), \"/.env\") or starts_with(lower(http.request.uri.path), \"/.git\") or starts_with(lower(http.request.uri.path), \"/wp-admin\") or lower(http.request.uri.path) in {\"/wp-login.php\" \"/xmlrpc.php\"}))",
+          "action": "block"
+        }
+      ]
+    },
+    "http_ratelimit": {
+      "name": "Aurora request burst protection",
+      "rules": [{
+        "ref": "aurora_public_burst_limit",
+        "description": "Aurora: 200 requests per IP per 10 seconds; verified bots excluded",
+        "enabled": true,
+        "expression": "(http.host in {\"auroramasajista.com\" \"www.auroramasajista.com\"} and not cf.client.bot)",
+        "action": "block",
+        "ratelimit": {
+          "characteristics": ["cf.colo.id", "ip.src"],
+          "period": 10,
+          "requests_per_period": 200,
+          "mitigation_timeout": 10
+        }
+      }]
+    }
+  }
+}

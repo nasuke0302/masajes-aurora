@@ -4,6 +4,7 @@ const origin='https://auroramasajista.com'
 for(const path of ['/','/masaje-relajante-avila','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-fluido-hero.png']){
  const response=await fetch(origin+path,{redirect:'manual',signal:AbortSignal.timeout(20000)})
  assert.equal(response.status,200,path)
+ if(path==='/')for(const [name,value] of Object.entries({'x-content-type-options':'nosniff','referrer-policy':'no-referrer','x-frame-options':'DENY'}))assert.equal(response.headers.get(name),value,name)
  if(path==='/'){
   const html=await response.text();assert.match(html,/Reservar por WhatsApp/);assert.doesNotMatch(html,/href="\/reservar"|Reservar una sesión|Recibirás la confirmación de tu reserva por email|challenges\.cloudflare\.com/)
   const scripts=[...html.matchAll(/<script[^>]*src="([^\"]+)"/g)].map(m=>m[1])
@@ -21,4 +22,6 @@ const www=await fetch('https://www.auroramasajista.com/privacidad?check=domain',
 assert.equal(www.status,308);assert.equal(www.headers.get('location'),origin+'/privacidad?check=domain')
 const staging=await fetch('https://aurora-staging.geonuvia.com/',{redirect:'manual'})
 assert.equal(staging.status,302);assert.match(staging.headers.get('location'),/geonuvia\.cloudflareaccess\.com/)
-console.log('Live production: static website and 404s verified; www redirect and staging Access preserved')
+for(const path of ['/.env','/.git/config','/wp-admin/','/wp-login.php','/xmlrpc.php'])assert.equal((await fetch(origin+path,{redirect:'manual',signal:AbortSignal.timeout(20000)})).status,403,path)
+assert.equal((await fetch(origin+'/',{method:'POST',redirect:'manual',signal:AbortSignal.timeout(20000)})).status,403,'POST blocked before assets')
+console.log('Live production: static pages, headers, real 404s, edge redirect and abuse rules verified; staging Access preserved')

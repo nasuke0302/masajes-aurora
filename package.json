@@ -21,7 +21,8 @@
     "verify:production": "node scripts/verify-production.mjs",
     "test:worker": "node scripts/preview.mjs --smoke",
     "setup:access": "node scripts/setup-access.mjs",
-    "setup:turnstile": "node scripts/setup-turnstile.mjs"
+    "setup:turnstile": "node scripts/setup-turnstile.mjs",
+    "setup:security": "node scripts/setup-production-security.mjs"
   },
   "dependencies": {
     "@fontsource/urbanist": "^5.3.0",

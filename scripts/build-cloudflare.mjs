@@ -17,15 +17,16 @@ if(mode==='production'){
  const config=await loadAndParseConfig(resolve('production.cloudflare.config.ts'),{mode,isPreview:false})
  if(!config.result.success)throw new Error('INVALID_STATIC_CONFIG: '+JSON.stringify(config.result.error))
  await writeRootConfig(packageRoot,{}, {mode,isPreview:false})
- const bundle=getWorkerBundleDir(packageRoot);await mkdir(bundle,{recursive:true})
- await cp(resolve('workers/marketing.mjs'),resolve(bundle,'index.mjs'))
  await rm(resolve('.output-production/public/200.html'),{force:true})
+ await cp(resolve('config/production-headers'),resolve('.output-production/public/_headers'))
  await writeAssets({root:packageRoot,sourceDirectory:resolve('.output-production/public')})
- await writeWorkerConfig({root:packageRoot,config:config.result.data.worker,manifest:{type:'complete',mainModule:'index.mjs',modules:{'index.mjs':{type:'esm'}}}})
+ // Omitting the manifest is assets-only mode: no executable bundle, even for unknown URLs.
+ await writeWorkerConfig({root:packageRoot,config:config.result.data.worker})
  await writeFile(resolve(packageRoot,'profile.json'),JSON.stringify({profile:mode})+'\n')
  const output=await readBuildOutput(packageRoot)
- if(Object.keys(output.workers).length!==1||Object.keys(output.workers.default.config.env).join(',')!=='ASSETS'||output.workers.default.config.triggers.length)throw new Error('STATIC_PACKAGE_HAS_BACKEND')
- console.log('Cloudflare static production package verified (no backend): '+packageRoot)
+ const web=output.workers.default
+ if(Object.keys(output.workers).length!==1||web.config.manifest||Object.keys(web.config.env).length||web.config.triggers.length||web.config.assets.runWorkerFirst!==false)throw new Error('STATIC_PACKAGE_HAS_BACKEND')
+ console.log('Cloudflare assets-only production package verified (no executable Worker): '+packageRoot)
  process.exit(0)
 }
 // The fixed build directory is inside the explicitly selected project.

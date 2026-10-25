@@ -11,7 +11,8 @@ export default defineConfig(({ mode }) => {
   domains: process.env.WORKER_DOMAIN ? [process.env.WORKER_DOMAIN] : undefined,
   entrypoint: './.output/server/index.mjs', compatibilityDate: '2026-10-11', compatibilityFlags: ['nodejs_compat'],
   assets: { runWorkerFirst: true },
-  observability: { enabled: true, redactQueryString: true, traces: { enabled: true, headSamplingRate: 0.1 } },
+  limits: { cpuMs: 100 },
+  observability: { enabled: true, headSamplingRate: 0.01, redactQueryString: true, logs: { enabled: true, headSamplingRate: 0.01 }, traces: { enabled: true, headSamplingRate: 0.01 } },
   triggers: [triggers.scheduled({ schedule: '* * * * *' })],
   env: {
    TURNSTILE_SECRET_KEY:process.env.TURNSTILE_SECRET_KEY?bindings.secret():bindings.text(''),
