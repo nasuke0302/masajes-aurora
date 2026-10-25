@@ -14,8 +14,32 @@ useTextReveal(page)
 const description = 'Dedícate un momento con Aurora Masajista. Masajes a domicilio exclusivamente en Ávila capital. Contacta por WhatsApp para reservar.'
 
 const config = useRuntimeConfig()
-useSeoMeta({ title: 'Aurora Masajista · Masajes a domicilio en Ávila', ogTitle: 'Aurora Masajista', ogDescription: description, ogImage: config.public.siteUrl ? new URL('/images/masaje-cuerpo-completo-hero.png', config.public.siteUrl).href : undefined })
-useHead({ script: [{ type: 'application/ld+json', innerHTML: JSON.stringify({ '@context': 'https://schema.org', '@type': 'ProfessionalService', name: 'Aurora Masajista', telephone: '+34644517187', areaServed: { '@type': 'City', name: 'Ávila' }, ...(config.public.siteUrl ? {url: config.public.siteUrl} : {}), description }) }], link: config.public.siteUrl ? [{ rel: 'canonical', href: config.public.siteUrl }] : [] })
+useSeoMeta({
+  title: 'Aurora Masajista · Masajes a domicilio en Ávila',
+  ogTitle: 'Aurora Masajista',
+  ogDescription: description,
+  ogImage: config.public.siteUrl ? new URL('/images/masaje-cuerpo-completo-hero.png', config.public.siteUrl).href : undefined
+})
+useHead({
+  script: [{
+    type: 'application/ld+json',
+    innerHTML: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      name: 'Aurora Masajista',
+      telephone: '+34644517187',
+      areaServed: {
+        '@type': 'City',
+        name: 'Ávila'
+      },
+      openingHours: "Mo-Sa 11:00-19:00",
+      priceRange: "€€",
+      ...(config.public.siteUrl ? { url: config.public.siteUrl } : {}),
+      description
+    })
+  }],
+  link: config.public.siteUrl ? [{ rel: 'canonical', href: config.public.siteUrl }] : []
+})
 </script>
 
 <template>
@@ -32,4 +56,3 @@ useHead({ script: [{ type: 'application/ld+json', innerHTML: JSON.stringify({ '@
     <Footer />
   </div>
 </template>
-
