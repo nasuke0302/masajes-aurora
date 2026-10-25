@@ -3,6 +3,7 @@ import {readFile,readdir} from 'node:fs/promises'
 import {resolve,extname} from 'node:path'
 import {Miniflare} from 'miniflare'
 import {readBuildOutput} from '@cloudflare/build-output-utils'
+import {assertGuide} from './assert-guide.mjs'
 const root=resolve('.cloudflare/production'),built=await readBuildOutput(root)
 assert.equal(JSON.parse(await readFile(resolve(root,'profile.json'),'utf8')).profile,'production')
 assert.deepEqual(Object.keys(built.workers),['default'])
@@ -19,10 +20,11 @@ config.manifest={mainModule:'index.mjs',modulesRoot:web.bundleDir,modules:{'inde
 config.assets={...config.assets,directory:web.assetsDir,hasUserWorker:true}
 const mf=new Miniflare({workers:[{config}],port:0,logRequests:false,telemetry:{enabled:false}})
 try{
- for(const path of ['/','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-fluido-hero.png']){
+ for(const path of ['/','/masaje-relajante-avila','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-fluido-hero.png']){
   const r=await mf.dispatchFetch('https://auroramasajista.com'+path);assert.equal(r.status,200,path)
-  if(path==='/'){const html=await r.text();assert.match(html,/Reservar por WhatsApp/);assert.doesNotMatch(html,/href="\/reservar"|Reservar una sesión|Recibirás la confirmación de tu reserva por email/);assert.match(html,/https:\/\/wa.me\/34644517187/)}
-  if(path==='/sitemap.xml')assert.doesNotMatch(await r.text(),/\/reservar|\/admin|\/reserva\//)
+  if(path==='/'){const html=await r.text();assert.match(html,/Reservar por WhatsApp/);assert.doesNotMatch(html,/href="\/reservar"|Reservar una sesión|Recibirás la confirmación de tu reserva por email/);assert.match(html,/https:\/\/wa.me\/34644517187/);assert(html.includes('href="/masaje-relajante-avila"'))}
+  if(path==='/masaje-relajante-avila')assertGuide(await r.text())
+  if(path==='/sitemap.xml'){const xml=await r.text();assert.doesNotMatch(xml,/\/reservar|\/admin|\/reserva\//);assert(xml.includes('<loc>https://auroramasajista.com/masaje-relajante-avila</loc>'))}
  }
  for(const path of ['/reservar','/reserva/token','/admin','/admin/acceso','/api/catalog','/api/auth-mode','/api/admin/settings','/unknown'])for(const headers of [{},{'Sec-Fetch-Mode':'navigate'}])assert.equal((await mf.dispatchFetch('https://auroramasajista.com'+path,{headers})).status,404,path)
  const www=await mf.dispatchFetch('https://www.auroramasajista.com/privacidad?test=1',{redirect:'manual'});assert.equal(www.status,308);assert.equal(www.headers.get('location'),'https://auroramasajista.com/privacidad?test=1')

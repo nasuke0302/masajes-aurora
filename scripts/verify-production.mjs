@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
+import {assertGuide} from './assert-guide.mjs'
 const origin='https://auroramasajista.com'
-for(const path of ['/','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-fluido-hero.png']){
+for(const path of ['/','/masaje-relajante-avila','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-fluido-hero.png']){
  const response=await fetch(origin+path,{redirect:'manual',signal:AbortSignal.timeout(20000)})
  assert.equal(response.status,200,path)
  if(path==='/'){
@@ -8,7 +9,8 @@ for(const path of ['/','/aviso-legal','/privacidad','/cookies','/condiciones-res
   const scripts=[...html.matchAll(/<script[^>]*src="([^\"]+)"/g)].map(m=>m[1])
   for(const script of scripts){const js=await fetch(new URL(script,origin)).then(r=>r.text());assert.doesNotMatch(js,/booking_create|\/api\/(?:bookings|admin|catalog)|vue-cal/)}
  }
- if(path==='/sitemap.xml')assert.doesNotMatch(await response.text(),/\/reservar|\/admin|\/reserva\//)
+ if(path==='/masaje-relajante-avila')assertGuide(await response.text())
+ if(path==='/sitemap.xml'){const xml=await response.text();assert.doesNotMatch(xml,/\/reservar|\/admin|\/reserva\//);assert(xml.includes('<loc>'+origin+'/masaje-relajante-avila</loc>'))}
  console.log(path,200)
 }
 for(const path of ['/reservar','/reservar/','/reserva/token','/admin','/admin/acceso','/api/catalog','/api/bookings','/api/auth-mode','/api/admin/settings','/unknown']){

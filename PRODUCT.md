@@ -4,6 +4,8 @@ Spanish website for at-home wellbeing massages exclusively in Ávila capital. Au
 
 ## Booking rules
 
+The public Spanish guide at `/masaje-relajante-avila` explains the at-home wellbeing service and converts enquiries through WhatsApp, with no automatic booking. It is shared by staging and static production, linked from the homepage services, dated 2026-10-25, and uses the existing illustrative image, typography and palette with an index and a 70ch reading column. Canonical, BlogPosting, BreadcrumbList, both sitemaps and production prerender include the route.
+
 These booking and admin features apply to staging only. Production at auroramasajista.com is an informational static website: WhatsApp booking CTA, no booking/admin routes or APIs, no database, emails, queue, cron, Access or Turnstile. Its public legal pages describe direct contact. Build scripts explicitly select the profile independently of NODE_ENV; preserve the full staging behavior when changing shared components.
 
 The public landing presents a 60-minute full-body massage and a facial massage as an optional 10-minute complement to that session. The staging booking catalog still contains 40- and 60-minute massages; the facial complement is not yet integrated into its booking flow.

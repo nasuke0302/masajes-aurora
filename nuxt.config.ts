@@ -32,6 +32,7 @@ export default defineNuxtConfig({
       if (marketing) {
         const allowed = new Set([
           "/",
+          "/masaje-relajante-avila",
           "/aviso-legal",
           "/privacidad",
           "/cookies",
@@ -83,6 +84,7 @@ export default defineNuxtConfig({
             failOnError: true,
             routes: [
               "/",
+              "/masaje-relajante-avila",
               "/aviso-legal",
               "/privacidad",
               "/cookies",

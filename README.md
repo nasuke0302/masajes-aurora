@@ -4,7 +4,7 @@
 
 Publicada el 24 de octubre de 2026 en https://auroramasajista.com. El Worker web es `masajes-aurora`; `www.auroramasajista.com` redirige con HTTP 308 al dominio principal conservando ruta y parámetros. Los dos hostnames son Custom Domains del Worker. Los registros de aparcamiento de Hostinger se sustituyeron por los gestionados por Workers.
 
-Producción es una web estática prerenderizada con Nuxt. Solo contiene portada, páginas legales, imágenes, fuentes, CSS, JavaScript de presentación, sitemap y robots. Muestra «Reservar por WhatsApp» como acción principal. Las rutas `/reservar`, `/reserva/**`, `/admin/**` y `/api/**` devuelven 404 real y se excluyen antes de compilar; no se genera su código de aplicación. La navegación del cliente tampoco incluye esas páginas. Las páginas legales de producción describen el contacto directo, sin formularios ni confirmaciones automáticas.
+Producción es una web estática prerenderizada con Nuxt. Solo contiene portada, guía de masaje relajante, páginas legales, imágenes, fuentes, CSS, JavaScript de presentación, sitemap y robots. Muestra «Reservar por WhatsApp» como acción principal. Las rutas `/reservar`, `/reserva/**`, `/admin/**` y `/api/**` devuelven 404 real y se excluyen antes de compilar; no se genera su código de aplicación. La navegación del cliente tampoco incluye esas páginas. Las páginas legales de producción describen el contacto directo, sin formularios ni confirmaciones automáticas.
 
 El Worker `masajes-aurora` solo sirve assets y redirige `www`; no ejecuta el servidor de Nuxt ni tiene D1, colas, tareas programadas, secretos, Access o Turnstile. Los recursos de backend creados inicialmente para producción se retiraron tras comprobar que no había reservas ni emails pendientes. Staging conserva sus recursos, páginas, autenticación, tarifas y formularios existentes.
 
@@ -14,6 +14,12 @@ Comandos: `npm run build:production` genera la web; `npm run test:production` in
 
 Los artefactos de producción están en `.nuxt-production/`, `.output-production/` y `.cloudflare/production/`; los de staging siguen en `.nuxt/`, `.output/` y `.cloudflare/output/`. No intercambiar paquetes precompilados entre perfiles. El despliegue de producción verifica el perfil, nombre del Worker, ausencia de backend y 404 antes de publicar. No hay fallback SPA (`200.html`) en el paquete estático.
 
+
+## Guía de masaje relajante
+
+`/masaje-relajante-avila` es una guía en español compartida por staging y producción, enlazada desde Servicios en portada. `src/pages/masaje-relajante-avila.vue` conserva Urbanist, la paleta existente y la fotografía ilustrativa; añade índice, lectura de hasta 70ch y contacto por WhatsApp. Publicación y modificación: 25 de octubre de 2026. Incluye canonical según el origen, `BlogPosting`, `BreadcrumbList`, entrada en ambos sitemaps y prerender de producción; mantiene la producción estática sin backend.
+
+Validación: `npm run type-check`, `npm run build:production` y `npm run test:production`; tras publicar, `npm run verify:production` comprueba también la guía y su entrada en el sitemap. La revisión independiente de fuente y capturas `.data/screenshots/guide-desktop-full.jpg` y `guide-mobile-full.jpg` devolvió SHIP sin correcciones, limitada a esta guía; no acredita una revisión completa de la web ni un despliegue. `DESIGN.md` y `.impeccable/design.json` conservan la identidad y los tokens existentes.
 
 ## Estado inicial
 
