@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
+import { optimizeHeroImages } from "./scripts/optimize-images";
 const profile = process.env.AURORA_PROFILE || "staging";
 if (!["production", "staging"].includes(profile))
   throw new Error("INVALID_AURORA_PROFILE");
@@ -28,6 +29,7 @@ export default defineNuxtConfig({
       ]
     : [],
   hooks: {
+    "build:before": optimizeHeroImages,
     "pages:extend"(pages) {
       if (marketing) {
         const allowed = new Set([

@@ -6,7 +6,10 @@ import Verified from '@primeicons/vue/verified'
 import Sliders from '@primeicons/vue/sliders-h'
 import MapMarker from '@primeicons/vue/map-marker'
 
-const artwork = '/images/masaje-cuerpo-completo-hero.png'
+const artwork = '/images/masaje-cuerpo-completo-hero-952.webp'
+const artworkSrcset = [480, 768, 952]
+  .map(width => `/images/masaje-cuerpo-completo-hero-${width}.webp ${width}w`)
+  .join(', ')
 const bookingEnabled = !!import.meta.env.AURORA_BOOKING_ENABLED
 </script>
 
@@ -29,7 +32,7 @@ const bookingEnabled = !!import.meta.env.AURORA_BOOKING_ENABLED
       </div>
       <div class="hero-photograph">
         <Image :src="artwork" alt="Masaje de espalda en una camilla a domicilio. La profesional lleva uniforme gris y su rostro queda fuera del encuadre."
-          :w="952" :h="528" sizes="(min-width: 1024px) 74vw, 100vw" eager />
+          :srcset="artworkSrcset" :w="952" :h="528" sizes="(min-width: 1800px) 1332px, (min-width: 1024px) 74vw, 100vw" eager />
       </div>
     </div>
     <ul class="hero-trust" aria-label="Sobre el servicio">
