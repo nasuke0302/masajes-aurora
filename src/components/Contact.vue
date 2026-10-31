@@ -1,6 +1,3 @@
-<script setup lang="ts">
-import ContactWidget from './ContactWidget.vue'
-</script>
 <template>
   <section id="aurora" aria-labelledby="about-title" class="scroll-mt-6">
     <div class="landing-columns gap-y-8 bg-[#d7eee8] px-[5%] py-16 lg:py-20">
@@ -19,6 +16,5 @@ import ContactWidget from './ContactWidget.vue'
         </p>
       </div>
     </div>
-    <ContactWidget />
   </section>
 </template>

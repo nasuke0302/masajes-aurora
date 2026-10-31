@@ -5,6 +5,8 @@ import Hero from '../components/Hero.vue'
 import MassageDetails from '../components/MassageDetails.vue'
 import Services from '../components/Services.vue'
 import Contact from '../components/Contact.vue'
+import GoogleReviewsLink from '../components/GoogleReviewsLink.vue'
+import ContactWidget from '../components/ContactWidget.vue'
 import Footer from '../components/Footer.vue'
 import { marketingPrice, marketingFirstSessionPrice } from '#shared/marketing-offer'
 
@@ -54,6 +56,8 @@ useHead({
       <MassageDetails />
       <Services />
       <Contact />
+      <ContactWidget />
+      <GoogleReviewsLink />
     </main>
     <Footer />
   </div>
