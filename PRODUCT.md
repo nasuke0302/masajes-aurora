@@ -10,7 +10,7 @@ Aurora brings the massage table, towel, hand sanitiser, creams and all necessary
 
 ## Booking rules
 
-The public Spanish guide at `/masaje-relajante-avila` explains the at-home wellbeing service and converts enquiries through WhatsApp, with no automatic booking. It is shared by staging and static production, linked from the homepage services, dated 2026-10-25, and uses the existing illustrative image, typography and palette with an index and a 70ch reading column. Canonical, BlogPosting, BreadcrumbList, both sitemaps and production prerender include the route.
+The public Spanish guide at `/blog/masaje-relajante-avila` explains the at-home wellbeing service and converts enquiries through WhatsApp, with no automatic booking. The old `/masaje-relajante-avila` URL redirects to it with 301. It is shared by staging and static production, linked from the homepage services, dated 2026-10-25, and uses the existing illustrative image, typography and palette with an index and a 70ch reading column. Canonical, BlogPosting, BreadcrumbList, both sitemaps and production prerender include the route.
 
 These booking and admin features apply to staging only. Production at auroramasajista.com is an informational static website: WhatsApp booking CTA, no booking/admin routes or APIs, no database, emails, queue, cron, Access or Turnstile. Its public legal pages describe direct contact. Build scripts explicitly select the profile independently of NODE_ENV; preserve the full staging behavior when changing shared components.
 

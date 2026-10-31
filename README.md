@@ -32,7 +32,7 @@ Ante una alerta: revisar Billing y las métricas por Worker antes de atribuirla 
 
 ## Guía de masaje relajante
 
-`/masaje-relajante-avila` es una guía en español compartida por staging y producción, enlazada desde Servicios en portada. `src/pages/masaje-relajante-avila.vue` conserva Urbanist, la paleta existente y la fotografía ilustrativa; añade índice, lectura de hasta 70ch y contacto por WhatsApp. Publicación y modificación: 25 de octubre de 2026. Incluye canonical según el origen, `BlogPosting`, `BreadcrumbList`, entrada en ambos sitemaps y prerender de producción; mantiene la producción estática sin backend.
+`/blog/masaje-relajante-avila` es una guía en español compartida por staging y producción, enlazada desde Servicios en portada. `src/pages/blog/masaje-relajante-avila.vue` conserva Urbanist, la paleta existente y la fotografía ilustrativa; añade índice, lectura de hasta 70ch y contacto por WhatsApp. La URL antigua `/masaje-relajante-avila` redirige con 301. Publicación: 25 de octubre de 2026; modificación: 31 de octubre de 2026. Incluye canonical según el origen, `BlogPosting`, `BreadcrumbList`, entrada en ambos sitemaps y prerender de producción; mantiene la producción estática sin backend.
 
 Validación: `npm run type-check`, `npm run build:production` y `npm run test:production`; tras publicar, `npm run verify:production` comprueba también la guía y su entrada en el sitemap. La revisión independiente de fuente y capturas `.data/screenshots/guide-desktop-full.jpg` y `guide-mobile-full.jpg` devolvió SHIP sin correcciones, limitada a esta guía; no acredita una revisión completa de la web ni un despliegue. `DESIGN.md` y `.impeccable/design.json` conservan la identidad y los tokens existentes.
 

@@ -32,7 +32,7 @@ import ContactButton from './ContactButton.vue'
       </div>
       <ContactButton class="mt-7" />
       <p class="mt-5 text-base leading-relaxed text-muted">¿Es tu primera sesión? Lee nuestra <NuxtLink
-          to="/masaje-relajante-avila" class="text-link">guía de masaje relajante en Ávila</NuxtLink> para saber qué
+          to="/blog/masaje-relajante-avila" class="text-link">guía de masaje relajante en Ávila</NuxtLink> para saber qué
         esperar de una visita a domicilio.</p>
     </div>
   </section>

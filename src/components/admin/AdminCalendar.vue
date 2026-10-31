@@ -7,7 +7,7 @@ const props=defineProps<{anchor:string;view:'week'|'month';dates:string[];rows:A
 const emit=defineEmits<{select:[reservation:AgendaReservation];create:[startAt:number];move:[reservation:AgendaReservation,startAt:number];invalid:[message:string]}>()
 const range=computed(()=>agendaRange(props.hours,props.rows))
 const calendarRoot=ref<HTMLElement|null>(null)
-const dragPreview=ref<{day:string;time:string;x:number;y:number}|null>(null)
+const dragPreview=ref<{day:string;time:string}|null>(null)
 let dragged:{row:AgendaReservation;grab:number}|null=null
 function clearDrag(){dragged=null;dragPreview.value=null}
 watch(()=>[props.view,props.anchor,props.revision,props.loading],clearDrag)
@@ -34,7 +34,7 @@ function previewDrag(e:DragEvent){
  const start=new Date(date+'T00:00:00');start.setMinutes(snapped)
  const end=new Date(start);end.setMinutes(end.getMinutes()+(dragged.row.end_at-dragged.row.start_at)/60)
  const clock=(d:Date)=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')
- dragPreview.value={day:new Intl.DateTimeFormat('es-ES',{weekday:'short',day:'numeric',month:'short'}).format(start),time:clock(start)+'–'+clock(end),x:Math.max(8,Math.min(e.clientX+16,window.innerWidth-184)),y:Math.max(8,Math.min(e.clientY+18,window.innerHeight-68))}
+ dragPreview.value={day:new Intl.DateTimeFormat('es-ES',{weekday:'short',day:'numeric',month:'short'}).format(start),time:clock(start)+'–'+clock(end)}
 }
 function leaveDrag(e:DragEvent){
  const bounds=calendarRoot.value?.getBoundingClientRect()
@@ -60,39 +60,25 @@ function create(date:Date){if(props.loading)return;try{const chosen=new Date(dat
 function move({event}:{event:{id:string;start:Date}}){const row=props.rows.find(r=>r.id===event.id);if(!row)return;try{emit('move',row,calendarInstant(event.start))}catch(e){emit('invalid',(e as Error).message)}}
 </script>
 <template>
- <div ref="calendarRoot" class="calendar-scroll aurora-vuecal" @dragstart="startDrag" @dragover="previewDrag" @dragleave="leaveDrag" @drop="clearDrag" @dragend="clearDrag" :aria-busy="loading" tabindex="0" aria-label="Agenda en hora de Ávila. Doble clic para crear una reserva.">
+ <div ref="calendarRoot" class="calendar-scroll h-[620px] max-h-[70vh] min-[601px]:h-[720px] min-[601px]:max-h-[75vh]
+   [&_.vuecal]:min-w-[720px] [&_.vuecal]:font-[inherit] [&_.vuecal]:shadow-none [&_.vuecal]:text-ink
+   [&_.vuecal__heading]:min-h-12 [&_.vuecal__heading]:bg-sage-light
+   [&_.vuecal__cell--today]:bg-[#edf8f566]
+   [&_.vuecal__event.aurora-session]:rounded-md [&_.vuecal__event.aurora-session]:border [&_.vuecal__event.aurora-session]:border-sage [&_.vuecal__event.aurora-session]:bg-sage-light [&_.vuecal__event.aurora-session]:text-ink
+   [&_.vuecal__event.is-selected]:outline-2 [&_.vuecal__event.is-selected]:-outline-offset-2 [&_.vuecal__event.is-selected]:outline-ink
+   [&_.vuecal__event.is-completed]:bg-sage-light [&_.vuecal__event.is-completed]:opacity-80
+   [&_.vuecal__event.aurora-unavailable]:border-y [&_.vuecal__event.aurora-unavailable]:border-[#8aaeb2] [&_.vuecal__event.aurora-unavailable]:bg-[#cbdadb] [&_.vuecal__event.aurora-unavailable]:text-[#214d53]
+   [&_.aurora-unavailable_.aurora-background-label]:font-semibold
+   [&_.vuecal__event.aurora-block]:bg-coral/15
+   [&_.vuecal__event.aurora-buffer]:bg-sage-light [&_.vuecal__event.aurora-buffer]:text-muted
+   [&_.vuecal__cell-events-count]:bg-sage
+   [&_.vuecal--month-view_.vuecal__cell]:min-h-[100px]"
+   @dragstart="startDrag" @dragover="previewDrag" @dragleave="leaveDrag" @drop="clearDrag" @dragend="clearDrag" :aria-busy="loading" tabindex="0" aria-label="Agenda en hora de Ávila. Doble clic para crear una reserva.">
   <ClientOnly><VueCal :key="revision+':'+view" :selected-date="anchor" :active-view="view" :disable-views="['years','year','day']" hide-view-selector hide-title-bar locale="es" :events="events" :events-on-month-view="false" :editable-events="{title:false,drag:view==='week',resize:false,create:false,delete:false}" :time-from="range.start" :time-to="range.end" :time-step="60" :time-cell-height="81" :snap-to-time="10" :dblclick-to-navigate="false" :click-to-navigate="false" :cell-click-hold="false" :drag-to-create-event="false" :transitions="false" :on-event-click="select" @cell-dblclick="create" @event-drop="move">
-   <template #weekday-heading="{heading}"><span>{{ heading.label }}<template v-if="view==='week'&&heading.date"> {{ heading.date.getDate() }}<small class="aurora-day-count">{{ dayMassageCount(rows,calendarDateText(heading.date)) }} masajes</small></template></span></template>
-   <template #cell-content="{cell,view,events}"><template v-if="view.id==='month'"><div class="vuecal__cell-date">{{ cell.content }}</div><p class="aurora-month-count">{{ events.length }} {{ events.length===1?'cita':'citas' }}</p></template></template>
-   <template #event="{event}"><div v-if="!event.background" role="button" tabindex="0" class="aurora-event-button" :aria-pressed="selectedId===event.id" @click.stop="select(event)" @keydown.enter.prevent="select(event)" @keydown.space.prevent="select(event)" @dblclick.stop><span>{{ label(event.id) }}</span><strong>{{ event.title }}</strong><span>{{ massages(event.id) }}</span></div><span v-else class="aurora-background-label">{{ event.title }}</span></template>
+   <template #weekday-heading="{heading}"><span>{{ heading.label }}<template v-if="view==='week'&&heading.date"> {{ heading.date.getDate() }}<small class="block text-xs text-muted">{{ dayMassageCount(rows,calendarDateText(heading.date)) }} masajes</small></template></span></template>
+   <template #cell-content="{cell,view,events}"><template v-if="view.id==='month'"><div class="vuecal__cell-date">{{ cell.content }}</div><p class="mt-2 text-[13px] leading-[1.3] text-muted tabular-nums">{{ events.length }} {{ events.length===1?'cita':'citas' }}</p></template></template>
+   <template #event="{event}"><div v-if="!event.background" role="button" tabindex="0" class="flex h-full w-full cursor-grab flex-col overflow-hidden px-1.5 py-1 text-left select-none focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ink [&_span]:text-xs [&_span]:tabular-nums [&_strong]:text-sm [&_strong]:leading-[1.3] [&_strong]:[overflow-wrap:anywhere]" :aria-pressed="selectedId===event.id" @click.stop="select(event)" @keydown.enter.prevent="select(event)" @keydown.space.prevent="select(event)" @dblclick.stop><span>{{ label(event.id) }}</span><strong>{{ event.title }}</strong><span>{{ massages(event.id) }}</span></div><span v-else class="aurora-background-label block px-1 py-0.5 text-xs leading-[1.3]">{{ event.title }}</span></template>
   </VueCal><template #fallback><p class="calendar-feedback">Cargando agenda…</p></template></ClientOnly>
  </div>
- <Teleport to="body"><div v-if="dragPreview" class="aurora-drag-preview" :style="{left:dragPreview.x+'px',top:dragPreview.y+'px'}"><span>{{ dragPreview.day }}</span><strong>{{ dragPreview.time }}</strong></div></Teleport>
+ <Teleport to="body"><div v-if="dragPreview" class="pointer-events-none fixed right-3 bottom-3 z-[1000] flex flex-col gap-0.5 whitespace-nowrap rounded-lg bg-ink px-3 py-2 text-white shadow-[0_4px_16px_#064f5826]"><span class="text-[11px] leading-[1.3]">{{ dragPreview.day }}</span><strong class="text-[15px] leading-[1.3] tabular-nums">{{ dragPreview.time }}</strong></div></Teleport>
 </template>
-<style>
-.aurora-drag-preview {position:fixed;z-index:1000;pointer-events:none;background:#064f58;color:#fff;border-radius:8px;padding:8px 12px;box-shadow:0 4px 16px #064f5826;display:flex;flex-direction:column;gap:2px;white-space:nowrap;}
-.aurora-drag-preview span {font-size:11px;line-height:1.3;}
-.aurora-drag-preview strong {font-size:15px;line-height:1.3;font-variant-numeric:tabular-nums;}
-.aurora-vuecal {height:720px;max-height:75vh;}
-.aurora-vuecal .vuecal {min-width:720px;font-family:inherit;box-shadow:none;color:#064f58;}
-.aurora-vuecal .vuecal__heading {background:#edf8f5;min-height:48px;}
-.aurora-vuecal .vuecal__cell--today {background:#edf8f566;}
-.aurora-vuecal .vuecal__event.aurora-session {background:#edf8f5;color:#064f58;border:1px solid #08767b;border-radius:6px;}
-.aurora-vuecal .vuecal__event.is-selected {outline:2px solid #064f58;outline-offset:-2px;}
-.aurora-vuecal .vuecal__event.is-completed {background:#edf8f5;opacity:.8;}
-.aurora-vuecal .vuecal__event.aurora-unavailable {background:#cbdadb;color:#214d53;border-top:1px solid #8aaeb2;border-bottom:1px solid #8aaeb2;}
-.aurora-vuecal .aurora-unavailable .aurora-background-label {font-weight:600;}
-.aurora-vuecal .vuecal__event.aurora-block {background:#c9534920;}
-.aurora-vuecal .vuecal__event.aurora-buffer {background:#edf8f5;color:#386369;}
-.aurora-background-label {font-size:12px;line-height:1.3;padding:2px 4px;display:block;}
-.calendar-help {font-size:12px;color:#386369;padding:12px 16px;}
-.aurora-month-count {margin:8px 0 0;font-size:13px;line-height:1.3;color:#386369;font-variant-numeric:tabular-nums;}
-.aurora-day-count {display:block;font-size:12px;color:#386369;}
-.aurora-event-button {user-select:none;width:100%;height:100%;padding:4px 6px;text-align:left;display:flex;flex-direction:column;overflow:hidden;cursor:grab;}
-.aurora-event-button span {font-size:12px;font-variant-numeric:tabular-nums;}
-.aurora-event-button strong {font-size:14px;line-height:1.3;overflow-wrap:anywhere;}
-.aurora-event-button:focus-visible {outline:2px solid #064f58;outline-offset:-2px;}
-.aurora-vuecal .vuecal__cell-events-count {background:#08767b;}
-.aurora-vuecal .vuecal--month-view .vuecal__cell {min-height:100px;}
-@media(max-width:600px){.aurora-vuecal{height:620px;max-height:70vh;}}
-</style>

@@ -34,7 +34,9 @@ export default defineNuxtConfig({
       if (marketing) {
         const allowed = new Set([
           "/",
-          "/masaje-relajante-avila",
+          "/blog",
+          "/blog/masaje-relajante-avila",
+          "/blog/masajes-relajacion-bienestar",
           "/aviso-legal",
           "/privacidad",
           "/cookies",
@@ -86,7 +88,9 @@ export default defineNuxtConfig({
             failOnError: true,
             routes: [
               "/",
-              "/masaje-relajante-avila",
+              "/blog",
+              "/blog/masaje-relajante-avila",
+              "/blog/masajes-relajacion-bienestar",
               "/aviso-legal",
               "/privacidad",
               "/cookies",

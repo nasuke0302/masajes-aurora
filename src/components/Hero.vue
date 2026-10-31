@@ -15,16 +15,16 @@ const bookingEnabled = !!import.meta.env.AURORA_BOOKING_ENABLED
 
 <template>
   <section id="home" aria-labelledby="hero-title" class="bg-cream">
-    <div class="hero-scene">
-      <header class="hero-header">
+    <div class="relative isolate overflow-hidden lg:min-h-[clamp(580px,43vw,690px)]">
+      <header class="relative z-[2] px-[5%] py-5 min-[600px]:py-6">
         <BrandLogo />
       </header>
-      <div class="hero-copy">
-        <h1 id="hero-title" class="hero-title">
+      <div class="relative z-[2] px-[5%] pt-5 pb-9 min-[600px]:pt-8 lg:pt-[clamp(35px,4vw,72px)] lg:pb-16">
+        <h1 id="hero-title" class="max-w-[13ch] text-[clamp(2.5rem,9vw,3.5rem)] leading-[1.04] font-extrabold tracking-[-.04em] min-[600px]:max-w-none min-[600px]:text-[clamp(2.75rem,6vw,6rem)] lg:w-max lg:max-w-[95%] lg:text-[clamp(3.25rem,5.4vw,6rem)]">
           Un masaje a tu ritmo.<br /><span class="text-coral">En tu casa.</span>
         </h1>
-        <p class="hero-description">Masajes de bienestar a domicilio, exclusivamente en Ávila capital.</p>
-        <div class="landing-actions">
+        <p class="mt-6 max-w-[35ch] text-lg leading-relaxed lg:hidden">Masajes de bienestar a domicilio, exclusivamente en Ávila capital.</p>
+        <div class="landing-actions lg:mt-8">
           <NuxtLink v-if="bookingEnabled" to="/reservar" class="landing-button">Reservar una sesión</NuxtLink>
           <ContactButton />
         </div>
@@ -32,169 +32,23 @@ const bookingEnabled = !!import.meta.env.AURORA_BOOKING_ENABLED
           <Phone :size="20" class="block shrink-0" aria-hidden="true" /><span>+34 644 51 71 87</span>
         </a>
       </div>
-      <div class="hero-photograph">
+      <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:left-[26%] lg:z-0">
         <Image :src="artwork" alt="Imagen ilustrativa de un masaje de espalda en una camilla a domicilio."
           :srcset="artworkSrcset" :w="952" :h="528" sizes="(min-width: 1800px) 1332px, (min-width: 1024px) 74vw, 100vw"
-          eager />
+          class="block h-auto w-full lg:h-full lg:object-cover lg:object-[56%_center]" eager />
       </div>
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 z-[1] hidden bg-[linear-gradient(90deg,#fafdfc_0%,#fafdfc_29%,#fafdfcf7_39%,#fafdfccc_48%,transparent_66%)] lg:block"></div>
     </div>
-    <ul class="hero-trust" aria-label="Sobre el servicio">
-      <li>
-        <Verified :size="24" aria-hidden="true" /><span>Más de 20 años de experiencia</span>
+    <ul class="flex flex-col items-start gap-2.5 border-t border-ink/15 px-[5%] py-6 text-sm leading-normal min-[600px]:flex-row min-[600px]:flex-wrap min-[600px]:items-center min-[600px]:justify-center min-[600px]:gap-x-10 min-[600px]:gap-y-4 lg:gap-0 lg:py-[26px]" aria-label="Sobre el servicio">
+      <li class="flex items-center gap-3.5 text-left min-[600px]:text-center lg:px-10">
+        <Verified :size="24" class="block shrink-0" aria-hidden="true" /><span>Más de 20 años de experiencia</span>
       </li>
-      <li>
-        <Sliders :size="24" aria-hidden="true" /><span>Adaptado a tus preferencias</span>
+      <li class="flex items-center gap-3.5 text-left min-[600px]:text-center lg:border-l lg:border-coral/65 lg:px-10">
+        <Sliders :size="24" class="block shrink-0" aria-hidden="true" /><span>Adaptado a tus preferencias</span>
       </li>
-      <li>
-        <MapMarker :size="24" aria-hidden="true" /><span>Solo en Ávila capital</span>
+      <li class="flex items-center gap-3.5 text-left min-[600px]:text-center lg:border-l lg:border-coral/65 lg:px-10">
+        <MapMarker :size="24" class="block shrink-0" aria-hidden="true" /><span>Solo en Ávila capital</span>
       </li>
     </ul>
   </section>
 </template>
-
-<style scoped>
-.hero-scene {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-.hero-header {
-  position: relative;
-  z-index: 2;
-  padding: 24px 5%;
-}
-
-.hero-copy {
-  position: relative;
-  z-index: 2;
-  padding: 32px 5% 36px;
-}
-
-.hero-title {
-  font-size: clamp(2.75rem, 6vw, 6rem);
-  font-weight: 800;
-  line-height: 1.04;
-  letter-spacing: -0.04em;
-}
-
-.hero-description {
-  max-width: 35ch;
-  margin-top: 24px;
-  font-size: 18px;
-  line-height: 1.6;
-}
-
-.hero-photograph img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.hero-trust {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 16px 40px;
-  padding: 24px 5%;
-  border-top: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.hero-trust li {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  text-align: center;
-}
-
-.hero-trust :deep(svg) {
-  display: block;
-  flex-shrink: 0;
-}
-
-@media (min-width: 1024px) {
-  .hero-scene {
-    min-height: clamp(580px, 43vw, 690px);
-  }
-
-  .hero-scene::after {
-    content: '';
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(90deg, var(--color-cream) 0%, var(--color-cream) 29%, rgb(250 253 252 / 97%) 39%, rgb(250 253 252 / 80%) 48%, transparent 66%);
-  }
-
-  .hero-copy {
-    padding-top: clamp(35px, 4vw, 72px);
-    padding-bottom: 64px;
-  }
-
-  .hero-title {
-    width: max-content;
-    max-width: 95%;
-    font-size: clamp(3.25rem, 5.4vw, 6rem);
-  }
-
-  .hero-description {
-    display: none;
-  }
-
-  .hero-copy .landing-actions {
-    margin-top: 32px;
-  }
-
-  .hero-photograph {
-    position: absolute;
-    z-index: 0;
-    inset: 0 0 0 26%;
-  }
-
-  .hero-photograph img {
-    height: 100%;
-    object-fit: cover;
-    object-position: 56% center;
-  }
-
-  .hero-trust {
-    gap: 0;
-    padding-block: 26px;
-  }
-
-  .hero-trust li {
-    padding-inline: 40px;
-  }
-
-  .hero-trust li+li {
-    border-left: 1px solid color-mix(in srgb, var(--color-coral) 65%, transparent);
-  }
-}
-
-@media (max-width: 599px) {
-  .hero-header {
-    padding-block: 20px;
-  }
-
-  .hero-copy {
-    padding-top: 20px;
-  }
-
-  .hero-title {
-    max-width: 13ch;
-    font-size: clamp(2.5rem, 9vw, 3.5rem);
-  }
-
-  .hero-trust {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .hero-trust li {
-    text-align: left;
-  }
-}
-</style>
