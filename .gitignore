@@ -53,3 +53,6 @@ worker-configuration.d.ts
 # Temporary design workflow state
 .impeccable/build/
 .impeccable/questions/
+
+
+/brag-*

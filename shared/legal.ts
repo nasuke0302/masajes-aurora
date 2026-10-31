@@ -2,7 +2,7 @@
 export const legalOwner = {
   name: "Melba Aurora Anias Martínez",
   nif: "Y7235857W",
-  address: "Calle Cardenal Pla y Deniel, 4, piso 1, 05001 Ávila, España",
+  address: "Calle Cardenal Pla y Deniel, Ávila",
   phone: "+34 644 51 71 87",
   phoneHref: "tel:+34644517187",
   email: "melbaaniasmartinez@gmail.com",

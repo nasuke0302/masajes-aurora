@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { legalOwner, TERMS_VERSION } from '#shared/legal'
+import { marketingPrice, marketingFirstSessionPrice, marketingFacialPrice, marketingCombinedPrice, marketingFirstCombinedPrice } from '#shared/marketing-offer'
 useSeoMeta({ title: 'Condiciones de reserva · Aurora Masajista', description: 'Precios, pago en efectivo, cambios, cancelaciones y desistimiento de las reservas de Aurora Masajista.' })
 </script>
 <template>
@@ -12,18 +13,21 @@ useSeoMeta({ title: 'Condiciones de reserva · Aurora Masajista', description: '
     <p>Ofrecemos masajes de bienestar a domicilio exclusivamente en Ávila capital y para personas mayores de 18 años. No
       son servicios sanitarios, diagnósticos ni tratamientos médicos. No se admiten reservas para menores.</p>
     <p>Puedes combinar masajes de 60 minutos para distintas personas adultas en una misma visita. Se realizan
-      consecutivamente, en una única dirección, con un contacto y un pago conjunto. La duración y el precio de los
-      masajes elegidos se suman sin descuentos por grupo.</p>
+      consecutivamente, en una única dirección, con un contacto y un pago conjunto. La primera sesión de cada persona
+      tiene el mismo precio de bienvenida aunque la reserva sea de grupo.</p>
     <h2>Precio y pago</h2>
+    <p>La sesión de 60 minutos cuesta {{ marketingPrice }}. La primera sesión de cada persona cuesta {{ marketingFirstSessionPrice }}.
+      El facial opcional añade 10 minutos por {{ marketingFacialPrice }}, sin descuento. Con facial, el total es
+      {{ marketingCombinedPrice }}, o {{ marketingFirstCombinedPrice }} en la primera sesión.</p>
     <p>
       El pago se acuerda entre la persona interesada y Aurora Masajista antes de confirmar la reserva de una sesión de
       masajes. Se paga en efectivo el día de la cita. La reserva implica la obligación de pagar el servicio
       prestado, aunque no se cobre al reservar. Los cambios posteriores de tarifa no alteran una reserva ya confirmada.
     </p>
     <h2>Cómo reservar</h2>
-    <p>Haz click en el botón "Reservar por WhatsApp" o llama por teléfono al número indicado, acuerda con Aurora
-      Masajista una fecha y una hora, y facilita tus datos de contacto y una dirección válida
-      de Ávila capital. Todas las personas que recibirán un masaje deben ser mayores de edad.</p>
+    <p>Puedes reservar desde la web o contactar con Aurora por WhatsApp o teléfono para acordar fecha y hora.
+      Facilita tus datos de contacto y una dirección válida de Ávila capital. Todas las personas que recibirán un masaje
+      deben ser mayores de edad.</p>
     <h2>Cambios, cancelaciones y ausencias</h2>
     <p>Puedes cancelar o pedir un cambio de fecha gratuitamente, avisando cuanto antes por teléfono, WhatsApp o email,
       con un mínimo de 3 horas de anterioridad. Los cambios dependen de la disponibilidad. No hay penalización por

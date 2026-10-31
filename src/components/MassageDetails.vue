@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { marketingFirstSessionPrice, marketingFacialPrice } from '#shared/marketing-offer'
+
 const sessions = [
   {
     duration: '60 min',
@@ -9,7 +11,7 @@ const sessions = [
   {
     duration: '10 min extras',
     title: 'Masaje facial',
-    description: 'Completa tu masaje de cuerpo completo con un momento de cuidado para tu rostro.',
+    description: 'Añade diez minutos de cuidado para tu rostro como complemento a la sesión de cuerpo completo.',
     icon: 'face',
   },
 ]
@@ -50,14 +52,22 @@ const sessions = [
             </h3>
           </div>
           <p class="mt-3 text-base leading-relaxed text-muted">{{ session.description }}</p>
+          <OfferSummary v-if="index === 0" :show-duration="false" />
+          <p v-else class="mt-4 font-semibold">Complemento: {{ marketingFacialPrice }}</p>
         </article>
       </div>
     </div>
     <div class="landing-columns mt-6">
-      <p class="rounded-2xl bg-[#d7eee8] px-6 py-4 text-sm leading-relaxed md:col-start-2">
-        <strong>Cremas neutras.</strong> Si tienes alergias o sensibilidad a algún producto,
-        coméntamelo antes de reservar para revisar los ingredientes contigo.
-      </p>
+      <div class="text-sm leading-relaxed md:col-start-2">
+        <p class="mb-4">Impuestos y desplazamiento en Ávila capital incluidos. La primera sesión
+          de 60 minutos de cada persona cuesta {{ marketingFirstSessionPrice }}, también si reserváis en grupo. El
+          facial
+          se cobra aparte.</p>
+        <p class="rounded-2xl bg-[#d7eee8] px-6 py-4">
+          <strong>Cremas neutras.</strong> Si tienes alergias o sensibilidad a algún producto,
+          coméntamelo antes de reservar para revisar los ingredientes contigo.
+        </p>
+      </div>
     </div>
   </section>
 </template>

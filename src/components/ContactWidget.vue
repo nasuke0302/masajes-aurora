@@ -17,6 +17,7 @@ const bookingEnabled=!!import.meta.env.AURORA_BOOKING_ENABLED
           Escríbeme por WhatsApp para consultar disponibilidad y acordar tu cita. Servicio
           exclusivamente en Ávila capital.
         </p>
+        <OfferSummary />
       </div>
       <div class="flex flex-col items-start gap-3">
         <a class="contact-phone"

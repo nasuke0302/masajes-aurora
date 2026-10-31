@@ -9,12 +9,13 @@ export function assertGuide(html,origin='https://auroramasajista.com'){
  assert.doesNotMatch(html,/<meta\b[^>]*name="robots"[^>]*content="[^"]*noindex/)
  const schemas=[...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].flatMap(m=>{const value=JSON.parse(m[1]);return value['@graph']||[value]})
  const article=schemas.find(s=>s['@type']==='BlogPosting'),breadcrumb=schemas.find(s=>s['@type']==='BreadcrumbList')
- assert(article);assert(breadcrumb);assert.equal(article.mainEntityOfPage,url);assert.equal(article.author.name,'Aurora Masajista');assert.equal(article.datePublished,'2026-10-25');assert.equal(article.dateModified,article.datePublished)
+ assert(article);assert(breadcrumb);assert.equal(article.mainEntityOfPage,url);assert.equal(article.author.name,'Aurora Masajista');assert.equal(article.datePublished,'2026-10-25');assert.equal(article.dateModified,'2026-10-31')
  assert.equal(article.image[0],new URL('/images/masaje-cuerpo-completo-hero.png',origin).href)
  assert.equal(breadcrumb.itemListElement[1].item,url)
- for(const id of ['que-es','a-domicilio','duracion','antes-de-la-visita','conoce-a-aurora','preguntas-frecuentes','reservar']){assert(html.includes('id="'+id+'"'));assert(html.includes('href="#'+id+'"'))}
+ for(const id of ['que-es','a-domicilio','duracion','antes-de-la-visita','preguntas-frecuentes','reservar']){assert(html.includes('id="'+id+'"'));assert(html.includes('href="#'+id+'"'))}
+ for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert(html.includes('id="'+id+'"'),'Missing guide anchor: '+id)
  assert.match(html,/60 minutos/);assert.match(html,/10 minutos/);assert.match(html,/Ávila capital/);assert.match(html,/https:\/\/wa.me\/34644517187/)
- assert.match(html,/tel:\+34644517187/);assert.match(html,/datetime="2026-10-25"/)
+ assert.match(html,/tel:\+34644517187/);assert.match(html,/datetime="2026-10-31"/)
  assert(html.includes('href="/#aurora"'));assert(html.includes('href="/#massage"'))
  assert.doesNotMatch(html,/href="\/reservar"|href="\/admin/)
 }

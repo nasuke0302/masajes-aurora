@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { legalOwner } from '#shared/legal'
+import { marketingPrice, marketingFirstSessionPrice, marketingFacialPrice, marketingCombinedPrice, marketingFirstCombinedPrice } from '#shared/marketing-offer'
 useSeoMeta({ title: 'Condiciones de reserva · Aurora Masajista', description: 'Cómo acordar tu visita por WhatsApp, precios, pago, cambios y cancelaciones.' })
 </script>
 <template>
   <LegalPage title="Condiciones de reserva"
     description="Las condiciones que se aplican al acordar tu visita con Aurora.">
-    <p>Versión para reservas por contacto directo: 24 de octubre de 2026. El servicio lo presta {{ legalOwner.name }},
+    <p>Versión para reservas por contacto directo: 31 de octubre de 2026. El servicio lo presta {{ legalOwner.name }},
       NIF {{ legalOwner.nif }}, con domicilio en {{ legalOwner.address }}. Contacto: <a
         :href="'mailto:' + legalOwner.email">{{ legalOwner.email }}</a> y <a :href="legalOwner.phoneHref">{{
           legalOwner.phone }}</a>.</p>
@@ -13,13 +14,20 @@ useSeoMeta({ title: 'Condiciones de reserva · Aurora Masajista', description: '
     <p>Ofrecemos masajes de bienestar a domicilio exclusivamente en Ávila capital y para personas mayores de 18 años. No
       son servicios sanitarios, diagnósticos ni tratamientos médicos. No se admiten reservas para menores.</p>
     <p>Puedes combinar masajes de 60 minutos para distintas personas adultas en una misma visita. Se realizan
-      consecutivamente, en una única dirección, con un contacto y un pago conjunto. La duración y el precio se suman sin
-      descuentos por grupo.</p>
+      consecutivamente, en una única dirección, con un contacto y un pago conjunto. La duración y el precio se suman.
+      No hay descuentos adicionales por grupo; cada persona conserva el precio de bienvenida si es su primera sesión.</p>
+    <p>Aurora lleva la camilla, la toalla, el gel hidroalcohólico, las cremas y el material necesario para el masaje.
+      La persona que recibe la visita debe preparar un espacio libre de aproximadamente 3 × 2 metros.</p>
     <h2>Precio y pago</h2>
-    <p>Las tarifas actuales son 40 € por 40 minutos y 50 € por 60 minutos, con los impuestos aplicables incluidos. No
+    <p>La sesión de 60 minutos cuesta {{ marketingPrice }}. Tu primera sesión de 60 minutos cuesta {{ marketingFirstSessionPrice }}.
+      El precio de bienvenida se aplica a la primera sesión de cada persona, tanto en una reserva individual como de grupo.
+      Los precios incluyen los impuestos aplicables. No
       hay suplementos de desplazamiento dentro de Ávila capital ni otros gastos adicionales. Antes de confirmar, Aurora
       te comunica el servicio y el importe total. Se paga en efectivo el día de la cita. Los cambios posteriores de
       tarifa no alteran una reserva ya confirmada.</p>
+    <p>El masaje facial es un complemento opcional de 10 minutos por {{ marketingFacialPrice }}, sin descuento.
+      La sesión de 60 minutos más el facial suma 70 minutos y cuesta {{ marketingCombinedPrice }}; si es tu primera sesión,
+      el total es {{ marketingFirstCombinedPrice }}. El facial no se reserva como servicio independiente.</p>
     <h2>Cómo reservar</h2>
     <p>Pulsa «Reservar por WhatsApp» o contacta por teléfono para consultar disponibilidad y acordar los masajes, el
       horario y la dirección. Puedes revisar y corregir los datos con Aurora antes de confirmar. La cita queda acordada

@@ -1,6 +1,12 @@
 # Aurora Masajista
 
-Spanish website for at-home wellbeing massages exclusively in Ávila capital. Aurora remains the professional, with more than ten years of experience. Contact: +34 644 51 71 87. Preserve existing imagery as illustrative, not verified portraits, and do not make medical claims.
+Spanish website for at-home wellbeing massages exclusively in Ávila capital. Aurora remains the professional, with more than twenty years of experience (owner-confirmed on 2026-10-31). Contact: +34 644 51 71 87. Preserve existing imagery as illustrative, not verified portraits, and do not make medical claims.
+
+## Public marketing offer (confirmed 2026-10-31)
+
+The public WhatsApp offer is €55 for 60 minutes. Each person's first 60-minute session costs €50, whether booked individually or in a group. Present it as a fixed welcome price, without a discount percentage or savings claim. The optional 10-minute facial costs €10 without discount; combined totals are €65 normally and €60 for a first session. No standalone facial or public 40-minute offer. Prices include applicable taxes and travel in Ávila capital; payment remains cash on the service date. Existing confirmed appointments retain their agreed prices. The owner requests the public address “Calle Cardenal Pla y Deniel, Ávila”, without a building number, and retains the homepage phrase “para todas las personas”.
+
+Aurora brings the massage table, towel, hand sanitiser, creams and all necessary massage materials. The client prepares approximately 3 × 2 metres of clear space. Do not assert whether setup and packing are outside the 60 minutes until confirmed. The canonical marketing context is `.agents/product-marketing.md`. The same offer and prices apply in staging and production; only staging supports web reservations. The current staging booking catalog and calculator still use the obsolete 40/60-minute products and must be migrated before web reservations can reflect this offer.
 
 ## Booking rules
 
@@ -10,7 +16,7 @@ These booking and admin features apply to staging only. Production at auroramasa
 
 Production is deployed as assets only, without an executable Worker or application bindings, including on unknown paths. Canonical-host redirection runs in Cloudflare Rules and security headers come from the assets `_headers` configuration. Aurora-only edge rules block unsupported methods and common secret/WordPress probes, and limit bursts to 200 requests per IP per location per 10 seconds, excluding verified bots. Staging retains owner-only Access, 1% log/trace sampling and explicit CPU limits; the queue consumer has no public workers.dev or preview URLs. The existing account-wide $2 usage alert is informational, not a spend cap. Other projects' shared-account billing is outside these changes.
 
-The public landing presents a 60-minute full-body massage and a facial massage as an optional 10-minute complement to that session. The staging booking catalog still contains 40- and 60-minute massages; the facial complement is not yet integrated into its booking flow.
+The public landing presents a 60-minute full-body massage and a facial massage as an optional 10-minute complement to that session. The staging booking catalog still contains 40- and 60-minute massages; its booking flow does not yet calculate the first-session price or facial complement. This is a known implementation gap, not a separate staging offer.
 
 Guests book without accounts. A booking is one visit to one address, with one contact and one joint payment. Combine quantities of 40- and 60-minute massages, without a daily massage quota; confirmed/completed sessions still occupy their reserved times. Durations and prices sum without group discounts.
 
@@ -26,7 +32,7 @@ Aurora can reprogram a future confirmed visit by dragging its event in the weekl
 
 The private agenda uses Vue Cal 4.10.2, opening in week view with a month option; years, year and day views are disabled. A booking is one event. Week view shows unavailable periods and the thirty-minute buffer after each visit; month view shows working hours and block counts. Double-clicking a cell opens the existing admin booking form with its date and start prefilled, without saving until the form is completed.
 
-Nuxt + Workers, D1 and a separate Queue/email Worker using Resend. Aurora signs in through a single-use email link and configures prices, hours, blocks, WhatsApp bookings, cancellations, completed sessions and cash collections. Staging accepts cash bookings only, with prices of €40 for 40 minutes and €50 for 60 minutes. Aurora configured initial hours Monday through Sunday, 09:00–21:00, and the authorized email masajesaurora@gmail.com.
+Nuxt + Workers, D1 and a separate Queue/email Worker using Resend. Aurora signs in through a single-use email link and configures prices, hours, blocks, WhatsApp bookings, cancellations, completed sessions and cash collections. Staging accepts cash bookings only; its old configured catalog must be reconciled with the confirmed €55/€50/€10 offer. Aurora configured initial hours Monday through Sunday, 09:00–21:00, and the authorized email masajesaurora@gmail.com.
 
 Existing .env.local is preserved. Production needs a real origin, authorized admin email, verified sender domain, separate DB/queue. Local emails are written to ignored .data/mail.jsonl, never sent to customers.
 

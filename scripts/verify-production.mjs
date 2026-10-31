@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import {assertGuide} from './assert-guide.mjs'
 const origin='https://auroramasajista.com'
-for(const path of ['/','/masaje-relajante-avila','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-fluido-hero.png']){
+for(const path of ['/','/masaje-relajante-avila','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-cuerpo-completo-hero-952.webp']){
  const response=await fetch(origin+path,{redirect:'manual',signal:AbortSignal.timeout(20000)})
  assert.equal(response.status,200,path)
  if(path==='/')for(const [name,value] of Object.entries({'x-content-type-options':'nosniff','referrer-policy':'no-referrer','x-frame-options':'DENY'}))assert.equal(response.headers.get(name),value,name)

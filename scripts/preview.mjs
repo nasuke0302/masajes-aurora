@@ -21,11 +21,11 @@ try{
  if(!await DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='settings'").first())await DB.exec((await readFile('migrations/0001_booking.sql','utf8')).replace(/\n/g,' '))
  if((await DB.prepare("SELECT sql FROM sqlite_master WHERE name='bookings'").first())?.sql?.includes('BETWEEN 1 AND 3'))await DB.exec((await readFile('migrations/0002_remove_daily_capacity.sql','utf8')).replace(/\n/g,' '))
  if((await DB.prepare("SELECT sql FROM sqlite_master WHERE name='bookings'").first())?.sql?.includes('checkout_url'))await DB.exec((await readFile('migrations/0003_cash_only.sql','utf8')).replace(/\n/g,' ')); if(!await DB.prepare("SELECT name FROM sqlite_master WHERE name='booking_legal'" ).first())await DB.exec((await readFile('migrations/0004_privacy.sql','utf8')).replace(/\n/g,' ')); if(smoke){
-  for(const path of ['/','/reservar','/admin/acceso','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/api/catalog','/images/masaje-fluido-hero.png']){
+  for(const path of ['/','/reservar','/admin/acceso','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/api/catalog','/images/masaje-cuerpo-completo-hero-952.webp']){
    const r=await mf.dispatchFetch('http://localhost:8888'+path);if(r.status!==200)console.error(await r.clone().text());assert.equal(r.status,200,path)
-   if(path==='/'){const html=await r.text();assert.match(html,/Aurora Masajista/);assert.match(html,/Reservar una sesión/);assert.match(html,/Consultar por WhatsApp/);assert.doesNotMatch(html,/Reservar por WhatsApp/)}
+   if(path==='/'){const html=await r.text();assert.match(html,/Aurora Masajista/);assert.match(html,/Reservar una sesión/);assert.match(html,/Consultar por WhatsApp/);assert.doesNotMatch(html,/Reservar por WhatsApp/);for(const price of ['55 €','50 €','10 €'])assert(html.includes(price),'Missing staging price: '+price)}
   }
-  for(const path of ['/','/api/catalog','/api/admin/settings','/images/masaje-fluido-hero.png'])assert.equal((await mf.dispatchFetch('https://untrusted.example'+path)).status,401)
+  for(const path of ['/','/api/catalog','/api/admin/settings','/images/masaje-cuerpo-completo-hero-952.webp'])assert.equal((await mf.dispatchFetch('https://untrusted.example'+path)).status,401)
   const catalog=await (await mf.dispatchFetch('http://localhost:8888/api/catalog')).json();assert.equal(catalog.accepting,false)
   await DB.prepare('UPDATE settings SET accepting=1').run();await DB.prepare('UPDATE products SET price_cents=5000').run()
   const form=await (await mf.dispatchFetch('http://localhost:8888/reservar')).text();assert.match(form,/Pago en efectivo/);assert.doesNotMatch(form,/Pagar ahora|Continuar al pago/)

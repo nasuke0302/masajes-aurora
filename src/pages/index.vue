@@ -6,16 +6,18 @@ import MassageDetails from '../components/MassageDetails.vue'
 import Services from '../components/Services.vue'
 import Contact from '../components/Contact.vue'
 import Footer from '../components/Footer.vue'
+import { marketingPrice, marketingFirstSessionPrice } from '#shared/marketing-offer'
 
 const page = ref<HTMLElement | null>(null)
 
 useTextReveal(page)
 
-const description = 'Dedícate un momento con Aurora Masajista. Masajes a domicilio exclusivamente en Ávila capital. Contacta por WhatsApp para reservar.'
+const description = `Masajes de bienestar a domicilio en Ávila capital. 60 minutos por ${marketingPrice}; primera sesión ${marketingFirstSessionPrice}. Reserva con Aurora.`
 
 const config = useRuntimeConfig()
 useSeoMeta({
   title: 'Aurora Masajista · Masajes a domicilio en Ávila',
+  description,
   ogTitle: 'Aurora Masajista',
   ogDescription: description,
   ogImage: config.public.siteUrl ? new URL('/images/masaje-cuerpo-completo-hero.png', config.public.siteUrl).href : undefined

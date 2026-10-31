@@ -13,14 +13,27 @@ import ContactButton from './ContactButton.vue'
         centrarnos en zonas como la espalda y los hombros.
       </p>
       <p class="mt-5 text-lg leading-relaxed text-muted">
-        Masajes de bienestar para personas de todas las edades. No está vinculado a fisioterapia.
+        Masajes de bienestar para todas las personas. No está vinculado a fisioterapia.
       </p>
       <p class="mt-5 text-lg leading-relaxed text-muted">
         De <strong>lunes a sábado, de 11:00 a 19:00</strong>, con flexibilidad horaria y siempre con reserva previa.
         Acordamos contigo el día, la hora y los detalles de la sesión.
       </p>
+      <ol class="mt-7 space-y-4 border-l-2 border-coral/40 pl-5 text-base leading-relaxed">
+        <li><strong>1. Cuéntame cuándo te viene bien.</strong> Escríbeme por WhatsApp o llama para consultar
+          disponibilidad.</li>
+        <li><strong>2. Acordamos tu visita.</strong> Confirmamos la sesión, el importe, la dirección y el horario antes
+          de la cita.</li>
+      </ol>
+      <div class="mt-7 space-y-3 text-base leading-relaxed">
+        <h3 class="text-xl font-bold">Solo necesitas preparar el espacio</h3>
+        <p>Deja libre una zona de aproximadamente <strong>3 × 2 metros</strong>. Yo llevo todo lo necesario para el
+          masaje.</p>
+      </div>
       <ContactButton class="mt-7" />
-      <p class="mt-5 text-base leading-relaxed text-muted">¿Es tu primera sesión? Lee nuestra <NuxtLink to="/masaje-relajante-avila" class="text-link">guía de masaje relajante en Ávila</NuxtLink> para saber qué esperar de una visita a domicilio.</p>
+      <p class="mt-5 text-base leading-relaxed text-muted">¿Es tu primera sesión? Lee nuestra <NuxtLink
+          to="/masaje-relajante-avila" class="text-link">guía de masaje relajante en Ávila</NuxtLink> para saber qué
+        esperar de una visita a domicilio.</p>
     </div>
   </section>
 </template>
