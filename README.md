@@ -2,11 +2,19 @@
 
 ## Producción: auroramasajista.com
 
-Publicada el 24 de octubre de 2026 en https://auroramasajista.com. El Worker web es `masajes-aurora`; `www.auroramasajista.com` redirige con HTTP 308 al dominio principal conservando ruta y parámetros. Los dos hostnames son Custom Domains del Worker. Los registros de aparcamiento de Hostinger se sustituyeron por los gestionados por Workers.
+Publicada el 24 de octubre de 2026 en https://auroramasajista.com. El Worker web es
+`masajes-aurora`. Las variantes HTTP y `www` redirigen con 308 a HTTPS sin `www`, conservando ruta
+y parámetros. Los dos hostnames son Custom Domains del Worker. Los registros de aparcamiento de
+Hostinger se sustituyeron por los gestionados por Workers.
 
 Producción es una web estática prerenderizada con Nuxt. Solo contiene portada, guía de masaje relajante, páginas legales, imágenes, fuentes, CSS, JavaScript de presentación, sitemap y robots. Muestra «Reservar por WhatsApp» como acción principal. Las rutas `/reservar`, `/reserva/**`, `/admin/**` y `/api/**` devuelven 404 real y se excluyen antes de compilar; no se genera su código de aplicación. La navegación del cliente tampoco incluye esas páginas. Las páginas legales de producción describen el contacto directo, sin formularios ni confirmaciones automáticas.
 
-`masajes-aurora` es un despliegue **assets-only**, sin módulo ejecutable, manifest ni bindings de aplicación. No se invoca código propio ni para URLs inexistentes; `runWorkerFirst` está desactivado. La redirección de `www` se ejecuta en Cloudflare Rules y las cabeceras salen de `config/production-headers`, copiado como `_headers` durante el build. Producción no usa Nuxt SSR, D1, colas, cron, secretos, Access ni Turnstile. Staging conserva sus recursos, autenticación y formularios.
+`masajes-aurora` es un despliegue **assets-only**, sin módulo ejecutable, manifest ni bindings de
+aplicación. No se invoca código propio ni para URLs inexistentes; `runWorkerFirst` está desactivado.
+Las redirecciones al origen canónico se ejecutan en Cloudflare Rules y las cabeceras salen de
+`config/production-headers`, copiado como `_headers` durante el build. Producción no usa Nuxt SSR,
+D1, colas, cron, secretos, Access ni Turnstile. Staging conserva sus recursos, autenticación y
+formularios.
 
 Los scripts fijan `AURORA_PROFILE=production` o `staging` explícitamente, independiente de `NODE_ENV`. Producción carga exclusivamente `.env.production.local` (ignorado por Git), con cuenta, dominio y opciones de presentación; `.env.production.example` documenta los valores públicos. Staging carga `.env.local`. La configuración Cloudflare de producción está en `production.cloudflare.config.ts`; `cloudflare.config.ts` rechaza el modo producción para evitar publicar el backend por error.
 
@@ -18,7 +26,8 @@ Los artefactos de producción están en `.nuxt-production/`, `.output-production
 
 La política reproducible está en `config/production-security.json`, limitada a los dos hosts de Aurora. `npm run setup:security -- --validate` valida las reglas sin activarlas; `npm run setup:security -- --apply` las aplica conservando reglas ajenas y guardando el estado anterior en `.data/security-backups/`. Sin opciones, el comando solo verifica la política y la alerta existente. El despliegue de producción exige que esa verificación pase antes de publicar.
 
-- Redirección 308 de `www` al dominio principal, conservando ruta y query, en la fase `http_request_dynamic_redirect`.
+- Redirecciones 308 de HTTP y `www` a HTTPS sin `www`, conservando ruta y query, en la fase
+  `http_request_dynamic_redirect`. Cada página pública tiene un canonical hacia su URL HTTPS.
 - WAF: GET y HEAD únicamente; bloqueo de sondeos a `/.env*`, `/.git*`, `/wp-admin*`, `/wp-login.php` y `/xmlrpc.php`. Las rutas de reservas, admin y API siguen siendo 404.
 - Rate limiting: 200 peticiones por IP y centro de datos cada 10 segundos, con bloqueo de 10 segundos. Los bots verificados por Cloudflare quedan excluidos. Es una defensa de ráfagas, no un límite económico global.
 - Producción no genera logs ni trazas de ejecución de aplicación. En staging, logs y trazas se muestrean al 1 %. CPU máxima configurada: 100 ms para el web de staging y 1.000 ms para el consumidor de emails; estos límites no equivalen a un presupuesto mensual.

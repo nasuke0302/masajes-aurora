@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict'
 import {assertGuide} from './assert-guide.mjs'
+import {assertCanonical} from './assert-canonical.mjs'
 const origin='https://auroramasajista.com'
 for(const path of ['/','/blog','/blog/masaje-relajante-avila','/blog/masajes-relajacion-bienestar','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-cuerpo-completo-hero-952.webp']){
  const response=await fetch(origin+path,{redirect:'manual',signal:AbortSignal.timeout(20000)})
  assert.equal(response.status,200,path)
+ if (!['/robots.txt', '/sitemap.xml'].includes(path) && !path.startsWith('/images/')) {
+  assertCanonical(await response.clone().text(), new URL(path, origin))
+ }
  if(path==='/sitemap.xml')assert((await response.clone().text()).includes('<loc>'+origin+'/blog</loc>'))
  if(path==='/')for(const [name,value] of Object.entries({'x-content-type-options':'nosniff','referrer-policy':'no-referrer','x-frame-options':'DENY'}))assert.equal(response.headers.get(name),value,name)
  if(path==='/'){
@@ -21,8 +25,15 @@ for(const path of ['/reservar','/reservar/','/reserva/token','/admin','/admin/ac
  for(const headers of [{},{'Sec-Fetch-Mode':'navigate'}])assert.equal((await fetch(origin+path,{headers,redirect:'manual',signal:AbortSignal.timeout(20000)})).status,404,path)
  console.log(path,404)
 }
-const www=await fetch('https://www.auroramasajista.com/privacidad?check=domain',{redirect:'manual'})
-assert.equal(www.status,308);assert.equal(www.headers.get('location'),origin+'/privacidad?check=domain')
+for (const source of [
+ 'http://auroramasajista.com',
+ 'http://www.auroramasajista.com',
+ 'https://www.auroramasajista.com',
+]) {
+ const response=await fetch(source+'/privacidad?check=domain',{redirect:'manual'})
+ assert.equal(response.status,308,source)
+ assert.equal(response.headers.get('location'),origin+'/privacidad?check=domain')
+}
 const staging=await fetch('https://aurora-staging.geonuvia.com/',{redirect:'manual'})
 assert.equal(staging.status,302);assert.match(staging.headers.get('location'),/geonuvia\.cloudflareaccess\.com/)
 for(const path of ['/.env','/.git/config','/wp-admin/','/wp-login.php','/xmlrpc.php'])assert.equal((await fetch(origin+path,{redirect:'manual',signal:AbortSignal.timeout(20000)})).status,403,path)

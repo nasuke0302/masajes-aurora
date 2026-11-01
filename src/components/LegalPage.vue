@@ -1,5 +1,10 @@
 <script setup lang="ts">
 defineProps<{title:string;description:string}>()
+const origin = useRuntimeConfig().public.siteUrl
+const path = useRoute().path
+useHead({
+  link: origin ? [{ rel: 'canonical', href: new URL(path, origin).href }] : [],
+})
 </script>
 <template>
  <div class="page-shell narrow">

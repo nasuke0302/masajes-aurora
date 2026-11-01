@@ -4,6 +4,7 @@ import {resolve,extname} from 'node:path'
 import {Miniflare} from 'miniflare'
 import {readBuildOutput} from '@cloudflare/build-output-utils'
 import {assertGuide} from './assert-guide.mjs'
+import {assertCanonical} from './assert-canonical.mjs'
 const root=resolve('.cloudflare/production'),built=await readBuildOutput(root)
 assert.equal(JSON.parse(await readFile(resolve(root,'profile.json'),'utf8')).profile,'production')
 assert.deepEqual(Object.keys(built.workers),['default'])
@@ -29,6 +30,9 @@ const mf=new Miniflare({workers:[{config}],port:0,logRequests:false,telemetry:{e
 try{
  for(const path of ['/','/blog','/blog/masaje-relajante-avila','/blog/masajes-relajacion-bienestar','/aviso-legal','/privacidad','/cookies','/condiciones-reserva','/robots.txt','/sitemap.xml','/images/masaje-cuerpo-completo-hero-952.webp']){
   const r=await mf.dispatchFetch('https://auroramasajista.com'+path);assert.equal(r.status,200,path)
+  if (!['/robots.txt', '/sitemap.xml'].includes(path) && !path.startsWith('/images/')) {
+   assertCanonical(await r.clone().text(), new URL(path, 'https://auroramasajista.com'))
+  }
   if(path==='/')assert((await r.clone().text()).includes('href="/blog"'))
   if(path==='/sitemap.xml')assert((await r.clone().text()).includes('<loc>https://auroramasajista.com/blog</loc>'))
   if(['/','/blog/masaje-relajante-avila','/condiciones-reserva'].includes(path))assertPublicOffer(await r.clone().text())
