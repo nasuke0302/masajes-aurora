@@ -9,7 +9,7 @@ const published = "2026-10-31";
 const origin = useRuntimeConfig().public.siteUrl || "https://auroramasajista.com";
 const canonical = new URL("/blog/masajes-relajacion-bienestar", origin).href;
 const home = new URL("/", origin).href;
-const image = new URL("/images/masaje-cuerpo-completo-hero.png", origin).href;
+const image = "/images/masaje-cuerpo-completo-blogpost-2.png";
 const sourceUrls = {
   mayo: "https://www.mayoclinic.org/tests-procedures/massage-therapy/about/pac-20384595",
   anxiety: "https://www.nccih.nih.gov/health/anxiety-and-complementary-health-approaches",
@@ -135,10 +135,10 @@ useHead({
           </div>
           <figure class="min-w-0">
             <img :class="[
-              'block aspect-video h-auto w-full rounded-2xl object-cover',
-              'object-[65%_center] lg:aspect-[4/5]',
-            ]" src="/images/masaje-cuerpo-completo-hero-952.webp" width="952" height="528"
-              alt="Imagen ilustrativa de un masaje de bienestar en casa." fetchpriority="high" />
+              'block aspect-auto h-auto w-full rounded-2xl object-contain',
+              'lg:aspect-[4/5] lg:object-cover lg:object-[65%_center]',
+            ]" :src="image" width="952" height="528" alt="Imagen ilustrativa de un masaje de bienestar en casa."
+              fetchpriority="high" />
             <figcaption class="mt-3 text-sm text-muted">Imagen ilustrativa.</figcaption>
           </figure>
         </div>
