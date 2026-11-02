@@ -10,7 +10,8 @@ export function assertGuide(html,origin='https://auroramasajista.com'){
  const schemas=[...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].flatMap(m=>{const value=JSON.parse(m[1]);return value['@graph']||[value]})
  const article=schemas.find(s=>s['@type']==='BlogPosting'),breadcrumb=schemas.find(s=>s['@type']==='BreadcrumbList')
  assert(article);assert(breadcrumb);assert.equal(article.mainEntityOfPage,url);assert.equal(article.author.name,'Aurora Masajista');assert.equal(article.datePublished,'2026-10-25');assert.equal(article.dateModified,'2026-10-31')
- assert.equal(article.image[0],new URL('/images/masaje-cuerpo-completo-hero.png',origin).href)
+ const image = new URL('/images/melba-retrato.png', origin).href
+ assert.equal(new URL(article.image[0], origin).href, image)
  assert.equal(breadcrumb.itemListElement[1].item,new URL('/blog',origin).href)
  assert.equal(breadcrumb.itemListElement[2].item,url)
  for(const id of ['que-es','a-domicilio','duracion','antes-de-la-visita','preguntas-frecuentes','reservar']){assert(html.includes('id="'+id+'"'));assert(html.includes('href="#'+id+'"'))}
